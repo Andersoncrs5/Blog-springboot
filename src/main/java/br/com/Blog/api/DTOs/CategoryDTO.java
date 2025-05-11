@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record CategoryDTO(
-        Long id,
         @NotBlank(message = "Field name is required")
         @Size(max = 100, message = "Size max is 100")
         String name
@@ -23,7 +22,6 @@ public record CategoryDTO(
         Category category = new Category();
 
         category.setName(name);
-        category.setId(id);
 
         return category;
     }

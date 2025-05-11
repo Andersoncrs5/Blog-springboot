@@ -1,106 +1,90 @@
 package br.com.Blog.api.services;
 
+import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.PostRepository;
-import br.com.Blog.api.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository repository;
-    private final UserRepository userRepository;
+    private final UserService userService;
+    private final CategoryService categoryService;
 
     @Async
     @Transactional
-    public ResponseEntity<?> Create(Post post, Long idUser){
-        try {
-            if (idUser == null)
-                return new ResponseEntity<>("Id is required", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> Create(Post post, Long userId, Long categoryId){
+        Category category = this.categoryService.get(categoryId);
+        User user = this.userService.Get(userId);
 
-            User user = this.userRepository.findById(idUser).orElse(null);
+        post.setUser(user);
+        post.setCategory(category);
 
-            if (user == null)
-                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+        this.repository.save(post);
 
-            post.setUser(user);
-            Post postModifed = this.repository.save(post);
-            return new ResponseEntity<>(postModifed, HttpStatus.CREATED);
-        } catch (Exception e){
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>("Post created with success!", HttpStatus.CREATED);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> Update(Post post){
-        try {
-            Post postForUpdate = this.repository.findById(post.getId()).orElse(null);
+    public ResponseEntity<?> Update(Long id, Post post){
+        Post postForUpdate = this.Get(id);
 
-            if (postForUpdate == null)
-                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+        postForUpdate.setTitle(post.getTitle());
+        postForUpdate.setContent(post.getContent());
 
-            postForUpdate.setTitle(post.getTitle());
-            postForUpdate.setContent(post.getContent());
+        this.repository.save(postForUpdate);
 
-            Post PostUpdated = this.repository.save(postForUpdate);
-
-            return new ResponseEntity<>(PostUpdated, HttpStatus.CREATED);
-        } catch (Exception e){
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>("Post updated with success", HttpStatus.OK);
     }
 
     @Async
-    public ResponseEntity<?> Get(Long id){
-        try {
-            if (id == null)
-                return new ResponseEntity<>("Id is required", HttpStatus.BAD_REQUEST);
+    @Transactional
+    public Post Get(Long id){
+        if (id == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
 
-            Post post = this.repository.findById(id).orElse(null);
+        Post post = this.repository.findById(id).orElse(null);
 
-            if(post == null)
-                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
+        if(post == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
 
-            return new ResponseEntity<>(post, HttpStatus.FOUND);
-        } catch (Exception e){
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return post;
     }
 
     @Async
     @Transactional
     public ResponseEntity<?> Delete(Long id){
-        try {
-            if (id == null)
-                return new ResponseEntity<>("Id is required", HttpStatus.BAD_REQUEST);
+        Post post = this.Get(id);
 
-            Post post = this.repository.findById(id).orElse(null);
-
-            if(post == null)
-                return new ResponseEntity<>("Post not found", HttpStatus.NOT_FOUND);
-
-            this.repository.delete(post);
-            return new ResponseEntity<>("Post deleted", HttpStatus.FOUND);
-        } catch (Exception e){
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        this.repository.delete(post);
+        return new ResponseEntity<>("Post deleted", HttpStatus.OK);
     }
 
     @Async
-    public ResponseEntity<?> GetAll(){
-        try {
-            return new ResponseEntity<>(this.repository.findAll(), HttpStatus.FOUND);
-        } catch (Exception e){
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    @Transactional
+    public ResponseEntity<?> GetAll(Pageable pageable){
+            return new ResponseEntity<>(this.repository.findAll(pageable), HttpStatus.OK);
+    }
+
+    @Async
+    @Transactional
+    public ResponseEntity<?> GetAllByCategory(Long categoryId, Pageable pageable){
+        Category category = this.categoryService.get(categoryId);
+
+        Page<Post> posts = this.repository.findAllByCategory(category ,pageable);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
 }

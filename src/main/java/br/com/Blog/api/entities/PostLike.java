@@ -9,10 +9,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "favorite_posts")
+@Table(name = "post_likes")
 @EntityListeners(AuditingEntityListener.class)
 @Data
-public class FavoritePost {
+public class PostLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,8 +29,4 @@ public class FavoritePost {
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

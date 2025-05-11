@@ -29,3 +29,20 @@ Database Structure:
     Category (categories) → Organizes posts into categories.
     Comment (comments) → Stores comments on posts.
     Favorite Post (favorite_posts) → Links users with their favorite posts.
+
+
+# Updates
+
+Jwt
+
+spring security
+
+Pagination
+
+crypto
+
+Tables : PostLikes and CommentLikes
+
+Otimizations
+
+Exceptions global

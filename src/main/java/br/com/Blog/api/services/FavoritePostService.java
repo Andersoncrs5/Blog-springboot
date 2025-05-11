@@ -1,103 +1,81 @@
 package br.com.Blog.api.services;
 
-import br.com.Blog.api.DTOs.FavoritePostDTO;
 import br.com.Blog.api.entities.FavoritePost;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.FavoritePostRepository;
-import br.com.Blog.api.repositories.PostRepository;
-import br.com.Blog.api.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
 public class FavoritePostService {
 
     private final FavoritePostRepository repository;
-    private final UserRepository userRepository;
-    private final PostRepository postRepository;
+    private final UserService userService;
+    private final PostService postService;
 
     @Async
-    public ResponseEntity<?> GetAllFavoritePostOfUser(Long idUser){
-        try {
-            if (idUser == null)
-                return new ResponseEntity<>("Id is required", HttpStatus.NOT_FOUND);
-
-            return new ResponseEntity<>(this.repository.findAllByUserId(idUser), HttpStatus.FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    public ResponseEntity<?> GetAllFavoritePostOfUser(Long userId, Pageable pageable){
+        User user = this.userService.Get(userId);
+        return new ResponseEntity<>(this.repository.findAllByUser(user, pageable), HttpStatus.OK);
     }
 
     @Async
     @Transactional
     public ResponseEntity<?> Delete(Long idItem){
-        try {
-            if (idItem == null)
-                return new ResponseEntity<>("Id is required", HttpStatus.NOT_FOUND);
-
-            FavoritePost favoritePost = this.repository.findById(idItem).orElse(null);
-
-            if (favoritePost == null)
-                return new ResponseEntity<>("Favorite post not found", HttpStatus.NOT_FOUND);
+            FavoritePost favoritePost = this.get(idItem);
 
             this.repository.delete(favoritePost);
-            return new ResponseEntity<>("favoritePost deleted ", HttpStatus.FOUND);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            return new ResponseEntity<>("favoritePost deleted ", HttpStatus.OK);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> create(FavoritePostDTO fp){
-        try {
-            boolean check = this.repository.existsByUserIdAndPostId(fp.idUser(), fp.idPost());
+    public ResponseEntity<?> create(Long postId, Long userId){
+        User user = this.userService.Get(userId);
+        Post post = this.postService.Get(postId);
 
-            if (check == true)
-                return new ResponseEntity<>("Item already exists", HttpStatus.NOT_FOUND );
+        boolean check = this.repository.existsByUserAndPost(user, post);
 
-            if (fp.idPost() == null && fp.idUser() == null )
-                return new ResponseEntity<>("Ids are required", HttpStatus.NOT_FOUND);
+        if (check)
+            return new ResponseEntity<>("Item already exists", HttpStatus.CONFLICT);
 
-            Post post = this.postRepository.findById(fp.idPost()).orElse(null);
-            User user = this.userRepository.findById(fp.idUser()).orElse(null);
+        FavoritePost fpToCreate = new FavoritePost();
 
-            if (post == null)
-                return new ResponseEntity<>("post not found", HttpStatus.NOT_FOUND);
+        fpToCreate.setPost(post);
+        fpToCreate.setUser(user);
 
-            if (user == null)
-                return new ResponseEntity<>("user not found", HttpStatus.NOT_FOUND);
-
-            FavoritePost fpToCreate = new FavoritePost();
-
-            fpToCreate.setPost(post);
-            fpToCreate.setUser(user);
-
-            FavoritePost fpCreated = this.repository.save(fpToCreate);
-            return new ResponseEntity<>(fpCreated, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        FavoritePost fpCreated = this.repository.save(fpToCreate);
+        return new ResponseEntity<>("Post saved with favorite!!", HttpStatus.CREATED);
     }
 
     @Async
     public ResponseEntity<?> existsItemSalve(Long idUser, Long idPost){
-        try {
-            boolean check = this.repository.existsByUserIdAndPostId(idUser, idPost);
+        boolean check = this.repository.existsByUserIdAndPostId(idUser, idPost);
 
-            if (check == false)
-                return new ResponseEntity<>(false, HttpStatus.NOT_FOUND );
+        if (!check)
+            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND );
 
-            return new ResponseEntity<>(true, HttpStatus.FOUND );
-        } catch (Exception e) {
-            return new ResponseEntity<>(e, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(true, HttpStatus.FOUND );
+    }
+
+    private FavoritePost get(Long id) {
+        if (id == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
+
+        FavoritePost favoritePost = this.repository.findById(id).orElse(null);
+
+        if (favoritePost == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Favorite post not found");
+
+        return favoritePost;
     }
 
 }
