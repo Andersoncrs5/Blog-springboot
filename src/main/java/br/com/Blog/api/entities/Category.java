@@ -31,6 +31,9 @@ public class Category {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Version
+    private Long version;
+
     @JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Post> posts;

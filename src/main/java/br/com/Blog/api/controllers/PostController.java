@@ -1,6 +1,7 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.PostDTO;
+import br.com.Blog.api.Specifications.PostSpecification;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.Post;
@@ -13,12 +14,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/posts")
@@ -38,9 +42,14 @@ public class PostController {
     @GetMapping
     public ResponseEntity<?> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) LocalDateTime createdAt,
+            @RequestParam(required = false) String title
+
+            ) {
         Pageable pageable = PageRequest.of(page, size);
-        return this.service.GetAll(pageable);
+        Specification<Post> spec = PostSpecification.filterBy(createdAt, title);
+        return this.service.GetAll(pageable, spec);
     }
 
     @SecurityRequirement(name = "bearerAuth")
@@ -70,7 +79,7 @@ public class PostController {
     }
 
     @GetMapping("/GetAllByCategory/{categoryId}")
-    public ResponseEntity<?> get(
+    public ResponseEntity<?> GetAllByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -79,8 +88,19 @@ public class PostController {
         return this.service.GetAllByCategory(categoryId, pageable);
     }
 
-    @GetMapping("/postLikeService/{postId}")
+    @GetMapping("/countLikeByPost/{postId}")
     public ResponseEntity<?> countLikeByPost(@PathVariable Long postId) {
         return this.postLikeService.countLikeByPost(postId);
     }
+
+    @GetMapping("/filterByTitle/{title}")
+    public ResponseEntity<?> filterByTitle(
+            @PathVariable String title,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return this.service.filterByTitle(title, pageable);
+    }
+
 }

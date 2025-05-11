@@ -1,0 +1,26 @@
+package br.com.Blog.api.controllers;
+
+import br.com.Blog.api.DTOs.RecoverPasswordDTO;
+import br.com.Blog.api.services.RecoverEmailService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/recover")
+@RequiredArgsConstructor
+public class RecoverController {
+
+    private final RecoverEmailService service;
+
+    @PostMapping("/request")
+    public ResponseEntity<?> requestToken(@RequestParam String email) {
+        return service.toCreateTokenOfRecover(email);
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<?> resetPassword(@RequestBody @Valid RecoverPasswordDTO dto) {
+        return service.toValidToken(dto);
+    }
+}

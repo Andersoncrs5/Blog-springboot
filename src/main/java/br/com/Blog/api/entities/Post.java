@@ -32,6 +32,18 @@ public class Post {
     @Size(min = 50, message = "Size min is 50")
     private String content;
 
+    @Column
+    private Long viewed;
+
+    @Column(nullable = false)
+    private Integer readingTime;
+
+    @Column(length = 500)
+    private String imageUrl;
+
+    @Version
+    private Long version;
+
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments;

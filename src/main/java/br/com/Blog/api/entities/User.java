@@ -22,19 +22,21 @@ public class User {
     private Long id;
 
     @Column(length = 100, nullable = false)
-    @NotBlank(message = "Field name is required")
     private String name;
 
-    @Email
     @Column(length = 150, unique = true, nullable = false)
-    @NotBlank(message = "Field email is required")
     private String email;
 
     @Column(length = 100, nullable = false)
-    @NotBlank(message = "Field password is required")
     private String password;
 
+    @Column
+    private String refreshToken;
+
     private Boolean isAdm = false;
+
+    @Version
+    private Long version;
 
     @CreatedDate
     @Column(name = "created_at")
@@ -67,5 +69,9 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<FavoritePost> favoritePosts;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private RecoverEmail recover;
 
 }

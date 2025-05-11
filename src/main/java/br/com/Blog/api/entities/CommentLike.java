@@ -21,6 +21,9 @@ public class CommentLike {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Version
+    private Long version;
+
     @ManyToOne
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;

@@ -44,3 +44,5 @@ date 5/11 :
     Otimizations
     Exceptions global
     Database: Postgresql
+    Recover Password
+    Filter System

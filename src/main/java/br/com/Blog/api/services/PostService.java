@@ -7,6 +7,7 @@ import br.com.Blog.api.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -43,6 +44,8 @@ public class PostService {
 
         postForUpdate.setTitle(post.getTitle());
         postForUpdate.setContent(post.getContent());
+        post.setReadingTime(post.getReadingTime());
+        post.setImageUrl(post.getImageUrl());
 
         this.repository.save(postForUpdate);
 
@@ -74,8 +77,8 @@ public class PostService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> GetAll(Pageable pageable){
-            return new ResponseEntity<>(this.repository.findAll(pageable), HttpStatus.OK);
+    public ResponseEntity<?> GetAll(Pageable pageable, Specification<Post> spec){
+            return new ResponseEntity<>(this.repository.findAll(spec, pageable), HttpStatus.OK);
     }
 
     @Async
@@ -85,6 +88,12 @@ public class PostService {
 
         Page<Post> posts = this.repository.findAllByCategory(category ,pageable);
         return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+    @Async
+    @Transactional
+    public ResponseEntity<?> filterByTitle(String title, Pageable pageable) {
+        return new ResponseEntity<>(this.repository.findByTitleContaining(title, pageable)  ,HttpStatus.OK);
     }
 
 }
