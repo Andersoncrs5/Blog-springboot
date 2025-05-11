@@ -1,4 +1,4 @@
-# Project Description: RESTful Blog Application
+# RESTful Blog Application In Spring boot with Java
 
 Overview:
 
@@ -8,12 +8,13 @@ Overview:
 
 Technologies Used:
 
-    JDK 21 – Java Development Kit.
-    Spring Boot 3.4.2 – Framework for building RESTful APIs.
+    JDK 23 – Java Development Kit.
+    Spring Boot 3.4.5 – Framework for building RESTful APIs.
     Spring Data JPA – ORM for database interaction.
-    MySQL 8.0.34 – Relational database for data storage.
+    Postgresql 17.4 – Relational database for data storage.
     Lombok – Reduces boilerplate code with annotations.
-    Swagger 2.8.4 – API documentation with Springdoc OpenAPI.
+    Swagger 2.8.8 – API documentation with Springdoc OpenAPI.
+    Spring security.
 
 Features
 
@@ -33,16 +34,13 @@ Database Structure:
 
 # Updates
 
-Jwt
+date 5/11 :
 
-spring security
-
-Pagination
-
-crypto
-
-Tables : PostLikes and CommentLikes
-
-Otimizations
-
-Exceptions global
+    Jwt
+    spring security
+    Pagination
+    crypto
+    Tables : PostLikes and CommentLikes
+    Otimizations
+    Exceptions global
+    Database: Postgresql
