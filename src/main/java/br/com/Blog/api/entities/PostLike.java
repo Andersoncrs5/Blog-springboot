@@ -1,5 +1,6 @@
 package br.com.Blog.api.entities;
 
+import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -25,6 +26,9 @@ public class PostLike {
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+    @Enumerated(EnumType.STRING)
+    private LikeOrUnLike status;
 
     @CreatedDate
     @Column(name = "created_at")

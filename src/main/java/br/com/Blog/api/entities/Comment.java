@@ -43,6 +43,9 @@ public class Comment {
     @Version
     private Long version;
 
+    @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private CommentMetrics metrics;
+
     @JsonIgnore
     @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentLike> likes;

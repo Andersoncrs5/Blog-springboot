@@ -1,9 +1,9 @@
 package br.com.Blog.api.services;
 
-import br.com.Blog.api.entities.Comment;
-import br.com.Blog.api.entities.CommentLike;
-import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.*;
+import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.repositories.CommentLikeRepository;
+import br.com.Blog.api.repositories.CommentMetricsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,69 +21,75 @@ public class CommentLikeService {
     private final CommentLikeRepository repository;
     private final UserService userService;
     private final CommentService commentService;
+    private final CommentMetricsRepository metricsRepository;
+    private final CommentMetricsService metricsService;
 
     @Async
     @Transactional
-    public ResponseEntity<?> save(Long userId, Long commentId) {
-        User user = this.userService.Get(userId);
-        Comment comment = this.commentService.Get(commentId);
+    public ResponseEntity<?> reactToComment(Long userId, Long commentId, LikeOrUnLike action) {
+        User user = userService.Get(userId);
+        Comment comment = commentService.Get(commentId);
+        CommentMetrics metrics = metricsService.get(comment);
 
-        boolean check = this.exists(userId, commentId);
-
-        if (check) {
-            return new ResponseEntity<>("Comment already has like", HttpStatus.CONFLICT);
+        boolean alreadyReacted = repository.existsByUserAndComment(user, comment);
+        if (alreadyReacted) {
+            return new ResponseEntity<>("User already reacted to this comment", HttpStatus.CONFLICT);
         }
 
-        CommentLike like = new CommentLike();
-        like.setComment(comment);
-        like.setUser(user);
-        this.repository.save(like);
+        CommentLike reaction = new CommentLike();
+        reaction.setUser(user);
+        reaction.setComment(comment);
+        reaction.setStatus(action);
 
-        return new ResponseEntity<>("Like added successfully", HttpStatus.OK);
+        if (action == LikeOrUnLike.LIKE) {
+            metrics.setLikes(metrics.getLikes() + 1);
+        } else {
+            metrics.setDislikes(metrics.getDislikes() + 1);
+        }
+
+        repository.save(reaction);
+        metricsRepository.save(metrics);
+
+        return new ResponseEntity<>("Reaction added successfully", HttpStatus.OK);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> remove(Long id) {
-        if (id == null || id <= 0) {
+    public ResponseEntity<?> removeReaction(Long reactionId) {
+        if (reactionId == null || reactionId <= 0) {
             return new ResponseEntity<>("Id is required", HttpStatus.BAD_REQUEST);
         }
 
-        CommentLike like = this.repository.findById(id).orElseThrow(
+        CommentLike reaction = repository.findById(reactionId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
         );
 
-        this.repository.delete(like);
+        CommentMetrics metrics = metricsService.get(reaction.getComment());
 
-        return new ResponseEntity<>("Like removed", HttpStatus.OK);
+        if (reaction.getStatus() == LikeOrUnLike.LIKE) {
+            metrics.setLikes(Math.max(0, metrics.getLikes() - 1));
+        } else {
+            metrics.setDislikes(Math.max(0, metrics.getDislikes() - 1));
+        }
+
+        repository.delete(reaction);
+        metricsRepository.save(metrics);
+
+        return new ResponseEntity<>("Reaction removed", HttpStatus.OK);
     }
 
     @Async
-    @Transactional
+    @Transactional(readOnly = true)
     public boolean exists(Long userId, Long commentId) {
-        User user = this.userService.Get(userId);
-        Comment comment = this.commentService.Get(commentId);
-
-        return this.repository.existsByUserAndComment(user, comment);
+        return repository.existsByUserIdAndCommentId(userId, commentId);
     }
 
     @Async
-    @Transactional
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getAllByUser(Long userId, Pageable pageable) {
-        User user = this.userService.Get(userId);
-
-        Page<CommentLike> likes = this.repository.findAllByUser(user, pageable);
-
+        User user = userService.Get(userId);
+        Page<CommentLike> likes = repository.findAllByUser(user, pageable);
         return new ResponseEntity<>(likes, HttpStatus.OK);
     }
 
-    @Async
-    @Transactional
-    public ResponseEntity<?> countLikeByComment(Long commentId) {
-        Comment comment = this.commentService.Get(commentId);
-
-        Integer count = this.repository.countAllByComment(comment);
-
-        return new ResponseEntity<>(count, HttpStatus.OK);
-    }
 }

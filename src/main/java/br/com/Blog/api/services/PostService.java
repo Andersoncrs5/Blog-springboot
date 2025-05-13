@@ -2,7 +2,10 @@ package br.com.Blog.api.services;
 
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.Post;
+import br.com.Blog.api.entities.PostMetrics;
 import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.enums.SumOrReduce;
+import br.com.Blog.api.repositories.PostMetricsRepository;
 import br.com.Blog.api.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,17 +25,28 @@ public class PostService {
     private final PostRepository repository;
     private final UserService userService;
     private final CategoryService categoryService;
+    private final PostMetricsService metricsService;
+    private final PostMetricsRepository metricsRepository;
+    private final UserMetricsService userMetricsService;
 
     @Async
     @Transactional
     public ResponseEntity<?> Create(Post post, Long userId, Long categoryId){
         Category category = this.categoryService.get(categoryId);
+
+        PostMetrics metrics = new PostMetrics();
+
         User user = this.userService.Get(userId);
 
         post.setUser(user);
         post.setCategory(category);
 
-        this.repository.save(post);
+        Post postCreated = this.repository.save(post);
+
+        metrics.setPost(postCreated);
+
+        this.userMetricsService.sumOrRedPostsCount(user, SumOrReduce.SUM);
+        this.metricsRepository.save(metrics);
 
         return new ResponseEntity<>("Post created with success!", HttpStatus.CREATED);
     }
@@ -47,6 +61,7 @@ public class PostService {
         post.setReadingTime(post.getReadingTime());
         post.setImageUrl(post.getImageUrl());
 
+        this.metricsService.editedTimes(postForUpdate);
         this.repository.save(postForUpdate);
 
         return new ResponseEntity<>("Post updated with success", HttpStatus.OK);
@@ -72,6 +87,7 @@ public class PostService {
         Post post = this.Get(id);
 
         this.repository.delete(post);
+        this.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.REDUCE);
         return new ResponseEntity<>("Post deleted", HttpStatus.OK);
     }
 

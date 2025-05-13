@@ -95,4 +95,15 @@ public class UserController {
         return this.service.Login(dto.email(), dto.password());
     }
 
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
+        Long id = jwtService.extractUserId(token);
+
+        return this.service.logout(id);
+    }
+
+
 }

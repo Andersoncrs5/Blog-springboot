@@ -15,6 +15,8 @@ Technologies Used:
     Lombok – Reduces boilerplate code with annotations.
     Swagger 2.8.8 – API documentation with Springdoc OpenAPI.
     Spring security.
+    JWT
+
 
 Features
 
@@ -22,27 +24,16 @@ Features
     CRUD operations for Users, Posts, Categories, and Comments.
     Favorite Posts System (Users can mark posts as favorites).
     RESTful API architecture with standardized endpoints.
-
-Database Structure:
-    
-    User (users) → Stores user data.
-    Post (posts) → Contains blog posts.~~~~
-    Category (categories) → Organizes posts into categories.
-    Comment (comments) → Stores comments on posts.
-    Favorite Post (favorite_posts) → Links users with their favorite posts.
-
+    Exceptions global
+    Pagination
+    crypto
+    Recover Password
+    Filter System
 
 # Updates
 
-date 5/11 :
+date 5/13 :
 
-    Jwt
-    spring security
-    Pagination
-    crypto
-    Tables : PostLikes and CommentLikes
-    Otimizations
-    Exceptions global
-    Database: Postgresql
-    Recover Password
-    Filter System
+    System of metrics for user, post, comment
+    Favorite System to comments
+

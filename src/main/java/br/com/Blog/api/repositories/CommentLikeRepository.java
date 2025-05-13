@@ -13,4 +13,6 @@ public interface CommentLikeRepository extends JpaRepository<CommentLike, Long> 
     Page<CommentLike> findAllByUser(User user, Pageable pageable);
 
     Integer countAllByComment(Comment comment);
+
+    boolean existsByUserIdAndCommentId(Long userId, Long commentId);
 }

@@ -3,8 +3,10 @@ package br.com.Blog.api.services;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.entities.Comment;
 import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.UserMetrics;
 import br.com.Blog.api.repositories.CommentRepository;
 import br.com.Blog.api.repositories.PostRepository;
+import br.com.Blog.api.repositories.UserMetricsRepository;
 import br.com.Blog.api.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -33,13 +36,20 @@ public class UserService {
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final UserMetricsRepository metricRepository;
+    private final UserMetricsService metricsService;
 
     @Async
     @Transactional
     public ResponseEntity<?> Create(User user){
         user.setEmail(user.getEmail().trim().toLowerCase());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        this.repository.save(user);
+        User userCreated = this.repository.save(user);
+
+        UserMetrics metrics = new UserMetrics();
+        metrics.setUser(userCreated);
+        this.metricRepository.save(metrics);
+
         return new ResponseEntity<>("User created with success!", HttpStatus.CREATED);
     }
 
@@ -103,6 +113,19 @@ public class UserService {
 
         String token = jwtService.generateToken((UserDetails) authentication.getPrincipal(), user.getId());
         return ResponseEntity.ok(Map.of("token", token));
+    }
+
+    @Async
+    @Transactional
+    public ResponseEntity<?> logout(Long id) {
+        User user = this.Get(id);
+        UserMetrics metrics = this.metricsService.get(user);
+
+        metrics.setLastLogin(LocalDateTime.now());
+
+        this.metricRepository.save(metrics);
+
+        return new ResponseEntity<>("Logout make with successfully!", HttpStatus.OK);
     }
 
 }

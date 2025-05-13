@@ -32,9 +32,6 @@ public class Post {
     @Size(min = 50, message = "Size min is 50")
     private String content;
 
-    @Column
-    private Long viewed;
-
     @Column(nullable = false)
     private Integer readingTime;
 
@@ -59,6 +56,9 @@ public class Post {
     @ManyToOne
     @JoinColumn(name = "category", nullable = false)
     private Category category;
+
+    @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private PostMetrics metrics;
 
     @CreatedDate
     @Column(name = "created_at")

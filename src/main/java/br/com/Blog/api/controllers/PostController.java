@@ -6,6 +6,7 @@ import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.services.PostLikeService;
+import br.com.Blog.api.services.PostMetricsService;
 import br.com.Blog.api.services.PostService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,11 +33,14 @@ public class PostController {
     private final PostService service;
     private final JwtService jwtService;
     private final PostLikeService postLikeService;
+    private final PostMetricsService postMetricsService;
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public Post get(@PathVariable Long id){
-        return this.service.Get(id);
+        Post post = this.service.Get(id);
+        postMetricsService.viewed(post);
+        return post;
     }
 
     @GetMapping
@@ -86,11 +90,6 @@ public class PostController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return this.service.GetAllByCategory(categoryId, pageable);
-    }
-
-    @GetMapping("/countLikeByPost/{postId}")
-    public ResponseEntity<?> countLikeByPost(@PathVariable Long postId) {
-        return this.postLikeService.countLikeByPost(postId);
     }
 
     @GetMapping("/filterByTitle/{title}")

@@ -1,7 +1,9 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.services.PostLikeService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -13,27 +15,31 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/postLike")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 public class PostLikeController {
 
     private final PostLikeService service;
     private final JwtService jwtService;
 
-    @PostMapping("/{postId}")
-    public ResponseEntity<?> save(
+    @PostMapping("/{type}/{postId}")
+    public ResponseEntity<?> react(
+            @PathVariable String type,
             @PathVariable Long postId,
             HttpServletRequest request
     ) {
+        LikeOrUnLike action;
+
+        action = LikeOrUnLike.valueOf(type.toUpperCase());
         String authHeader = request.getHeader("Authorization");
         String token = authHeader.substring(7);
         Long id = jwtService.extractUserId(token);
 
-        return this.service.save(id, postId);
+        return this.service.reactToPost(id, postId, action);
     }
 
     @DeleteMapping("/{likeId}")
     public ResponseEntity<?> remove(@PathVariable Long likeId) {
-
-        return this.service.remove(likeId);
+        return this.service.removeReaction(likeId);
     }
 
     @GetMapping("/{postId}")

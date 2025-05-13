@@ -3,6 +3,7 @@ package br.com.Blog.api.controllers;
 import br.com.Blog.api.DTOs.CommentDTO;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.entities.Comment;
+import br.com.Blog.api.services.CommentMetricsService;
 import br.com.Blog.api.services.CommentService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,11 +23,15 @@ public class CommentController {
 
     private final CommentService service;
     private final JwtService jwtService;
+    private final CommentMetricsService metricsService;
 
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public Comment get(@PathVariable Long id){
-        return this.service.Get(id);
+        Comment comment = this.service.Get(id);
+        this.metricsService.sumView(comment);
+
+        return comment;
     }
 
     @DeleteMapping("{id}")

@@ -1,6 +1,5 @@
 package br.com.Blog.api.entities;
 
-import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -9,10 +8,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comment_likes")
+@Table(name = "favorite_comments")
 @EntityListeners(AuditingEntityListener.class)
 @Data
-public class CommentLike {
+public class FavoriteComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,17 +21,15 @@ public class CommentLike {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private LikeOrUnLike status;
-
-    @Version
-    private Long version;
-
     @ManyToOne
     @JoinColumn(name = "comment_id", nullable = false)
     private Comment comment;
 
+    @Version
+    private Long version;
+
     @CreatedDate
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
 }
