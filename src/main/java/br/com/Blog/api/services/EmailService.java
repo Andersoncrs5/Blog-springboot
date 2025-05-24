@@ -45,7 +45,6 @@ public class EmailService {
 
     public String loadTemplateHtml(String nameFile, Map<String, String> variaveis) {
         try {
-
             ClassPathResource resource = new ClassPathResource("templates/" + nameFile);
             String conteudo = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 

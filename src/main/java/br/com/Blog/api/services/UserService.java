@@ -8,7 +8,10 @@ import br.com.Blog.api.repositories.CommentRepository;
 import br.com.Blog.api.repositories.PostRepository;
 import br.com.Blog.api.repositories.UserMetricsRepository;
 import br.com.Blog.api.repositories.UserRepository;
+import br.com.Blog.api.services.response.ResponseTokens;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
 @Service
@@ -38,6 +42,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMetricsRepository metricRepository;
     private final UserMetricsService metricsService;
+    private final CustomUserDetailsService userDetailsService;
 
     @Async
     @Transactional
@@ -104,7 +109,8 @@ public class UserService {
     }
 
     @Async
-    public ResponseEntity<?> Login(String email, String password){
+    @Transactional
+    public Map<String, String> Login(String email, String password){
         User user = this.repository.findByEmail(email);
 
         Authentication authentication = authManager.authenticate(
@@ -112,7 +118,14 @@ public class UserService {
         );
 
         String token = jwtService.generateToken((UserDetails) authentication.getPrincipal(), user.getId());
-        return ResponseEntity.ok(Map.of("token", token));
+        String refresh = jwtService.generateRefreshtoken((UserDetails) authentication.getPrincipal(), user.getId());
+
+        user.setRefreshToken(refresh);
+
+        this.repository.save(user);
+
+        ResponseTokens res = new ResponseTokens(token, refresh);
+        return res.showTokens();
     }
 
     @Async
@@ -124,6 +137,27 @@ public class UserService {
         metrics.setLastLogin(LocalDateTime.now());
 
         this.metricRepository.save(metrics);
+    }
+
+    @Async
+    @Transactional
+    public Map<String, String> refreshToken(String refreshToken) {
+        Claims claims = jwtService.extractAllClaims(refreshToken);
+
+        if (claims.getExpiration().before(new Date())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        String username = claims.getSubject();
+        Long userId = claims.get("userId", Long.class);
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        String token = jwtService.generateToken(userDetails, userId);
+        String refresh = jwtService.generateRefreshtoken(userDetails, userId);
+
+        ResponseTokens res = new ResponseTokens(token, refresh);
+        return res.showTokens();
     }
 
 }

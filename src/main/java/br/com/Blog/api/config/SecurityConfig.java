@@ -28,10 +28,12 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("swagger-ui/**",
+                        .requestMatchers(
+                                "swagger-ui/**",
                                 "/v1/user/login",
                                 "/v1/user/register",
                                 "/v1/user/logout",
+                                "/v1/user/refresh/**",
                                 "/api/**",
                                 "/v1/recover/**",
                                 "/v1/comment/GetAllCommentsOfPost/**",
@@ -39,7 +41,8 @@ public class SecurityConfig {
                                 "/v1/posts/get/**",
                                 "/v1/posts/GetAllByCategory/**",
                                 "/v1/posts/filterByTitle/**",
-                                "/v3/api-docs/**").permitAll()
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -50,10 +53,18 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> web.ignoring().requestMatchers(
-                "/swagger-ui/**",
-                "/user/login",
-                "/user/register",
+                "swagger-ui/**",
+                "/v1/user/login",
+                "/v1/user/register",
+                "/v1/user/logout",
+                "/v1/user/refresh/**",
                 "/api/**",
+                "/v1/recover/**",
+                "/v1/comment/GetAllCommentsOfPost/**",
+                "/v1/posts/getAll/**",
+                "/v1/posts/get/**",
+                "/v1/posts/GetAllByCategory/**",
+                "/v1/posts/filterByTitle/**",
                 "/v3/api-docs/**"
         );
     }

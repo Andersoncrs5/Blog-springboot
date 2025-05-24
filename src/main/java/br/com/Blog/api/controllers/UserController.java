@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/v1/user")
 @RequiredArgsConstructor
@@ -46,7 +48,8 @@ public class UserController {
     public ResponseEntity<?> ListPostsOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size
+    ) {
         Pageable pageable = PageRequest.of(page, size);
 
         Long id = jwtService.extractId(request);
@@ -70,7 +73,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 14)
+    @RateLimit(capacity = 16, refillTokens = 2, refillSeconds = 14)
     public ResponseEntity<?> register(@RequestBody @Valid UserDTO dto, HttpServletRequest request){
         User user = this.service.Create(dto.MappearUserToCreate());
 
@@ -81,7 +84,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping
-    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> delete(HttpServletRequest request) {
         Long id = jwtService.extractId(request);
 
@@ -91,7 +94,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping
-    @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> update(@RequestBody @Valid UserDTO dto, HttpServletRequest request) {
         Long id = jwtService.extractId(request);
 
@@ -101,19 +104,30 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> Login(@RequestBody @Valid LoginDTO dto){
-        return this.service.Login(dto.email(), dto.password());
+        Map<String, String> res = this.service.Login(dto.email(), dto.password());
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @GetMapping("/logout")
-    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> logout(HttpServletRequest request) {
         Long id = jwtService.extractId(request);
 
         this.service.logout(id);
         var response = responseDefault.response("Logout make with successfully",200,request.getRequestURL().toString(), "", true);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @PostMapping("/refresh/{refresh}")
+    @SecurityRequirement(name = "bearerAuth")
+    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
+    public ResponseEntity<?> refresh(@PathVariable String refresh ){
+        Map<String, String> res = this.service.refreshToken(refresh);
+
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
 }

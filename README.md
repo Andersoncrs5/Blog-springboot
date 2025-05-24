@@ -32,7 +32,6 @@
 
 # Updates
 
-date 5/23 :
-    Fix bugs
-    xss protection
-    rate limiting
+date 5/24 :
+    Response
+    Refresh

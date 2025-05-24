@@ -28,10 +28,10 @@ public class User {
     private String email;
 
     @Column(length = 100, nullable = false)
-    private String password;
+    private String password = "";
 
     @Column
-    private String refreshToken;
+    private String refreshToken = "";
 
     private Boolean isAdm = false;
 

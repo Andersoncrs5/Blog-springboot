@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,14 +15,31 @@ import java.util.Date;
 @Component
 public class JwtService  {
 
-    private final String SECRET_KEY = "123456765432345678996487863866756789678743653675167";
+    @Value("${app.jwt.secret}")
+    private String SECRET_KEY;
+
+    @Value("${app.jwt.expiration}")
+    private long EXPIRETION_ACCESS_TOKEN;
+
+    @Value("${app.jwt.expiration.refresh_token}")
+    private long EXPIRATION_REFRESH_TOKEN;
 
     public String generateToken(UserDetails userDetails, Long id) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
                 .claim("userId", id)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2 ))
+                .setExpiration(new Date(System.currentTimeMillis() + this.EXPIRETION_ACCESS_TOKEN ))
+                .signWith(getKey(), SignatureAlgorithm.HS384)
+                .compact().trim();
+    }
+
+    public String generateRefreshtoken(UserDetails userDetails, Long id) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .claim("userId", id)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + this.EXPIRATION_REFRESH_TOKEN ))
                 .signWith(getKey(), SignatureAlgorithm.HS384)
                 .compact().trim();
     }

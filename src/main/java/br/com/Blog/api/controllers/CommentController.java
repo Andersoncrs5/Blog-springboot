@@ -4,8 +4,10 @@ import br.com.Blog.api.DTOs.CommentDTO;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.entities.Comment;
+import br.com.Blog.api.entities.CommentMetrics;
 import br.com.Blog.api.services.CommentMetricsService;
 import br.com.Blog.api.services.CommentService;
+import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -25,6 +27,7 @@ public class CommentController {
     private final CommentService service;
     private final JwtService jwtService;
     private final CommentMetricsService metricsService;
+    private final ResponseDefault responseDefault;
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("{id}")
@@ -71,6 +74,17 @@ public class CommentController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return this.service.GetAllCommentsOfPost(id, pageable);
+    }
+
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
+    @GetMapping("/getMetric/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> getMetric(
+            @PathVariable Long id,
+            HttpServletRequest request
+    ){
+        var response = responseDefault.response("Metric got with successfully",201,request.getRequestURL().toString(), this.service.getMetric(id), true);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

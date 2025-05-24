@@ -104,4 +104,12 @@ public class CommentService {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
+    @Async
+    @Transactional
+    public CommentMetrics getMetric(Long commentId) {
+        Comment comment = this.Get(commentId);
+
+        return this.metricsService.get(comment);
+    }
+
 }
