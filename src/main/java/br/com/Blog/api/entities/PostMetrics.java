@@ -44,7 +44,7 @@ public class PostMetrics {
     private Long clicks = 0L;
 
     @Column
-    private Long viewed;
+    private Long viewed = 0L;
 
     @Column(name = "last_interaction_at")
     private LocalDateTime lastInteractionAt;

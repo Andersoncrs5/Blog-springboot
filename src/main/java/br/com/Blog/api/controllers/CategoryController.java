@@ -1,8 +1,12 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.CategoryDTO;
+import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.services.CategoryService;
+import br.com.Blog.api.services.response.ResponseDefault;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,36 +15,58 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/v1/category")
 @RequiredArgsConstructor
 public class CategoryController {
 
     private final CategoryService service;
+    private final JwtService jwtService;
+    private final ResponseDefault responseDefault;
 
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Category get(@PathVariable Long id){
-        return this.service.get(id);
+    public ResponseEntity<?> get(@PathVariable Long id){
+        return new ResponseEntity<>(this.service.get(id), HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("")
     public ResponseEntity<?> getAll(){
-        return this.service.getAll();
+        return new ResponseEntity<>(this.service.getAll(), HttpStatus.OK);
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id){
-        return this.service.delete(id);
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
+        this.service.delete(id);
+
+        var response = this.responseDefault.response("Task deleted with successfully", 200, request.getRequestURL().toString(), "", true);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping("{idUser}")
-    public ResponseEntity<?> create(@RequestBody @Valid CategoryDTO dto, @PathVariable Long idUser){
-        return this.service.create(dto.MappearCategoryToCreate(), idUser);
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping
+    public ResponseEntity<?> create(
+            @RequestBody @Valid CategoryDTO dto,
+            HttpServletRequest request
+    ){
+
+        Long id = jwtService.extractId(request);
+
+        var result = this.service.create(dto.MappearCategoryToCreate(), id);
+        var response = this.responseDefault.response("Category created with successfully", 201, request.getRequestURL().toString(), result, true);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<?> update(@PathVariable Long id ,@RequestBody @Valid CategoryDTO dto){
-        return this.service.update(id, dto.MappearCategoryToUpdate());
+    @SecurityRequirement(name = "bearerAuth")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(
+            @PathVariable Long id ,@RequestBody @Valid CategoryDTO dto,
+            HttpServletRequest request
+            ){
+
+        var result = this.service.update(id, dto.MappearCategoryToUpdate());
+        var response = this.responseDefault.response("Category update with successfully", 200, request.getRequestURL().toString(), result, true);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

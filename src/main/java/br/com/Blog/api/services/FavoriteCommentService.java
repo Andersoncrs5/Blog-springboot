@@ -26,7 +26,6 @@ public class FavoriteCommentService {
     private final CommentMetricsService commentMetricsService;
     private final UserMetricsService userMetricsService;
 
-
     @Async
     @Transactional
     public ResponseEntity<?> GetAllFavoriteOfUser(Long userId, Pageable pageable){
@@ -54,7 +53,7 @@ public class FavoriteCommentService {
 
         Boolean check = this.repository.existsByUserAndComment(user, comment);
 
-        if (!check)
+        if (check)
             return new ResponseEntity<>("Item already exists", HttpStatus.CONFLICT);
 
         FavoriteComment favorite = new FavoriteComment();
@@ -67,7 +66,6 @@ public class FavoriteCommentService {
 
         this.repository.save(favorite);
         return new ResponseEntity<>("Comment saved with favorite!!", HttpStatus.CREATED);
-
     }
 
     @Async

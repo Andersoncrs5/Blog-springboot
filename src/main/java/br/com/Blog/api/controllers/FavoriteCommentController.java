@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/favoriteComment")
+@RequestMapping("/v1/favoriteComment")
 @RequiredArgsConstructor
 public class FavoriteCommentController {
 
@@ -23,11 +23,7 @@ public class FavoriteCommentController {
     @GetMapping("exists/{commentId}")
     @ResponseStatus(HttpStatus.OK)
     public Boolean exists(@PathVariable Long commentId, HttpServletRequest request) {
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
-
+        Long id = jwtService.extractId(request);
         return this.service.existsItemSalve(id, commentId);
     }
 
@@ -43,23 +39,15 @@ public class FavoriteCommentController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = this.jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.GetAllFavoriteOfUser(id, pageable);
     }
 
-
     @PostMapping("/{CommentId}")
     public ResponseEntity<?> create(@PathVariable Long CommentId , HttpServletRequest request) {
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = this.jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.create(CommentId, id);
     }
-
 }

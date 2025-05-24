@@ -99,5 +99,4 @@ public class PostMetricsService {
         this.repository.save(metric);
     }
 
-
 }

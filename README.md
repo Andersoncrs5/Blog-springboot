@@ -1,12 +1,13 @@
 # RESTful Blog Application In Spring boot with Java
 
-Overview:
+## Overview:
 
     This project is a RESTful API built with Spring Boot 3.4.2, designed for managing blog posts, 
     users, categories, and comments. It includes a favorite posts system, allowing users to save their 
-    favorite blog posts. The application follows CRUD principles and uses Spring Data JPA for database interactions.
+    favorite blog posts. The application follows CRUD principles and uses Spring Data JPA for database 
+    interactions, with system of recover password by email
 
-Technologies Used:
+## Technologies Used:
 
     JDK 23 – Java Development Kit.
     Spring Boot 3.4.5 – Framework for building RESTful APIs.
@@ -17,8 +18,7 @@ Technologies Used:
     Spring security.
     JWT
 
-
-Features
+## Features
 
     User authentication (JWT-based login & registration).
     CRUD operations for Users, Posts, Categories, and Comments.
@@ -32,8 +32,6 @@ Features
 
 # Updates
 
-date 5/13 :
-
-    System of metrics for user, post, comment
-    Favorite System to comments
-
+date 5/23 :
+    Fix bugs
+    xss protection

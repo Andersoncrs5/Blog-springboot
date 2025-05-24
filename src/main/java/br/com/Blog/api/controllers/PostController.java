@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/v1/posts")
 @RequiredArgsConstructor
 public class PostController {
 
@@ -35,7 +35,7 @@ public class PostController {
     private final PostLikeService postLikeService;
     private final PostMetricsService postMetricsService;
 
-    @GetMapping("{id}")
+    @GetMapping("/get/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Post get(@PathVariable Long id){
         Post post = this.service.Get(id);
@@ -43,7 +43,7 @@ public class PostController {
         return post;
     }
 
-    @GetMapping
+    @GetMapping("/getAll")
     public ResponseEntity<?> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -70,9 +70,7 @@ public class PostController {
             @PathVariable Long categoryId
     ) {
 
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
         return this.service.Create(dto.MappearPostToCreate(), id, categoryId);
     }
 

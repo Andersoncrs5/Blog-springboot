@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,7 @@ public class JwtService  {
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 2 ))
                 .signWith(getKey(), SignatureAlgorithm.HS384)
-                .compact();
+                .compact().trim();
     }
 
     private Key getKey() {
@@ -34,6 +35,12 @@ public class JwtService  {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public Long extractId(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
+        return extractUserId(token);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

@@ -13,7 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/postLike")
+@RequestMapping("/v1/postLike")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class PostLikeController {
@@ -30,9 +30,7 @@ public class PostLikeController {
         LikeOrUnLike action;
 
         action = LikeOrUnLike.valueOf(type.toUpperCase());
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.reactToPost(id, postId, action);
     }
@@ -48,23 +46,19 @@ public class PostLikeController {
             @PathVariable Long postId,
             HttpServletRequest request
     ) {
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.exists(id, postId);
     }
 
+    @GetMapping("/getAllByUser")
     public ResponseEntity<?> getAllByUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.getAllByUser(id, pageable);
     }

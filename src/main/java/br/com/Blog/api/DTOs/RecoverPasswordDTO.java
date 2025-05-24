@@ -1,16 +1,22 @@
 package br.com.Blog.api.DTOs;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class RecoverPasswordDTO {
+
+    @Pattern(regexp = "^[^<>]*$", message = "invalid character")
     @Size(max = 100, message = "Size max of 100")
     @NotBlank(message = "Field password is required")
     private String password;
+
+    @Pattern(regexp = "^[^<>]*$", message = "invalid character")
     @Size(max = 100, message = "Size max of 100")
     @NotBlank(message = "Field password is required")
     private String confirmPassword;
 
+    @Pattern(regexp = "^[^<>]*$", message = "invalid character")
     @NotBlank(message = "Field token is required")
     private String token;
 

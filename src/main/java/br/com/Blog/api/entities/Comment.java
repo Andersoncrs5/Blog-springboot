@@ -43,6 +43,7 @@ public class Comment {
     @Version
     private Long version;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private CommentMetrics metrics;
 

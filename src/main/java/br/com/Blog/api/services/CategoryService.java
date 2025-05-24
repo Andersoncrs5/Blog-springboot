@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
@@ -20,8 +22,8 @@ public class CategoryService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> getAll(){
-        return new ResponseEntity<>(this.repository.findAll(), HttpStatus.OK);
+    public List<Category> getAll(){
+        return this.repository.findAll();
     }
 
     @Async
@@ -39,31 +41,28 @@ public class CategoryService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> delete(Long id){
+    public void delete(Long id){
         Category category = this.get(id);
         this.repository.delete(category);
-
-        return new ResponseEntity<>("Category deleted", HttpStatus.FOUND);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> create(Category category, Long userId){
+    public Category create(Category category, Long userId){
         User user = this.userService.Get(userId);
 
         category.setUser(user);
-        return new ResponseEntity<>(this.repository.save(category), HttpStatus.CREATED);
+        return this.repository.save(category);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> update(Long id, Category category){
+    public Category update(Long id, Category category){
         Category categoryToUpdate = this.get(id);
 
         categoryToUpdate.setName(category.getName());
 
-        Category categoryUpdated = this.repository.save(categoryToUpdate);
-        return new ResponseEntity<>(categoryUpdated, HttpStatus.OK);
+        return this.repository.save(categoryToUpdate);
     }
 
 }

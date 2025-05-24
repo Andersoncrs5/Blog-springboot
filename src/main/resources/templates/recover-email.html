@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <meta charset="UTF-8" />
+    <title>Password Reset</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #121212; padding: 40px;">
+<div style="background-color: #ffffff; padding: 40px; border-radius: 12px; max-width: 600px; margin: auto; color: #111;">
+    <h2 style="color: #000000;">Password Recovery</h2>
+    <p>Hello,</p>
+    <p>You requested a password reset. Click the button below to set a new password:</p>
+    <p style="text-align: center; margin: 30px 0;">
+        <a href="{{link}}" style="background-color: #000000; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            Reset Password
+        </a>
+    </p>
+    <p>If the button doesn't work, copy and paste the following link into your browser:</p>
+    <p style="word-break: break-all;"><a href="{{link}}" style="color: #000;">{{link}}</a></p>
+    <p><strong>Token:</strong> {{token}}</p>
+    <p style="margin-top: 30px; font-size: 0.9em; color: #555;">
+        This link will expire in 1 hour for your security.
+    </p>
+</div>
+</body>
+</html>

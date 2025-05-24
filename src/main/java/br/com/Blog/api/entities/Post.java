@@ -53,10 +53,12 @@ public class Post {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "category", nullable = false)
     private Category category;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private PostMetrics metrics;
 

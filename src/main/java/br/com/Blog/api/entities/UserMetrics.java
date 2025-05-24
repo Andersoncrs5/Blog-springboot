@@ -1,5 +1,6 @@
 package br.com.Blog.api.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,6 +18,7 @@ public class UserMetrics {
     @Id
     private Long id;
 
+    @JsonIgnore
     @OneToOne
     @MapsId
     @JoinColumn(name = "user_id", nullable = false, unique = true)

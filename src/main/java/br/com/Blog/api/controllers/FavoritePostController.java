@@ -8,11 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @SecurityRequirement(name = "bearerAuth")
 @RestController
-@RequestMapping("/favoritePost")
+@RequestMapping("/v1/favoritePost")
 @RequiredArgsConstructor
 public class FavoritePostController {
 
@@ -21,10 +22,7 @@ public class FavoritePostController {
 
     @GetMapping("exists/{idPost}")
     public ResponseEntity<?> exists(@PathVariable Long idPost, HttpServletRequest request) {
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
         return this.service.existsItemSalve(id, idPost);
     }
 
@@ -34,25 +32,22 @@ public class FavoritePostController {
     }
 
     @GetMapping("GetAllFavoritePostOfUser")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> GetAllFavoritePostOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
         ) {
         Pageable pageable = PageRequest.of(page, size);
+        Long id = jwtService.extractId(request);
 
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
         return this.service.GetAllFavoritePostOfUser(id, pageable);
     }
 
     @PostMapping("/{postId}")
     public ResponseEntity<?> delete(@PathVariable Long postId , HttpServletRequest request) {
 
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
         return this.service.create(postId, id);
     }
 

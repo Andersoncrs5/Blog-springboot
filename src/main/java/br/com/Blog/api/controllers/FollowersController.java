@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(name = "followers")
+@RequestMapping(name = "/v1/followers")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class FollowersController {
@@ -25,10 +25,7 @@ public class FollowersController {
             @PathVariable Long userId,
             HttpServletRequest request
     ) {
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.follow(id, userId);
     }
@@ -39,23 +36,18 @@ public class FollowersController {
             HttpServletRequest request
     ) {
 
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.unfollow(id, userId);
     }
 
-    @PostMapping("/")
+    @GetMapping("/")
     public ResponseEntity<?> getAllFollowed(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.getAllFollowed(id, pageable);
     }
@@ -63,10 +55,7 @@ public class FollowersController {
     @PostMapping("/areFollowing/{userId}")
     @ResponseStatus(HttpStatus.OK)
     public Boolean areFollowing(@PathVariable Long userId, HttpServletRequest request){
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.areFollowing(id, userId);
     }
@@ -79,10 +68,7 @@ public class FollowersController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
+        Long id = jwtService.extractId(request);
 
         return this.service.getMutualFollowed(id, userId, pageable);
     }

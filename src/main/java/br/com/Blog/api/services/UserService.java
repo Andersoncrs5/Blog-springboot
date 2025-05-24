@@ -41,16 +41,17 @@ public class UserService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> Create(User user){
+    public User Create(User user){
         user.setEmail(user.getEmail().trim().toLowerCase());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User userCreated = this.repository.save(user);
 
         UserMetrics metrics = new UserMetrics();
         metrics.setUser(userCreated);
+
         this.metricRepository.save(metrics);
 
-        return new ResponseEntity<>("User created with success!", HttpStatus.CREATED);
+        return userCreated;
     }
 
     @Async
@@ -69,32 +70,31 @@ public class UserService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> Delete(Long id){
+    public void Delete(Long id){
         User user = this.Get(id);
         this.repository.delete(user);
-
-        return new ResponseEntity<>("User deleted", HttpStatus.OK);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> Update(Long id, User user){
+    public User Update(Long id, User user){
         User userForUpdate = this.Get(id);
 
         userForUpdate.setName(user.getName());
         userForUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        this.repository.save(userForUpdate);
-        return new ResponseEntity<>("User updated with success", HttpStatus.OK);
+        return this.repository.save(userForUpdate);
     }
 
     @Async
+    @Transactional(readOnly = true)
     public ResponseEntity<?> ListPostsOfUser(Long id, Pageable pageable){
         User user = this.Get(id);
         return new ResponseEntity<>(this.postRepository.findAllByUser(user, pageable), HttpStatus.OK);
     }
 
     @Async
+    @Transactional(readOnly = true)
     public ResponseEntity<?> ListCommentsOfUser(Long id, Pageable pageable){
         User user = this.Get(id);
 
@@ -117,15 +117,13 @@ public class UserService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> logout(Long id) {
+    public void logout(Long id) {
         User user = this.Get(id);
         UserMetrics metrics = this.metricsService.get(user);
 
         metrics.setLastLogin(LocalDateTime.now());
 
         this.metricRepository.save(metrics);
-
-        return new ResponseEntity<>("Logout make with successfully!", HttpStatus.OK);
     }
 
 }

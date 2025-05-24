@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/comment")
+@RequestMapping("/v1/comment")
 @RequiredArgsConstructor
 public class CommentController {
 
@@ -40,18 +40,15 @@ public class CommentController {
         return this.service.Delete(id);
     }
 
-    @PostMapping("/{idPost}")
+    @PostMapping("/{postId}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> Create(
             @RequestBody @Valid CommentDTO dto,
-            @PathVariable Long idPost,
+            @PathVariable Long postId,
             HttpServletRequest request
     ) {
-
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = jwtService.extractUserId(token);
-        return this.service.Create(dto.MappearCommentToCreate(), id, idPost);
+        Long id = jwtService.extractId(request);
+        return this.service.Create(dto.MappearCommentToCreate(), id, postId);
     }
 
     @SecurityRequirement(name = "bearerAuth")
@@ -64,7 +61,8 @@ public class CommentController {
     public ResponseEntity<?> GetAllCommentsOfPost(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size
+    ) {
         Pageable pageable = PageRequest.of(page, size);
         return this.service.GetAllCommentsOfPost(id, pageable);
     }
