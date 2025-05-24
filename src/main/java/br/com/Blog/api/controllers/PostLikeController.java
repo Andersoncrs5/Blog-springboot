@@ -1,6 +1,7 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.services.PostLikeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,6 +23,7 @@ public class PostLikeController {
     private final JwtService jwtService;
 
     @PostMapping("/{type}/{postId}")
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> react(
             @PathVariable String type,
             @PathVariable Long postId,
@@ -35,11 +37,13 @@ public class PostLikeController {
         return this.service.reactToPost(id, postId, action);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @DeleteMapping("/{likeId}")
     public ResponseEntity<?> remove(@PathVariable Long likeId) {
         return this.service.removeReaction(likeId);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @GetMapping("/{postId}")
     @ResponseStatus(HttpStatus.OK)
     public boolean exists(
@@ -51,6 +55,7 @@ public class PostLikeController {
         return this.service.exists(id, postId);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @GetMapping("/getAllByUser")
     public ResponseEntity<?> getAllByUser(
             HttpServletRequest request,

@@ -27,6 +27,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, ex.getStatusCode());
     }
 
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public static class RateLimitExceededException extends RuntimeException {
+        public RateLimitExceededException() {
+            super("Too many requests. Please try again later.");
+        }
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

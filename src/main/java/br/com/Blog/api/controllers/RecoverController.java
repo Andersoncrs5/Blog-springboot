@@ -1,6 +1,7 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.RecoverPasswordDTO;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.services.RecoverEmailService;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -17,11 +18,13 @@ public class RecoverController {
 
     private final RecoverEmailService service;
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
     @PostMapping("/request")
     public ResponseEntity<?> requestToken(@RequestParam String email) {
         return service.toCreateTokenOfRecover(email);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
     @PostMapping("/reset")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid RecoverPasswordDTO dto) {
         return service.toValidToken(dto);

@@ -35,3 +35,4 @@
 date 5/23 :
     Fix bugs
     xss protection
+    rate limiting

@@ -1,6 +1,7 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.services.FollowersService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,27 +21,28 @@ public class FollowersController {
     private final FollowersService service;
     private final JwtService jwtService;
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     @PostMapping("/follow/{userId}")
     public ResponseEntity<?> follow(
             @PathVariable Long userId,
             HttpServletRequest request
     ) {
         Long id = jwtService.extractId(request);
-
         return this.service.follow(id, userId);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     @PostMapping("/unfollow/{userId}")
     public ResponseEntity<?> unfollow(
             @PathVariable Long userId,
             HttpServletRequest request
     ) {
-
         Long id = jwtService.extractId(request);
 
         return this.service.unfollow(id, userId);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @GetMapping("/")
     public ResponseEntity<?> getAllFollowed(
             HttpServletRequest request,
@@ -53,6 +55,7 @@ public class FollowersController {
     }
 
     @PostMapping("/areFollowing/{userId}")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 6)
     @ResponseStatus(HttpStatus.OK)
     public Boolean areFollowing(@PathVariable Long userId, HttpServletRequest request){
         Long id = jwtService.extractId(request);
@@ -61,6 +64,7 @@ public class FollowersController {
     }
 
     @PostMapping("/mutual/{userId}")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 6)
     public ResponseEntity<?> getMutualFollowed(
             @PathVariable Long userId,
             HttpServletRequest request,

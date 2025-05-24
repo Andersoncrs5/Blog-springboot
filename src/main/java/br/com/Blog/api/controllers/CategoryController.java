@@ -2,6 +2,7 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.CategoryDTO;
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.services.CategoryService;
 import br.com.Blog.api.services.response.ResponseDefault;
@@ -23,17 +24,20 @@ public class CategoryController {
     private final JwtService jwtService;
     private final ResponseDefault responseDefault;
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("{id}")
     public ResponseEntity<?> get(@PathVariable Long id){
         return new ResponseEntity<>(this.service.get(id), HttpStatus.OK);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 5)
     @GetMapping("")
     public ResponseEntity<?> getAll(){
         return new ResponseEntity<>(this.service.getAll(), HttpStatus.OK);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
@@ -43,6 +47,7 @@ public class CategoryController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 20)
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<?> create(
@@ -57,6 +62,7 @@ public class CategoryController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 20)
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(

@@ -1,6 +1,7 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.services.FavoritePostService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ public class FavoritePostController {
     private final FavoritePostService service;
     private final JwtService jwtService;
 
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @GetMapping("exists/{idPost}")
     public ResponseEntity<?> exists(@PathVariable Long idPost, HttpServletRequest request) {
         Long id = jwtService.extractId(request);
@@ -27,12 +29,14 @@ public class FavoritePostController {
     }
 
     @DeleteMapping("{id}")
+    @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> delete(@PathVariable Long id){
         return this.service.Delete(id);
     }
 
     @GetMapping("GetAllFavoritePostOfUser")
     @Transactional(readOnly = true)
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     public ResponseEntity<?> GetAllFavoritePostOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
@@ -45,6 +49,7 @@ public class FavoritePostController {
     }
 
     @PostMapping("/{postId}")
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     public ResponseEntity<?> delete(@PathVariable Long postId , HttpServletRequest request) {
 
         Long id = jwtService.extractId(request);

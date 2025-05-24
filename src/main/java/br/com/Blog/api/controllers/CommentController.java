@@ -2,6 +2,7 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.CommentDTO;
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.entities.Comment;
 import br.com.Blog.api.services.CommentMetricsService;
 import br.com.Blog.api.services.CommentService;
@@ -25,6 +26,7 @@ public class CommentController {
     private final JwtService jwtService;
     private final CommentMetricsService metricsService;
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public Comment get(@PathVariable Long id){
@@ -34,6 +36,7 @@ public class CommentController {
         return comment;
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 15)
     @DeleteMapping("{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> delete(@PathVariable Long id){
@@ -42,6 +45,7 @@ public class CommentController {
 
     @PostMapping("/{postId}")
     @SecurityRequirement(name = "bearerAuth")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 15)
     public ResponseEntity<?> Create(
             @RequestBody @Valid CommentDTO dto,
             @PathVariable Long postId,
@@ -53,10 +57,12 @@ public class CommentController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/{id}")
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 15)
     public ResponseEntity<?> Update(@RequestBody @Valid CommentDTO dto, @PathVariable Long id){
         return this.service.Update(id, dto.MappearCommentToUpdate());
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("/GetAllCommentsOfPost/{id}")
     public ResponseEntity<?> GetAllCommentsOfPost(
             @PathVariable Long id,

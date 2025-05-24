@@ -1,6 +1,7 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.services.CommentLikeService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,7 @@ public class CommentLikeController {
         return jwtService.extractUserId(token);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @PostMapping("/{type}/{commentId}")
     public ResponseEntity<?> react(
             @PathVariable String type,
@@ -42,11 +44,13 @@ public class CommentLikeController {
         return service.reactToComment(userId, commentId, action);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @DeleteMapping("/{likeId}")
     public ResponseEntity<?> remove(@PathVariable Long likeId) {
         return service.removeReaction(likeId);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("/exists/{commentId}")
     public boolean exists(
             @PathVariable Long commentId,
@@ -56,6 +60,7 @@ public class CommentLikeController {
         return service.exists(userId, commentId);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 8)
     @GetMapping("/user")
     public ResponseEntity<?> getAllByUser(
             HttpServletRequest request,

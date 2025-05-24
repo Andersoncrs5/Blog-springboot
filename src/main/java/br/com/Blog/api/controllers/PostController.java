@@ -3,6 +3,7 @@ package br.com.Blog.api.controllers;
 import br.com.Blog.api.DTOs.PostDTO;
 import br.com.Blog.api.Specifications.PostSpecification;
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.services.PostLikeService;
@@ -37,6 +38,7 @@ public class PostController {
 
     @GetMapping("/get/{id}")
     @ResponseStatus(HttpStatus.OK)
+    @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
     public Post get(@PathVariable Long id){
         Post post = this.service.Get(id);
         postMetricsService.viewed(post);
@@ -44,6 +46,7 @@ public class PostController {
     }
 
     @GetMapping("/getAll")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 12)
     public ResponseEntity<?> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -56,6 +59,7 @@ public class PostController {
         return this.service.GetAll(pageable, spec);
     }
 
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("{id}")
     public ResponseEntity<?> delete(@PathVariable Long id){
@@ -64,6 +68,7 @@ public class PostController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/{categoryId}")
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> Create(
             @RequestBody @Valid PostDTO dto,
             HttpServletRequest request,
@@ -76,11 +81,13 @@ public class PostController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("{id}")
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> Update(@PathVariable Long id, @RequestBody @Valid PostDTO dto){
         return this.service.Update(id, dto.MappearPostToUpdate());
     }
 
     @GetMapping("/GetAllByCategory/{categoryId}")
+    @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> GetAllByCategory(
             @PathVariable Long categoryId,
             @RequestParam(defaultValue = "0") int page,
@@ -91,6 +98,7 @@ public class PostController {
     }
 
     @GetMapping("/filterByTitle/{title}")
+    @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> filterByTitle(
             @PathVariable String title,
             @RequestParam(defaultValue = "0") int page,

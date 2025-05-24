@@ -3,6 +3,7 @@ package br.com.Blog.api.controllers;
 import br.com.Blog.api.DTOs.LoginDTO;
 import br.com.Blog.api.DTOs.UserDTO;
 import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.services.RecoverEmailService;
 import br.com.Blog.api.services.UserService;
@@ -29,6 +30,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("me")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> get(HttpServletRequest request) {
         Long id = jwtService.extractId(request);
@@ -40,6 +42,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/ListPostsOfUser")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 12)
     public ResponseEntity<?> ListPostsOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
@@ -52,6 +55,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/ListCommentsOfUser")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> ListCommentsOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
@@ -66,6 +70,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 14)
     public ResponseEntity<?> register(@RequestBody @Valid UserDTO dto, HttpServletRequest request){
         User user = this.service.Create(dto.MappearUserToCreate());
 
@@ -76,6 +81,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> delete(HttpServletRequest request) {
         Long id = jwtService.extractId(request);
 
@@ -85,6 +91,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping
+    @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> update(@RequestBody @Valid UserDTO dto, HttpServletRequest request) {
         Long id = jwtService.extractId(request);
 
@@ -94,11 +101,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> Login(@RequestBody @Valid LoginDTO dto){
         return this.service.Login(dto.email(), dto.password());
     }
 
     @GetMapping("/logout")
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> logout(HttpServletRequest request) {
         Long id = jwtService.extractId(request);
 
