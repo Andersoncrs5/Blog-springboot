@@ -32,7 +32,7 @@ public class PostLikeService {
     @Async
     @Transactional
     public ResponseEntity<?> reactToPost(Long userId, Long postId, LikeOrUnLike action) {
-        User user = userService.Get(userId);
+        User user = userService.get(userId);
         Post post = this.postService.Get(postId);
         PostMetrics metrics = this.metricsService.get(post);
 
@@ -94,7 +94,7 @@ public class PostLikeService {
     @Async
     @Transactional
     public boolean exists(Long userId, Long postId) {
-        User user = this.userService.Get(userId);
+        User user = this.userService.get(userId);
         Post post = this.postService.Get(postId);
 
         return this.repository.existsByUserAndPost(user, post);
@@ -103,7 +103,7 @@ public class PostLikeService {
     @Async
     @Transactional
     public ResponseEntity<?> getAllByUser(Long userId, Pageable pageable) {
-        User user = this.userService.Get(userId);
+        User user = this.userService.get(userId);
 
         Page<PostLike> likes = this.repository.findAllByUser(user, pageable);
 

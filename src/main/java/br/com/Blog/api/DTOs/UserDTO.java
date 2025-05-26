@@ -9,8 +9,6 @@ import jakarta.validation.constraints.Size;
 
 public record UserDTO(
 
-        Long id,
-
         @Pattern(regexp = "^[^<>]*$", message = "invalid character")
         @Size(max = 100, message = "Size max of 100")
         @NotBlank(message = "Field name is required")
@@ -28,7 +26,7 @@ public record UserDTO(
         String password
 ) {
 
-    public User MappearUserToCreate(){
+    public User MappearToUser(){
         User user = new User();
 
         user.setName(name);
@@ -37,16 +35,4 @@ public record UserDTO(
 
         return user;
     }
-
-    public User MappearUserToUpdate(){
-        User user = new User();
-
-        user.setId(id);
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(password);
-
-        return user;
-    }
-
 }

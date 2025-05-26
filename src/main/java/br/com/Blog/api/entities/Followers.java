@@ -1,7 +1,8 @@
 package br.com.Blog.api.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -10,7 +11,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "followers")
 @EntityListeners(AuditingEntityListener.class)
-@Data
+@Setter
+@Getter
 public class Followers {
 
     @Id

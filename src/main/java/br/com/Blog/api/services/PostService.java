@@ -2,9 +2,7 @@ package br.com.Blog.api.services;
 
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.Post;
-import br.com.Blog.api.entities.PostMetrics;
 import br.com.Blog.api.entities.User;
-import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.PostMetricsRepository;
 import br.com.Blog.api.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,46 +29,32 @@ public class PostService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> Create(Post post, Long userId, Long categoryId){
+    public Post Create(Post post, Long userId, Long categoryId){
         Category category = this.categoryService.get(categoryId);
-
-        PostMetrics metrics = new PostMetrics();
-
-        User user = this.userService.Get(userId);
+        User user = this.userService.get(userId);
 
         post.setUser(user);
         post.setCategory(category);
 
-        Post postCreated = this.repository.save(post);
-
-        metrics.setPost(postCreated);
-
-        this.userMetricsService.sumOrRedPostsCount(user, SumOrReduce.SUM);
-        this.metricsRepository.save(metrics);
-
-        return new ResponseEntity<>("Post created with success!", HttpStatus.CREATED);
+        return this.repository.save(post);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> Update(Long id, Post post){
-        Post postForUpdate = this.Get(id);
+    public Post Update(Long postId, Post post){
+        Post postExist = this.Get(postId);
 
-        postForUpdate.setTitle(post.getTitle());
-        postForUpdate.setContent(post.getContent());
-        post.setReadingTime(post.getReadingTime());
-        post.setImageUrl(post.getImageUrl());
+        post.setUser(postExist.getUser());
+        post.setId(postId);
+        post.setCategory(postExist.getCategory());
 
-        this.metricsService.editedTimes(postForUpdate);
-        this.repository.save(postForUpdate);
-
-        return new ResponseEntity<>("Post updated with success", HttpStatus.OK);
+        return this.repository.save(post);
     }
 
     @Async
     @Transactional
     public Post Get(Long id){
-        if (id == null)
+        if (id <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
 
         Post post = this.repository.findById(id).orElse(null);
@@ -83,18 +67,17 @@ public class PostService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> Delete(Long id){
+    public Post Delete(Long id){
         Post post = this.Get(id);
 
         this.repository.delete(post);
-        this.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.REDUCE);
-        return new ResponseEntity<>("Post deleted", HttpStatus.OK);
+        return post;
     }
 
     @Async
     @Transactional
     public ResponseEntity<?> GetAll(Pageable pageable, Specification<Post> spec){
-            return new ResponseEntity<>(this.repository.findAll(spec, pageable), HttpStatus.OK);
+        return new ResponseEntity<>(this.repository.findAll(spec, pageable), HttpStatus.OK);
     }
 
     @Async
@@ -109,7 +92,7 @@ public class PostService {
     @Async
     @Transactional
     public ResponseEntity<?> filterByTitle(String title, Pageable pageable) {
-        return new ResponseEntity<>(this.repository.findByTitleContaining(title, pageable)  ,HttpStatus.OK);
+        return new ResponseEntity<>(this.repository.findByTitleContainingIgnoreCase(title, pageable)  ,HttpStatus.OK);
     }
 
 }

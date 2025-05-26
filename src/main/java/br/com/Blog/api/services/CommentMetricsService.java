@@ -39,6 +39,15 @@ public class CommentMetricsService {
 
     @Async
     @Transactional
+    public void create(Comment comment) {
+        CommentMetrics metrics = new CommentMetrics();
+        metrics.setComment(comment);
+
+        this.metricsRepository.save(metrics);
+    }
+
+    @Async
+    @Transactional
     public void sumView(Comment comment) {
         if (comment == null ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

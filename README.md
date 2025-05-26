@@ -32,6 +32,6 @@
 
 # Updates
 
-date 5/24 :
-    Response
-    Refresh
+date 5/26 :
+    notification system
+    Unit of work

@@ -73,3 +73,8 @@ DELETE - /v1/commentLike/{likeId}
 GET - /v1/commentLike/user
 POST - /v1/commentLike/{type}/{commentId}
 GET - /v1/commentLike/exists/{commentId}
+
+oo que falta:
+
+corn
+comment on comment

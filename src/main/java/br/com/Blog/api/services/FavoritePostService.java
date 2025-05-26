@@ -3,8 +3,6 @@ package br.com.Blog.api.services;
 import br.com.Blog.api.entities.FavoritePost;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
-import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
-import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.FavoritePostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -27,42 +25,37 @@ public class FavoritePostService {
 
     @Async
     public ResponseEntity<?> GetAllFavoritePostOfUser(Long userId, Pageable pageable){
-        User user = this.userService.Get(userId);
+        User user = this.userService.get(userId);
         return new ResponseEntity<>(this.repository.findAllByUser(user, pageable), HttpStatus.OK);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> Delete(Long idItem){
+    public FavoritePost Delete(Long idItem){
         FavoritePost favoritePost = this.get(idItem);
 
         this.repository.delete(favoritePost);
-        postMetricsService.sumOrReduceFavorite(favoritePost.getPost(), ActionSumOrReduceComment.REDUCE);
-        this.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.REDUCE);
-        return new ResponseEntity<>("favoritePost deleted ", HttpStatus.OK);
+
+        return favoritePost;
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> create(Long postId, Long userId){
-        User user = this.userService.Get(userId);
+    public FavoritePost create(Long postId, Long userId){
+        User user = this.userService.get(userId);
         Post post = this.postService.Get(postId);
 
         boolean check = this.repository.existsByUserAndPost(user, post);
 
         if (check)
-            return new ResponseEntity<>("Item already exists", HttpStatus.CONFLICT);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Item already exists");
 
         FavoritePost fpToCreate = new FavoritePost();
 
         fpToCreate.setPost(post);
         fpToCreate.setUser(user);
 
-        this.userMetricsService.sumOrRedSavedPostsCount(user, SumOrReduce.SUM);
-        postMetricsService.sumOrReduceFavorite(post, ActionSumOrReduceComment.SUM);
-
-        FavoritePost fpCreated = this.repository.save(fpToCreate);
-        return new ResponseEntity<>("Post saved with favorite!!", HttpStatus.CREATED);
+        return this.repository.save(fpToCreate);
     }
 
     @Async

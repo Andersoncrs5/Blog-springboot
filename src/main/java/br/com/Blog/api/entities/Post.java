@@ -35,11 +35,15 @@ public class Post {
     @Column(nullable = false)
     private Integer readingTime;
 
-    @Column(length = 500)
+    @Lob
+    @Column
     private String imageUrl;
 
     @Version
     private Long version;
+
+    @Column(unique = true)
+    private String slug;
 
     @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

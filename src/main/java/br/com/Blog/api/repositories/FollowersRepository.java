@@ -9,10 +9,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface FollowersRepository extends JpaRepository<Followers, Long> {
 
     Page<Followers> findAllByFollowed(User user, Pageable pageable);
+
+    List<Followers> findAllByFollowed(User user);
 
     Boolean existsByFollowerAndFollowed(User user, User followed);
 

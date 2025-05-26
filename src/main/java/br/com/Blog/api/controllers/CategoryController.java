@@ -3,6 +3,7 @@ package br.com.Blog.api.controllers;
 import br.com.Blog.api.DTOs.CategoryDTO;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
+import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.services.CategoryService;
 import br.com.Blog.api.services.response.ResponseDefault;
@@ -20,28 +21,27 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CategoryController {
 
-    private final CategoryService service;
-    private final JwtService jwtService;
     private final ResponseDefault responseDefault;
+    private final UnitOfWork uow;
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("{id}")
     public ResponseEntity<?> get(@PathVariable Long id){
-        return new ResponseEntity<>(this.service.get(id), HttpStatus.OK);
+        return new ResponseEntity<>(this.uow.categoryService.get(id), HttpStatus.OK);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 5)
     @GetMapping("")
     public ResponseEntity<?> getAll(){
-        return new ResponseEntity<>(this.service.getAll(), HttpStatus.OK);
+        return new ResponseEntity<>(this.uow.categoryService.getAll(), HttpStatus.OK);
     }
 
     @RateLimit(capacity = 10, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
-        this.service.delete(id);
+        this.uow.categoryService.delete(id);
 
         var response = this.responseDefault.response("Task deleted with successfully", 200, request.getRequestURL().toString(), "", true);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -54,10 +54,9 @@ public class CategoryController {
             @RequestBody @Valid CategoryDTO dto,
             HttpServletRequest request
     ){
+        Long id = this.uow.jwtService.extractId(request);
 
-        Long id = jwtService.extractId(request);
-
-        var result = this.service.create(dto.MappearCategoryToCreate(), id);
+        Category result = this.uow.categoryService.create(dto.MappearToCategory(), id);
         var response = this.responseDefault.response("Category created with successfully", 201, request.getRequestURL().toString(), result, true);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -70,7 +69,7 @@ public class CategoryController {
             HttpServletRequest request
             ){
 
-        var result = this.service.update(id, dto.MappearCategoryToUpdate());
+        var result = this.uow.categoryService.update(id, dto.MappearToCategory());
         var response = this.responseDefault.response("Category update with successfully", 200, request.getRequestURL().toString(), result, true);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

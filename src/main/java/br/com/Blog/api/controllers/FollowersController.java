@@ -1,8 +1,9 @@
 package br.com.Blog.api.controllers;
 
-import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
-import br.com.Blog.api.services.FollowersService;
+import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
+import br.com.Blog.api.entities.Followers;
+import br.com.Blog.api.entities.enums.FollowerOrFollowering;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -13,57 +14,84 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(name = "/v1/followers")
+@RequestMapping("/v1/followers")
 @RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class FollowersController {
 
-    private final FollowersService service;
-    private final JwtService jwtService;
+    private final UnitOfWork uow;
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     @PostMapping("/follow/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> follow(
             @PathVariable Long userId,
             HttpServletRequest request
     ) {
-        Long id = jwtService.extractId(request);
-        return this.service.follow(id, userId);
+        Long id = this.uow.jwtService.extractId(request);
+        Followers follower = this.uow.followersService.follow(id, userId);
+
+        this.uow.userMetricsService.incrementMetric(
+                follower.getFollower(), FollowerOrFollowering.FOLLOWERING
+        );
+
+        this.uow.userMetricsService.incrementMetric(
+                follower.getFollowed(), FollowerOrFollowering.FOLLOWER
+        );
+
+        return new ResponseEntity<>("You are follower this the " + follower.getFollower().getName(), HttpStatus.CREATED );
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     @PostMapping("/unfollow/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> unfollow(
             @PathVariable Long userId,
             HttpServletRequest request
     ) {
-        Long id = jwtService.extractId(request);
+        Long id = this.uow.jwtService.extractId(request);
 
-        return this.service.unfollow(id, userId);
+        Followers unfollowed = this.uow.followersService.unfollow(id, userId);
+
+        if (unfollowed == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("You are not following this user");
+        }
+
+        this.uow.userMetricsService.incrementMetric(
+                unfollowed.getFollower(), FollowerOrFollowering.UNFOLLOWERING
+        );
+
+        this.uow.userMetricsService.incrementMetric(
+                unfollowed.getFollowed(), FollowerOrFollowering.UNFOLLOWER
+        );
+
+        return ResponseEntity.ok("You have unfollowed " + unfollowed.getFollowed().getName());
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @GetMapping("/")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getAllFollowed(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Long id = jwtService.extractId(request);
+        Long id = this.uow.jwtService.extractId(request);
 
-        return this.service.getAllFollowed(id, pageable);
+        return this.uow.followersService.getAllFollowed(id, pageable);
     }
 
     @PostMapping("/areFollowing/{userId}")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 6)
     @ResponseStatus(HttpStatus.OK)
     public Boolean areFollowing(@PathVariable Long userId, HttpServletRequest request){
-        Long id = jwtService.extractId(request);
+        Long id = this.uow.jwtService.extractId(request);
 
-        return this.service.areFollowing(id, userId);
+        return this.uow.followersService.areFollowing(id, userId);
     }
 
     @PostMapping("/mutual/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 6)
     public ResponseEntity<?> getMutualFollowed(
             @PathVariable Long userId,
@@ -72,9 +100,9 @@ public class FollowersController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Long id = jwtService.extractId(request);
+        Long id = this.uow.jwtService.extractId(request);
 
-        return this.service.getMutualFollowed(id, userId, pageable);
+        return this.uow.followersService.getMutualFollowed(id, userId, pageable);
     }
 
 

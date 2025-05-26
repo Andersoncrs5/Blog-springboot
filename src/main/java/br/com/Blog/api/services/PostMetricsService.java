@@ -23,6 +23,14 @@ public class PostMetricsService {
 
     @Async
     @Transactional
+    public void create(Post post) {
+        PostMetrics metrics = new PostMetrics();
+        metrics.setPost(post);
+        this.repository.save(metrics);
+    }
+
+    @Async
+    @Transactional(readOnly = true)
     public PostMetrics get(Post post) {
         if (post == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

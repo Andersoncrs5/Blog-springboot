@@ -2,18 +2,14 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.PostDTO;
 import br.com.Blog.api.Specifications.PostSpecification;
-import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
-import br.com.Blog.api.entities.Category;
+import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Post;
-import br.com.Blog.api.services.PostLikeService;
-import br.com.Blog.api.services.PostMetricsService;
-import br.com.Blog.api.services.PostService;
+import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,17 +27,14 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class PostController {
 
-    private final PostService service;
-    private final JwtService jwtService;
-    private final PostLikeService postLikeService;
-    private final PostMetricsService postMetricsService;
+    private final UnitOfWork uow;
 
     @GetMapping("/get/{id}")
     @ResponseStatus(HttpStatus.OK)
     @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
     public Post get(@PathVariable Long id){
-        Post post = this.service.Get(id);
-        postMetricsService.viewed(post);
+        Post post = this.uow.postService.Get(id);
+        this.uow.postMetricsService.viewed(post);
         return post;
     }
 
@@ -50,20 +43,25 @@ public class PostController {
     public ResponseEntity<?> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) LocalDateTime createdAt,
-            @RequestParam(required = false) String title
+            @RequestParam(required = false) LocalDateTime createdAtAfter,
+            @RequestParam(required = false) LocalDateTime createdAtBefore,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) Long categoryId
 
             ) {
         Pageable pageable = PageRequest.of(page, size);
-        Specification<Post> spec = PostSpecification.filterBy(createdAt, title);
-        return this.service.GetAll(pageable, spec);
+        Specification<Post> spec = PostSpecification.filterBy(createdAtBefore, createdAtAfter, title, categoryId);
+        return this.uow.postService.GetAll(pageable, spec);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("{id}")
     public ResponseEntity<?> delete(@PathVariable Long id){
-        return this.service.Delete(id);
+        Post post = this.uow.postService.Delete(id);
+        this.uow.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.REDUCE);
+
+        return new ResponseEntity<>("Post deleted with successfully", HttpStatus.OK);
     }
 
     @SecurityRequirement(name = "bearerAuth")
@@ -75,15 +73,23 @@ public class PostController {
             @PathVariable Long categoryId
     ) {
 
-        Long id = jwtService.extractId(request);
-        return this.service.Create(dto.MappearPostToCreate(), id, categoryId);
+        Long userId = this.uow.jwtService.extractId(request);
+        Post post = this.uow.postService.Create(dto.MappearToPost(), userId, categoryId);
+        this.uow.postMetricsService.create(post);
+        this.uow.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.SUM);
+        this.uow.notificationsService.notifyFollowersAboutPostCreated(post);
+
+        return new ResponseEntity<>("Post created with successfully", HttpStatus.CREATED);
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("{id}")
+    @PutMapping("{postId}")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
-    public ResponseEntity<?> Update(@PathVariable Long id, @RequestBody @Valid PostDTO dto){
-        return this.service.Update(id, dto.MappearPostToUpdate());
+    public ResponseEntity<?> Update(@PathVariable Long postId, @RequestBody @Valid PostDTO dto){
+        Post post = this.uow.postService.Update(postId, dto.MappearToPost());
+        this.uow.postMetricsService.editedTimes(post);
+
+        return new ResponseEntity<>("Post updated with successfully", HttpStatus.OK);
     }
 
     @GetMapping("/GetAllByCategory/{categoryId}")
@@ -94,7 +100,7 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return this.service.GetAllByCategory(categoryId, pageable);
+        return this.uow.postService.GetAllByCategory(categoryId, pageable);
     }
 
     @GetMapping("/filterByTitle/{title}")
@@ -105,7 +111,7 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return this.service.filterByTitle(title, pageable);
+        return this.uow.postService.filterByTitle(title, pageable);
     }
 
 }

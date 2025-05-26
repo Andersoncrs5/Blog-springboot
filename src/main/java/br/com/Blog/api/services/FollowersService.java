@@ -8,8 +8,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -19,53 +22,62 @@ public class FollowersService {
     private final FollowersRepository repository;
     private final UserService userService;
 
-    public ResponseEntity<?> follow(Long userId, Long followedId) {
-        User user = userService.Get(userId);
-        User followed = userService.Get(followedId);
+    @Async
+    @Transactional
+    public Followers follow(Long userId, Long followedId) {
+        User user = userService.get(userId);
+        User followed = userService.get(followedId);
 
         boolean alreadyFollowing = repository.existsByFollowerAndFollowed(user, followed);
 
         if (alreadyFollowing) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("You are already following this user");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "You are already following this user");
         }
 
         Followers follower = new Followers();
         follower.setFollower(user);
         follower.setFollowed(followed);
-        repository.save(follower);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("User followed successfully");
+        return repository.save(follower);
     }
 
-    public ResponseEntity<?> unfollow(Long userId, Long followedId) {
-        User user = userService.Get(userId);
-        User followed = userService.Get(followedId);
+    @Async
+    @Transactional
+    public Followers unfollow(Long userId, Long followedId) {
+        User user = userService.get(userId);
+        User followed = userService.get(followedId);
 
         Followers followerRecord = repository.findByFollowerAndFollowed(user, followed);
 
         if (followerRecord == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("You are not following this user");
+            return null;
         }
 
         repository.delete(followerRecord);
-        return ResponseEntity.ok("Unfollowed successfully");
+        return followerRecord;
     }
 
+    @Async
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getAllFollowed(Long userId, Pageable pageable) {
-        User user = userService.Get(userId);
+        User user = userService.get(userId);
         Page<Followers> followed = repository.findAllByFollowed(user, pageable);
         return ResponseEntity.ok(followed);
     }
 
+    @Async
+    @Transactional(readOnly = true)
     public Boolean areFollowing(Long userId, Long followedId) {
-        User user = userService.Get(userId);
-        User followed = userService.Get(followedId);
+        User user = userService.get(userId);
+        User followed = userService.get(followedId);
         return repository.existsByFollowerAndFollowed(user, followed);
     }
 
+    @Async
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getMutualFollowed(Long user1Id, Long user2Id, Pageable pageable) {
-        User user1 = userService.Get(user1Id);
-        User user2 = userService.Get(user2Id);
+        User user1 = userService.get(user1Id);
+        User user2 = userService.get(user2Id);
 
         Page<User> mutuals = repository.findMutualFollowed(user1, user2, pageable);
         return ResponseEntity.ok(mutuals);

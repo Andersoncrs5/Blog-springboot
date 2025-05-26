@@ -5,7 +5,6 @@ import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,7 +48,7 @@ public class CategoryService {
     @Async
     @Transactional
     public Category create(Category category, Long userId){
-        User user = this.userService.Get(userId);
+        User user = this.userService.get(userId);
 
         category.setUser(user);
         return this.repository.save(category);
@@ -60,9 +59,10 @@ public class CategoryService {
     public Category update(Long id, Category category){
         Category categoryToUpdate = this.get(id);
 
-        categoryToUpdate.setName(category.getName());
+        category.setUser(categoryToUpdate.getUser());
+        category.setId(categoryToUpdate.getId());
 
-        return this.repository.save(categoryToUpdate);
+        return this.repository.save(category);
     }
 
 }

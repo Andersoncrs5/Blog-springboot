@@ -10,12 +10,24 @@ import java.util.List;
 
 public class PostSpecification {
 
-    public static Specification<Post> filterBy(LocalDateTime createdAt, String title) {
+    public static Specification<Post> filterBy(LocalDateTime createdAtBefore, LocalDateTime createdAtAfter, String title, Long categoryId) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (createdAt != null) {
-                predicates.add(cb.equal(root.get("createdAt"), createdAt));
+            if (createdAtAfter != null && createdAtBefore != null ) {
+                predicates.add(cb.between(root.get("createdAt"), createdAtAfter, createdAtBefore));
+            }
+
+            if (createdAtBefore != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), createdAtBefore));
+            }
+
+            if (createdAtAfter != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), createdAtAfter));
+            }
+
+            if (categoryId != null) {
+                predicates.add(cb.equal(root.get("category").get("id"), categoryId));
             }
 
             if (title != null && !title.isEmpty()) {

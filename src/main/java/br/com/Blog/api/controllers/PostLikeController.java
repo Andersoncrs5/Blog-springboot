@@ -2,6 +2,7 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
+import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.services.PostLikeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,8 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class PostLikeController {
 
-    private final PostLikeService service;
-    private final JwtService jwtService;
+    private final UnitOfWork uow;
 
     @PostMapping("/{type}/{postId}")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
@@ -32,15 +32,15 @@ public class PostLikeController {
         LikeOrUnLike action;
 
         action = LikeOrUnLike.valueOf(type.toUpperCase());
-        Long id = jwtService.extractId(request);
+        Long id = this.uow.jwtService.extractId(request);
 
-        return this.service.reactToPost(id, postId, action);
+        return this.uow.postLikeService.reactToPost(id, postId, action);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @DeleteMapping("/{likeId}")
     public ResponseEntity<?> remove(@PathVariable Long likeId) {
-        return this.service.removeReaction(likeId);
+        return this.uow.postLikeService.removeReaction(likeId);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
@@ -50,9 +50,9 @@ public class PostLikeController {
             @PathVariable Long postId,
             HttpServletRequest request
     ) {
-        Long id = jwtService.extractId(request);
+        Long id = this.uow.jwtService.extractId(request);
 
-        return this.service.exists(id, postId);
+        return this.uow.postLikeService.exists(id, postId);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
@@ -63,9 +63,9 @@ public class PostLikeController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Long id = jwtService.extractId(request);
+        Long id = this.uow.jwtService.extractId(request);
 
-        return this.service.getAllByUser(id, pageable);
+        return this.uow.postLikeService.getAllByUser(id, pageable);
     }
 
 }

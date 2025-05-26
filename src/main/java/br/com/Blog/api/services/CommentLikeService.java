@@ -27,7 +27,7 @@ public class CommentLikeService {
     @Async
     @Transactional
     public ResponseEntity<?> reactToComment(Long userId, Long commentId, LikeOrUnLike action) {
-        User user = userService.Get(userId);
+        User user = userService.get(userId);
         Comment comment = commentService.Get(commentId);
         CommentMetrics metrics = metricsService.get(comment);
 
@@ -87,7 +87,7 @@ public class CommentLikeService {
     @Async
     @Transactional(readOnly = true)
     public ResponseEntity<?> getAllByUser(Long userId, Pageable pageable) {
-        User user = userService.Get(userId);
+        User user = userService.get(userId);
         Page<CommentLike> likes = repository.findAllByUser(user, pageable);
         return new ResponseEntity<>(likes, HttpStatus.OK);
     }

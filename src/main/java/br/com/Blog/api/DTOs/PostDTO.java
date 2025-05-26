@@ -26,27 +26,20 @@ public record PostDTO(
         @Pattern(regexp = "^[^<>]*$", message = "invalid character")
         @Size(max = 500, message = "Image URL too long")
         @URL(message = "Invalid image URL")
-        String imageUrl
+        String imageUrl,
+
+        @Pattern(regexp = "^[^<>]*$", message = "invalid character")
+        @Size(max = 500, message = "slug too long")
+        String slug
 ) {
-    public Post MappearPostToCreate() {
+    public Post MappearToPost() {
         Post post = new Post();
 
         post.setTitle(title);
         post.setContent(content);
         post.setReadingTime(readingTime);
         post.setImageUrl(imageUrl);
-
-        return post;
-    }
-
-    public Post MappearPostToUpdate() {
-        Post post = new Post();
-
-        post.setId(id);
-        post.setTitle(title);
-        post.setContent(content);
-        post.setReadingTime(readingTime);
-        post.setImageUrl(imageUrl);
+        post.setSlug(slug);
 
         return post;
     }

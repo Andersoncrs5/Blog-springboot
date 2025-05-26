@@ -3,8 +3,6 @@ package br.com.Blog.api.services;
 import br.com.Blog.api.entities.Comment;
 import br.com.Blog.api.entities.FavoriteComment;
 import br.com.Blog.api.entities.User;
-import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
-import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.FavoriteCommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,48 +27,42 @@ public class FavoriteCommentService {
     @Async
     @Transactional
     public ResponseEntity<?> GetAllFavoriteOfUser(Long userId, Pageable pageable){
-        User user = this.userService.Get(userId);
+        User user = this.userService.get(userId);
         Page<FavoriteComment> page = this.repository.findAllByUser(user, pageable);
         return new ResponseEntity<>(page, HttpStatus.OK);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> Delete(Long idItem){
+    public FavoriteComment Delete(Long idItem){
         FavoriteComment favorite = this.get(idItem);
 
         this.repository.delete(favorite);
-        this.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.REDUCE);
-        this.userMetricsService.sumOrRedSavedCommentsCount(favorite.getUser(), SumOrReduce.REDUCE);
-        return new ResponseEntity<>("favorite comment deleted ", HttpStatus.OK);
+        return favorite;
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> create(Long commentId, Long userId){
-        User user = this.userService.Get(userId);
+    public FavoriteComment create(Long commentId, Long userId){
+        User user = this.userService.get(userId);
         Comment comment = this.commentService.Get(commentId);
 
         Boolean check = this.repository.existsByUserAndComment(user, comment);
 
         if (check)
-            return new ResponseEntity<>("Item already exists", HttpStatus.CONFLICT);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Item already exists");
 
         FavoriteComment favorite = new FavoriteComment();
 
         favorite.setComment(comment);
         favorite.setUser(user);
 
-        this.userMetricsService.sumOrRedSavedCommentsCount(user, SumOrReduce.SUM);
-        this.commentMetricsService.sumOrReduceFavorite(comment, ActionSumOrReduceComment.SUM);
-
-        this.repository.save(favorite);
-        return new ResponseEntity<>("Comment saved with favorite!!", HttpStatus.CREATED);
+        return this.repository.save(favorite);
     }
 
     @Async
     public Boolean existsItemSalve(Long userId, Long commentId){
-        User user = this.userService.Get(userId);
+        User user = this.userService.get(userId);
         Comment comment = this.commentService.Get(commentId);
 
         return this.repository.existsByUserAndComment(user, comment);

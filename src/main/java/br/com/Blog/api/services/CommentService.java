@@ -4,9 +4,6 @@ import br.com.Blog.api.entities.Comment;
 import br.com.Blog.api.entities.CommentMetrics;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
-import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
-import br.com.Blog.api.entities.enums.SumOrReduce;
-import br.com.Blog.api.repositories.CommentMetricsRepository;
 import br.com.Blog.api.repositories.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,10 +22,7 @@ public class CommentService {
     private final CommentRepository repository;
     private final UserService userService;
     private final PostService postService;
-    private final CommentMetricsRepository metricsRepository;
     private final CommentMetricsService metricsService;
-    private final PostMetricsService postMetricsService;
-    private final UserMetricsService userMetricsService;
 
     @Async
     @Transactional
@@ -46,52 +40,36 @@ public class CommentService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> Create(Comment comment, Long userId, Long postId){
-        User user = this.userService.Get(userId);
+    public Comment Create(Comment comment, Long userId, Long postId){
+        User user = this.userService.get(userId);
         Post post = this.postService.Get(postId);
 
         comment.setName(user.getName());
         comment.setUser(user);
         comment.setPost(post);
 
-        postMetricsService.sumOrReduceComments(post, ActionSumOrReduceComment.SUM);
-
-        Comment commentCreated = this.repository.save(comment);
-
-        CommentMetrics metrics = new CommentMetrics();
-
-        metrics.setComment(comment);
-
-        this.metricsRepository.save(metrics);
-        this.userMetricsService.sumOrRedCommentsCount(user, SumOrReduce.SUM);
-
-        return new ResponseEntity<>("Comment created with success!", HttpStatus.CREATED);
+        return this.repository.save(comment);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> Delete(Long id){
+    public Comment Delete(Long id){
         Comment comment = this.Get(id);
 
-        postMetricsService.sumOrReduceComments(comment.getPost(), ActionSumOrReduceComment.REDUCE);
-        this.userMetricsService.sumOrRedCommentsCount(comment.getUser(), SumOrReduce.REDUCE);
         this.repository.delete(comment);
-        return new ResponseEntity<>("Comment deleted with success", HttpStatus.OK);
-
+        return comment;
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> Update(Long id, Comment comment){
+    public Comment Update(Long id, Comment comment){
         Comment commentToUpdate = this.Get(id);
 
         commentToUpdate.setContent(comment.getContent());
-        this.metricsService.sumEdited(commentToUpdate);
 
         commentToUpdate.setIsEdited(true);
-        Comment commentUpdated = this.repository.save(commentToUpdate);
 
-        return new ResponseEntity<>(commentUpdated, HttpStatus.OK);
+        return this.repository.save(commentToUpdate);
     }
 
     @Async

@@ -5,7 +5,6 @@ import br.com.Blog.api.entities.UserMetrics;
 import br.com.Blog.api.entities.enums.FollowerOrFollowering;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.UserMetricsRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -22,7 +22,7 @@ public class UserMetricsService {
     private UserMetricsRepository repository;
 
     @Async
-    @Transactional
+    @Transactional(readOnly = true)
     public UserMetrics get(User user) {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -37,31 +37,46 @@ public class UserMetricsService {
     }
 
     @Async
-    @Transactional
-    public void FollowerOrFollowering(User user, FollowerOrFollowering action) {
-        UserMetrics metrics = this.get(user);
+    @Transactional(readOnly = true)
+    public void create(User user) {
+        UserMetrics metric = new UserMetrics();
+        metric.setUser(user);
 
-        if (action == FollowerOrFollowering.FOLLOWERING )
-            metrics.setFollowingCount(metrics.getFollowingCount() + 1);
-
-        if (action == FollowerOrFollowering.FOLLOWER )
-            metrics.setFollowersCount(metrics.getFollowersCount() + 1);
-
-        this.repository.save(metrics);
+        this.repository.save(metric);
     }
 
     @Async
     @Transactional
-    public void removeFollowerOrFollowering(User user, FollowerOrFollowering action) {
+    public void setLastLogin(User user) {
+        UserMetrics metric = this.get(user);
+        metric.setLastLogin(LocalDateTime.now());
+        this.repository.save(metric);
+    }
+
+    @Async
+    @Transactional
+    public void incrementMetric(User user, FollowerOrFollowering action) {
         UserMetrics metrics = this.get(user);
 
-        if (action == FollowerOrFollowering.FOLLOWERING )
-            metrics.setFollowingCount(metrics.getFollowingCount() - 1);
+        switch (action) {
+            case FOLLOWERING -> metrics.setFollowingCount(metrics.getFollowingCount() + 1);
+            case FOLLOWER -> metrics.setFollowersCount(metrics.getFollowersCount() + 1);
+        }
 
-        if (action == FollowerOrFollowering.FOLLOWER )
-            metrics.setFollowersCount(metrics.getFollowersCount() - 1);
+        repository.save(metrics);
+    }
 
-        this.repository.save(metrics);
+    @Async
+    @Transactional
+    public void decrementMetric(User user, FollowerOrFollowering action) {
+        UserMetrics metrics = this.get(user);
+
+        switch (action) {
+            case FOLLOWERING -> metrics.setFollowingCount(metrics.getFollowingCount() - 1);
+            case FOLLOWER -> metrics.setFollowersCount(metrics.getFollowersCount() - 1);
+        }
+
+        repository.save(metrics);
     }
 
     @Async
