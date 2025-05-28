@@ -25,6 +25,7 @@ public class FavoriteCommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("exists/{commentId}")
+    @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.OK)
     public Boolean exists(@PathVariable Long commentId, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
@@ -33,6 +34,7 @@ public class FavoriteCommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 15)
     @DeleteMapping("{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         FavoriteComment favorite = this.uow.favoriteCommentService.Delete(id);
         this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.REDUCE);
@@ -45,6 +47,7 @@ public class FavoriteCommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 15)
     @GetMapping("GetAllFavoriteOfUser")
+    @SecurityRequirement(name = "bearerAuth")
     public Page<FavoriteComment> GetAllFavoriteOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
@@ -57,6 +60,7 @@ public class FavoriteCommentController {
     }
 
     @PostMapping("/{CommentId}")
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> create(@PathVariable Long CommentId , HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);

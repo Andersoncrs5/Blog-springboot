@@ -37,6 +37,7 @@ public class UserMetricsService {
     public void create(User user) {
         UserMetrics metric = new UserMetrics();
         metric.setUser(user);
+        metric.setId(null);
 
         this.repository.save(metric);
     }
@@ -87,7 +88,6 @@ public class UserMetricsService {
             metrics.setPostsCount(metrics.getPostsCount() - 1);
 
         this.repository.save(metrics);
-
     }
 
     @Async

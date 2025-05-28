@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,28 +29,35 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/user")
-@RequiredArgsConstructor
 public class UserController {
 
-    private final ResponseDefault responseDefault;
-    private final UnitOfWork uow;
+    @Autowired
+    private ResponseDefault responseDefault;
+    @Autowired
+    private UnitOfWork uow;
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/getMetric")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getMetric(HttpServletRequest request) {
         Long userId = this.uow.jwtService.extractId(request);
         User user = this.uow.userService.get(userId);
         UserMetrics metric = this.uow.userMetricsService.get(user);
 
-        var response = responseDefault.response("User metric found with successfully",200,request.getRequestURL().toString(), metric, true);
+        var response = this.uow.responseDefault.response(
+                "User metric found with successfully",
+                200,
+                request.getRequestURL().toString(),
+                metric,
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/getMetricOfUser/{userId}")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getMetricOfUser(
             HttpServletRequest request,
             @PathVariable Long userId
@@ -62,18 +70,26 @@ public class UserController {
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("me")
+    @GetMapping("/me")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> get(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
 
         User user = this.uow.userService.get(id);
-        var response = responseDefault.response("User found with successfully",200,request.getRequestURL().toString(), user, true);
+        var response = responseDefault.response(
+                "User found with successfully",
+                200,
+                request.getRequestURL().toString(),
+                user,
+                true
+        );
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/getProfile/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getProfile(@PathVariable Long id , HttpServletRequest request) {
@@ -138,48 +154,73 @@ public class UserController {
         User user = this.uow.userService.create(dto.MappearToUser());
 
         this.uow.userMetricsService.create(user);
-        var response = responseDefault.response("User created with successfully",201,request.getRequestURL().toString(), user, true);
-        this.uow.recoverEmailService.messageWelcome(user.getEmail());
+        var response = responseDefault.response(
+                "User created with successfully",
+                201,
+                request.getRequestURL().toString(),
+                user,
+                true
+        );
+//        this.uow.recoverEmailService.messageWelcome(user.getEmail());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @DeleteMapping
+    @DeleteMapping("/")
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> delete(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-
-        var response = responseDefault.response("User deleted with successfully",200,request.getRequestURL().toString(), "", true);
+        this.uow.userService.delete(id);
+        var response = responseDefault.response(
+                "User deleted with successfully",
+                200,
+                request.getRequestURL().toString(),
+                "",
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping
+    @PutMapping("/")
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> update(@RequestBody @Valid UserDTO dto, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
 
         var user = this.uow.userService.update(id, dto.MappearToUser());
-        var response = responseDefault.response("User update with successfully",200,request.getRequestURL().toString(), user, true);
+        var response = responseDefault.response(
+                "User update with successfully",
+                200,
+                request.getRequestURL().toString(),
+                user,
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/login")
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> Login(@RequestBody @Valid LoginDTO dto){
-        Map<String, String> res = this.uow.userService.login(dto.email(), dto.password());
+        Map<String, String> res = this.uow.userService.login(dto.email().trim().toLowerCase(), dto.password());
 
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @GetMapping("/logout")
-    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 16)
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
 
         User user = this.uow.userService.logout(id);
         this.uow.userMetricsService.setLastLogin(user);
-        var response = responseDefault.response("Logout make with successfully",200,request.getRequestURL().toString(), "", true);
+        var response = responseDefault.response(
+                "Logout make with successfully",
+                200,
+                request.getRequestURL().toString(),
+                "",
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

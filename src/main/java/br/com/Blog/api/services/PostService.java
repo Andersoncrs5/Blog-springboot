@@ -32,6 +32,7 @@ public class PostService {
 
         post.setUser(user);
         post.setCategory(category);
+        post.setId(null);
 
         boolean checkSlug = this.repository.existsBySlug(post.getSlug());
 

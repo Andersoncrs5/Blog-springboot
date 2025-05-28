@@ -1,10 +1,9 @@
 package br.com.Blog.api.controllers;
 
-import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
-import br.com.Blog.api.services.CommentLikeService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +30,7 @@ public class CommentLikeController {
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping("/{type}/{commentId}")
     public ResponseEntity<?> react(
             @PathVariable String type,
@@ -46,12 +46,14 @@ public class CommentLikeController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @DeleteMapping("/{likeId}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> remove(@PathVariable Long likeId) {
         return this.uow.commentLikeService.removeReaction(likeId);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("/exists/{commentId}")
+    @SecurityRequirement(name = "bearerAuth")
     public boolean exists(
             @PathVariable Long commentId,
             HttpServletRequest request
@@ -61,7 +63,8 @@ public class CommentLikeController {
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 8)
-    @GetMapping("/user")
+    @GetMapping("/getAllByUser")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getAllByUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,

@@ -9,6 +9,7 @@ import br.com.Blog.api.services.PostLikeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +19,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/postLike")
-@RequiredArgsConstructor
 @SecurityRequirement(name = "bearerAuth")
 public class PostLikeController {
 
-    private final UnitOfWork uow;
+    @Autowired
+    private UnitOfWork uow;
 
     @PostMapping("/{type}/{postId}")
     @SecurityRequirement(name = "bearerAuth")

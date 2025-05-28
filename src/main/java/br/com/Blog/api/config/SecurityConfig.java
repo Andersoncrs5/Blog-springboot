@@ -1,7 +1,6 @@
 package br.com.Blog.api.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,16 +31,8 @@ public class SecurityConfig {
                                 "swagger-ui/**",
                                 "/v1/user/login",
                                 "/v1/user/register",
-                                "/v1/user/logout",
-                                "/v1/user/refresh/**",
-                                "/v1/user/getProfile/**",
                                 "/api/**",
                                 "/v1/recover/**",
-                                "/v1/comment/GetAllCommentsOfPost/**",
-                                "/v1/posts/getAll/**",
-                                "/v1/posts/get/**",
-                                "/v1/posts/GetAllByCategory/**",
-                                "/v1/posts/filterByTitle/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated()
@@ -57,16 +48,8 @@ public class SecurityConfig {
                 "swagger-ui/**",
                 "/v1/user/login",
                 "/v1/user/register",
-                "/v1/user/logout",
-                "/v1/user/getProfile/**",
-                "/v1/user/refresh/**",
                 "/api/**",
                 "/v1/recover/**",
-                "/v1/comment/GetAllCommentsOfPost/**",
-                "/v1/posts/getAll/**",
-                "/v1/posts/get/**",
-                "/v1/posts/GetAllByCategory/**",
-                "/v1/posts/filterByTitle/**",
                 "/v3/api-docs/**"
         );
     }

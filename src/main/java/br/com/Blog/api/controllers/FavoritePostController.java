@@ -8,6 +8,7 @@ import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,19 +20,21 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 @RestController
 @RequestMapping("/v1/favoritePost")
-@RequiredArgsConstructor
 public class FavoritePostController {
 
-    private final UnitOfWork uow;
+    @Autowired
+    private UnitOfWork uow;
 
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @GetMapping("exists/{idPost}")
+    @SecurityRequirement(name = "bearerAuth")
     public boolean exists(@PathVariable Long idPost, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
         return this.uow.favoritePostService.existsItemSalve(id, idPost);
     }
 
     @DeleteMapping("{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         FavoritePost favoritePost = this.uow.favoritePostService.Delete(id);
@@ -43,8 +46,8 @@ public class FavoritePostController {
     }
 
     @GetMapping("GetAllFavoritePostOfUser")
-    @Transactional(readOnly = true)
     @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     public Page<FavoritePost> GetAllFavoritePostOfUser(
             HttpServletRequest request,
@@ -59,6 +62,7 @@ public class FavoritePostController {
 
     @PostMapping("/{postId}")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> create(@PathVariable Long postId , HttpServletRequest request) {
 
         Long id = this.uow.jwtService.extractId(request);

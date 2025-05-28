@@ -28,16 +28,23 @@ public class CategoryController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request){
         Category category = this.uow.categoryService.get(id);
-        var response = this.uow.responseDefault.response("Category found with successfully",201,request.getRequestURL().toString(), category, true);
+        var response = this.uow.responseDefault.response(
+                "Category found with successfully",
+                200,
+                request.getRequestURL().toString(),
+                category,
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 5)
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @SecurityRequirement(name = "bearerAuth")
     public List<Category> getAll(){
         return this.uow.categoryService.getAll();
     }
@@ -48,13 +55,19 @@ public class CategoryController {
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         this.uow.categoryService.delete(id);
 
-        var response = this.responseDefault.response("Task deleted with successfully", 200, request.getRequestURL().toString(), "", true);
+        var response = this.responseDefault.response(
+                "Task deleted with successfully",
+                200,
+                request.getRequestURL().toString(),
+                "",
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 20)
     @SecurityRequirement(name = "bearerAuth")
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<?> create(
             @RequestBody @Valid CategoryDTO dto,
             HttpServletRequest request
@@ -62,7 +75,13 @@ public class CategoryController {
         Long id = this.uow.jwtService.extractId(request);
 
         Category result = this.uow.categoryService.create(dto.MappearToCategory(), id);
-        var response = this.responseDefault.response("Category created with successfully", 201, request.getRequestURL().toString(), result, true);
+        var response = this.responseDefault.response(
+                "Category created with successfully",
+                201,
+                request.getRequestURL().toString(),
+                result,
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -75,7 +94,13 @@ public class CategoryController {
             ){
 
         var result = this.uow.categoryService.update(id, dto.MappearToCategory());
-        var response = this.responseDefault.response("Category update with successfully", 200, request.getRequestURL().toString(), result, true);
+        var response = this.responseDefault.response(
+                "Category update with successfully",
+                200,
+                request.getRequestURL().toString(),
+                result,
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,21 +31,22 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/posts")
-@RequiredArgsConstructor
 public class PostController {
 
-    private final UnitOfWork uow;
-    private final ResponseDefault responseDefault;
+    @Autowired
+    private UnitOfWork uow;
 
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
-    public ResponseEntity<Map<String, Object>> get(@PathVariable Long id, HttpServletRequest request){
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request){
         Post post = this.uow.postService.Get(id);
         this.uow.postMetricsService.viewed(post);
+
         var response = this.uow.responseDefault.response(
-                "Notification marked with read!!",
-                201 ,
+                "Post found with successfully",
+                200,
                 request.getRequestURL().toString(),
                 post,
                 true
@@ -63,12 +65,19 @@ public class PostController {
         Post post = this.uow.postService.Get(postId);
         PostMetrics metric = this.uow.postMetricsService.get(post);
 
-        var response = this.uow.responseDefault.response("Post metric found with successfully",200,request.getRequestURL().toString(), metric, true);
+        var response = this.uow.responseDefault.response(
+                "Post metric found with successfully",
+                200,
+                request.getRequestURL().toString(),
+                metric,
+                true
+        );
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/getAll")
     @RateLimit(capacity = 26, refillTokens = 2, refillSeconds = 8)
+    @SecurityRequirement(name = "bearerAuth")
     public Page<Post> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -117,7 +126,13 @@ public class PostController {
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         Post post = this.uow.postService.Delete(id);
         this.uow.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.REDUCE);
-        var response = this.uow.responseDefault.response("Post deleted with successfully",200,request.getRequestURL().toString(), null, true);
+        var response = this.uow.responseDefault.response(
+                "Post deleted with successfully",
+                200,
+                request.getRequestURL().toString(),
+                null,
+                true
+        );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -136,23 +151,40 @@ public class PostController {
         this.uow.postMetricsService.create(post);
         this.uow.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.SUM);
         this.uow.notificationsService.notifyFollowersAboutPostCreated(post);
-        var response = this.uow.responseDefault.response("Post created with successfully",200,request.getRequestURL().toString(), post, true);
-        return new ResponseEntity<>(post, HttpStatus.CREATED);
+
+        var response = this.uow.responseDefault.response(
+                "Post created with successfully",
+                200,
+                request.getRequestURL().toString(),
+                post,
+                true
+        );
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @SecurityRequirement(name = "bearerAuth")
-    @PutMapping("{postId}")
+    @PutMapping("/{postId}")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
-    public ResponseEntity<?> Update(@PathVariable Long postId, @RequestBody @Valid PostDTO dto, HttpServletRequest request){
+    public ResponseEntity<?> Update(
+            @PathVariable Long postId,
+            @RequestBody @Valid PostDTO dto,
+            HttpServletRequest request
+    ){
         Post post = this.uow.postService.Update(postId, dto.MappearToPost());
-        this.uow.postMetricsService.editedTimes(post);
 
-        var response = this.uow.responseDefault.response("Post updated with successfully",200,request.getRequestURL().toString(), post, true);
+        var response = this.uow.responseDefault.response(
+                "Post updated with successfully",
+                200,
+                request.getRequestURL().toString(),
+                post,
+                true
+        );
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/GetAllByCategory/{categoryId}")
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 8)
     public Page<Post> GetAllByCategory(
             @PathVariable Long categoryId,
@@ -164,6 +196,7 @@ public class PostController {
     }
 
     @GetMapping("/filterByTitle/{title}")
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 8)
     public Page<Post> filterByTitle(
             @PathVariable String title,

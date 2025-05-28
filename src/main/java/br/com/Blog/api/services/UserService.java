@@ -1,7 +1,6 @@
 package br.com.Blog.api.services;
 
 import br.com.Blog.api.config.JwtService;
-import br.com.Blog.api.entities.Comment;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.CommentRepository;
@@ -14,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,10 +33,8 @@ public class UserService {
 
     private final UserRepository repository;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
-    private final UserMetricsService metricsService;
     private final PasswordEncoder passwordEncoder;
     private final CustomUserDetailsService userDetailsService;
 
@@ -98,6 +95,12 @@ public class UserService {
     @Transactional
     public Map<String, String> login(String email, String password){
         User user = this.repository.findByEmail(email);
+
+        if (user == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+
+        if (!this.passwordEncoder.matches(password, user.getPassword()))
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
         Authentication authentication = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)

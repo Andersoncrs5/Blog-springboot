@@ -17,11 +17,4 @@ public class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    @Test
-    public void testSaveUser(){
-        User user = new User();
-        user.setName("Test da silva");
-        user.setEmail("testDaSilva@gmail.com");
-    }
-
 }

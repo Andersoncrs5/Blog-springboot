@@ -7,8 +7,6 @@ import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.URL;
 
 public record PostDTO(
-        Long id,
-
         @Pattern(regexp = "^[^<>]*$", message = "invalid character")
         @NotBlank(message = "Field title is required")
         String title,

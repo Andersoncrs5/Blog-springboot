@@ -42,6 +42,7 @@ public class CommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 6)
     @GetMapping("/getAllByUser")
+    @SecurityRequirement(name = "bearerAuth")
     public Page<Comment> getAllCommentByUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
@@ -80,6 +81,7 @@ public class CommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request){
         Comment comment = this.uow.commentService.Get(id);
         this.uow.commentMetricsService.sumView(comment);
@@ -135,6 +137,7 @@ public class CommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 8)
     @GetMapping("/GetAllCommentsOfPost/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     public Page<Comment> GetAllCommentsOfPost(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
@@ -145,6 +148,7 @@ public class CommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @GetMapping("/getMetric/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getMetric(
             @PathVariable Long id,

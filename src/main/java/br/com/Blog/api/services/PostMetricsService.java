@@ -13,20 +13,23 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 public class PostMetricsService {
 
-    @Autowired
-    private PostMetricsRepository repository;
+    private final PostMetricsRepository repository;
 
     @Async
     @Transactional
     public void create(Post post) {
         PostMetrics metrics = new PostMetrics();
         metrics.setPost(post);
-        this.repository.save(metrics);
+        metrics.setId(null);
+
+        var result = this.repository.save(metrics);
     }
 
     @Async
@@ -36,13 +39,13 @@ public class PostMetricsService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Post is required!");
         }
 
-        PostMetrics metric = this.repository.findByPost(post);
+        Optional<PostMetrics> metric = this.repository.findByPost(post);
 
-        if (metric == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Metric not found");
+        if (metric.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post metric not found");
         }
 
-        return metric;
+        return metric.get();
     }
 
     @Async
@@ -56,6 +59,7 @@ public class PostMetricsService {
             metric.setComments(metric.getComments() - 1);
         }
 
+        metric.setEditedTimes(metric.getEditedTimes() + 1);
         metric.setLastInteractionAt(LocalDateTime.now());
 
         this.repository.save(metric);
@@ -72,6 +76,7 @@ public class PostMetricsService {
             metric.setFavorites(metric.getFavorites() - 1);
         }
 
+        metric.setEditedTimes(metric.getEditedTimes() + 1);
         metric.setLastInteractionAt(LocalDateTime.now());
         this.repository.save(metric);
     }
@@ -82,6 +87,7 @@ public class PostMetricsService {
         PostMetrics metric = this.get(post);
 
         metric.setClicks(metric.getClicks() + 1);
+        metric.setEditedTimes(metric.getEditedTimes() + 1);
 
         metric.setLastInteractionAt(LocalDateTime.now());
         this.repository.save(metric);
@@ -93,17 +99,9 @@ public class PostMetricsService {
         PostMetrics metric = this.get(post);
 
         metric.setViewed(metric.getViewed() + 1);
-
-        metric.setLastInteractionAt(LocalDateTime.now());
-        this.repository.save(metric);
-    }
-
-    @Async
-    @Transactional
-    public void editedTimes(Post post){
-        PostMetrics metric = this.get(post);
         metric.setEditedTimes(metric.getEditedTimes() + 1);
 
+        metric.setLastInteractionAt(LocalDateTime.now());
         this.repository.save(metric);
     }
 

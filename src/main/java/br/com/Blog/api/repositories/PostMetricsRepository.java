@@ -4,7 +4,8 @@ import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.PostMetrics;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PostMetricsRepository extends JpaRepository<PostMetrics, Post> {
-    PostMetrics findByPost(Post post);
+import java.util.Optional;
 
+public interface PostMetricsRepository extends JpaRepository<PostMetrics, Long> {
+    Optional<PostMetrics> findByPost(Post post);
 }

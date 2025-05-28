@@ -6,7 +6,7 @@ import br.com.Blog.api.entities.Followers;
 import br.com.Blog.api.entities.enums.FollowerOrFollowering;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -15,11 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/v1/followers")
-@RequiredArgsConstructor
-@SecurityRequirement(name = "bearerAuth")
 public class FollowersController {
 
-    private final UnitOfWork uow;
+    @Autowired
+    private UnitOfWork uow;
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
     @PostMapping("/follow/{userId}")
@@ -85,6 +84,7 @@ public class FollowersController {
     }
 
     @PostMapping("/areFollowing/{userId}")
+    @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 6)
     @ResponseStatus(HttpStatus.OK)
     public Boolean areFollowing(@PathVariable Long userId, HttpServletRequest request){

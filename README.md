@@ -32,10 +32,5 @@
 
 # Updates
 
-date 5/27 :
-    response improvements
-    Fix bugs
-    Filtering improvements
-
-next update :
-    Integration and e2e test
+date 5/28 :
+    Integration test in user, category and post

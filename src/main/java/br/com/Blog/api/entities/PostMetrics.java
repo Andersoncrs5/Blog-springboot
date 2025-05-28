@@ -18,10 +18,10 @@ import java.time.LocalDateTime;
 public class PostMetrics {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
-    @MapsId
     @JoinColumn(name = "postId" , nullable = false, unique = true)
     private Post post;
 
@@ -71,5 +71,27 @@ public class PostMetrics {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Override
+    public String toString() {
+        return "PostMetrics{" +
+                "likes=" + likes +
+                ", dislikes=" + dislikes +
+                ", shares=" + shares +
+                ", comments=" + comments +
+                ", favorites=" + favorites +
+                ", bookmarks=" + bookmarks +
+                ", clicks=" + clicks +
+                ", viewed=" + viewed +
+                ", lastInteractionAt=" + lastInteractionAt +
+                ", engagementScore=" + engagementScore +
+                ", reportCount=" + reportCount +
+                ", editedTimes=" + editedTimes +
+                ", version=" + version +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                ", id=" + id +
+                '}';
+    }
 }
 
