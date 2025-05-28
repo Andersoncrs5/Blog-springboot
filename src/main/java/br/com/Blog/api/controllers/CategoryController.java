@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/category")
 @RequiredArgsConstructor
@@ -27,14 +29,17 @@ public class CategoryController {
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("{id}")
-    public ResponseEntity<?> get(@PathVariable Long id){
-        return new ResponseEntity<>(this.uow.categoryService.get(id), HttpStatus.OK);
+    public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request){
+        Category category = this.uow.categoryService.get(id);
+        var response = this.uow.responseDefault.response("Category found with successfully",201,request.getRequestURL().toString(), category, true);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 5)
-    @GetMapping("")
-    public ResponseEntity<?> getAll(){
-        return new ResponseEntity<>(this.uow.categoryService.getAll(), HttpStatus.OK);
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<Category> getAll(){
+        return this.uow.categoryService.getAll();
     }
 
     @RateLimit(capacity = 10, refillTokens = 5, refillSeconds = 10)

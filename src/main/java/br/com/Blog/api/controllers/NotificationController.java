@@ -30,22 +30,29 @@ public class NotificationController {
 
     @GetMapping("/{notId}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> get(@PathVariable Long notId) {
+    public ResponseEntity<?> get(@PathVariable Long notId, HttpServletRequest request) {
         Notification notification = this.uow.notificationsService.get(notId);
 
-        return ResponseEntity.ok().body(notification);
+        var response = this.uow.responseDefault.response("Notification found",200,request.getRequestURL().toString(), notification, true);
+
+        return ResponseEntity.ok().body(response);
     }
 
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> create(@PathVariable Long userId, @RequestBody @Valid NotificationDto dto) {
-
+    public ResponseEntity<?> create(@PathVariable Long userId, @RequestBody @Valid NotificationDto dto, HttpServletRequest request) {
         User user = this.uow.userService.get(userId);
-
         Notification not = this.uow.notificationsService.create(user, dto.mappearToNotification());
 
+        var response = this.uow.responseDefault.response(
+                "Notification created with successfully",
+                201 ,
+                request.getRequestURL().toString(),
+                not,
+                true
+        );
 
-        return new ResponseEntity<>(not, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -69,10 +76,18 @@ public class NotificationController {
 
     @GetMapping("/markHowRead/{notId}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> markHowRead(@PathVariable Long notId) {
+    public ResponseEntity<?> markHowRead(@PathVariable Long notId, HttpServletRequest request) {
         this.uow.notificationsService.markHowRead(notId);
 
-        return ResponseEntity.ok().body(Map.of("message", "Notification marked with read!!").toString());
+        var response = this.uow.responseDefault.response(
+                "Notification marked with read!!",
+                201 ,
+                request.getRequestURL().toString(),
+                null,
+                true
+        );
+
+        return ResponseEntity.ok().body(response);
     }
 
 }

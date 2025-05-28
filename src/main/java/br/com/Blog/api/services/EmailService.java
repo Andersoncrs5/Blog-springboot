@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,6 +24,7 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
+    @Async
     public void sendEmail(String to, String assunto, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -33,6 +35,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     public void sendEmailWithHtml(String para, String assunto, String html) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
 
@@ -43,6 +46,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     public String loadTemplateHtml(String nameFile, Map<String, String> variaveis) {
         try {
             ClassPathResource resource = new ClassPathResource("templates/" + nameFile);

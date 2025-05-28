@@ -23,9 +23,6 @@ public class PostService {
     private final PostRepository repository;
     private final UserService userService;
     private final CategoryService categoryService;
-    private final PostMetricsService metricsService;
-    private final PostMetricsRepository metricsRepository;
-    private final UserMetricsService userMetricsService;
 
     @Async
     @Transactional
@@ -35,6 +32,12 @@ public class PostService {
 
         post.setUser(user);
         post.setCategory(category);
+
+        boolean checkSlug = this.repository.existsBySlug(post.getSlug());
+
+        if(checkSlug) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Slug in used!! try another");
+        }
 
         return this.repository.save(post);
     }
@@ -46,6 +49,7 @@ public class PostService {
 
         post.setUser(postExist.getUser());
         post.setId(postId);
+        post.setVersion(postExist.getVersion());
         post.setCategory(postExist.getCategory());
 
         return this.repository.save(post);
@@ -76,23 +80,22 @@ public class PostService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> GetAll(Pageable pageable, Specification<Post> spec){
-        return new ResponseEntity<>(this.repository.findAll(spec, pageable), HttpStatus.OK);
+    public Page<Post> GetAll(Pageable pageable, Specification<Post> spec){
+        return this.repository.findAll(spec, pageable);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> GetAllByCategory(Long categoryId, Pageable pageable){
+    public Page<Post> GetAllByCategory(Long categoryId, Pageable pageable){
         Category category = this.categoryService.get(categoryId);
 
-        Page<Post> posts = this.repository.findAllByCategory(category ,pageable);
-        return new ResponseEntity<>(posts, HttpStatus.OK);
+        return this.repository.findAllByCategory(category ,pageable);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> filterByTitle(String title, Pageable pageable) {
-        return new ResponseEntity<>(this.repository.findByTitleContainingIgnoreCase(title, pageable)  ,HttpStatus.OK);
+    public Page<Post> filterByTitle(String title, Pageable pageable) {
+        return this.repository.findByTitleContainingIgnoreCase(title, pageable);
     }
 
 }

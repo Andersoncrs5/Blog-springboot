@@ -31,7 +31,7 @@ public class PostLikeService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> reactToPost(Long userId, Long postId, LikeOrUnLike action) {
+    public String reactToPost(Long userId, Long postId, LikeOrUnLike action) {
         User user = userService.get(userId);
         Post post = this.postService.Get(postId);
         PostMetrics metrics = this.metricsService.get(post);
@@ -39,7 +39,7 @@ public class PostLikeService {
         boolean alreadyReacted = this.repository.existsByUserAndPost(user, post);
 
         if (alreadyReacted) {
-            return new ResponseEntity<>("User already reacted to this post", HttpStatus.CONFLICT);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already reacted to this post");
         }
 
         PostLike like = new PostLike();
@@ -61,14 +61,14 @@ public class PostLikeService {
         this.repository.save(like);
         this.metricsRepository.save(metrics);
 
-        return new ResponseEntity<>("Reaction added successfully", HttpStatus.OK);
+        return "Reaction added successfully";
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> removeReaction(Long id) {
+    public void removeReaction(Long id) {
         if (id == null || id <= 0 ) {
-            return new ResponseEntity<>("Id is required", HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
         }
 
         PostLike like = this.repository.findById(id).orElseThrow(
@@ -87,8 +87,6 @@ public class PostLikeService {
 
         this.repository.delete(like);
         this.metricsRepository.save(metrics);
-
-        return new ResponseEntity<>("Like removed", HttpStatus.OK);
     }
 
     @Async
@@ -102,12 +100,10 @@ public class PostLikeService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> getAllByUser(Long userId, Pageable pageable) {
+    public Page<PostLike> getAllByUser(Long userId, Pageable pageable) {
         User user = this.userService.get(userId);
 
-        Page<PostLike> likes = this.repository.findAllByUser(user, pageable);
-
-        return new ResponseEntity<>(likes, HttpStatus.OK);
+        return this.repository.findAllByUser(user, pageable);
     }
 
 }

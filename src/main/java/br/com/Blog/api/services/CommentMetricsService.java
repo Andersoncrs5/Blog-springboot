@@ -70,18 +70,7 @@ public class CommentMetricsService {
     @Async
     @Transactional
     public void sumEdited(Comment comment) {
-        if (comment == null ) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-
-        Optional<CommentMetrics> metricsOptional = this.metricsRepository.findByComment(comment);
-
-        if (metricsOptional.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-
-
-        CommentMetrics metrics = metricsOptional.get();
+        CommentMetrics metrics = this.get(comment);
 
         metrics.setLastEditedAt(LocalDateTime.now());
         metrics.setEditedTimes(metrics.getEditedTimes() + 1);
@@ -89,6 +78,8 @@ public class CommentMetricsService {
         this.metricsRepository.save(metrics);
     }
 
+    @Async
+    @Transactional
     public void sumOrReduceFavorite(Comment comment, ActionSumOrReduceComment action) {
         CommentMetrics metric = this.get(comment);
 

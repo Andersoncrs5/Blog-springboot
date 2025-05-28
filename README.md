@@ -32,6 +32,10 @@
 
 # Updates
 
-date 5/26 :
-    notification system
-    Unit of work
+date 5/27 :
+    response improvements
+    Fix bugs
+    Filtering improvements
+
+next update :
+    Integration and e2e test

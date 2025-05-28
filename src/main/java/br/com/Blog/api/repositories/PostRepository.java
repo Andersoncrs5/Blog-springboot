@@ -14,4 +14,6 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     Page<Post> findAllByCategory(Category category, Pageable pageable);
 
     Page<Post> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    boolean existsBySlug(String slug);
 }

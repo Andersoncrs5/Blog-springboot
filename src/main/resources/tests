@@ -1,17 +1,25 @@
 user:
-user/login
-user/register
-user/update
-user/me
-/v1/user/ListPostsOfUser
-/v1/user/ListCommentsOfUser
+- user/login
+- user/register
+- user/update
+- user/refresh/{refresh}
+- user/me
+- /v1/user/logout
+- /v1/user/getProfile/{id}
+- /v1/user/getMetric
+- /v1/user/getMetricOfUser/{userId}
+- /v1/user/ListPostsOfUser
 
 category:
-/v1/category - post
+- /v1/category - post
+- GET /v1/category
+- DELETE /v1/category/{id}
+- PUT /v1/category/{id}
+- GET /v1/category/{id}
 
 post:
-/v1/posts/ - post
-/v1/posts/getAll - GET
+- POST /v1/posts/{categoryId}
+- GET /v1/posts/getAll
 /v1/posts/ - PUT
 /v1/posts/filterByTitle/{title} - GET
 /v1/posts/GetAllByCategory/{categoryId} - GET

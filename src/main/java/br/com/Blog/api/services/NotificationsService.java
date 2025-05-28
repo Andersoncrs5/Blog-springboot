@@ -31,13 +31,13 @@ public class NotificationsService {
     @Transactional(readOnly = true)
     public Notification get(Long notiId) {
         if (notiId <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, Map.of("message", "ID is required").toString());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ID is required");
         }
 
         Notification notification = this.repository.findById(notiId).orElse(null);
 
         if (notification == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, Map.of("message", "Notification not found").toString());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Notification not found");
         }
 
         return notification;
@@ -46,7 +46,6 @@ public class NotificationsService {
     @Async
     @Transactional
     public Notification create(User user, Notification notification) {
-
         notification.setUser(user);
         return this.repository.save(notification);
     }

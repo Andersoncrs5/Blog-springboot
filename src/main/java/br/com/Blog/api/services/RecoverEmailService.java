@@ -103,7 +103,7 @@ public class RecoverEmailService {
     }
 
     @Async
-    public ResponseEntity<?> messageWelcome(String email) {
+    public void messageWelcome(String email) {
         try {
             if (email == null || email.isBlank()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
@@ -120,11 +120,8 @@ public class RecoverEmailService {
             String html = emailService.loadTemplateHtml("welcome-message.html", variaveis);
 
             emailService.sendEmailWithHtml(email, "Welcome to BlogSpace!", html);
-
-            return ResponseEntity.ok().build();
         } catch (MessagingException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An error occurred while trying to send the email.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An error occurred while trying to send the email.");
         }
     }
 

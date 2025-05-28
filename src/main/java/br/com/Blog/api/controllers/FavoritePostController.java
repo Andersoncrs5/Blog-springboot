@@ -8,6 +8,7 @@ import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -25,25 +26,27 @@ public class FavoritePostController {
 
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @GetMapping("exists/{idPost}")
-    public ResponseEntity<?> exists(@PathVariable Long idPost, HttpServletRequest request) {
+    public boolean exists(@PathVariable Long idPost, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
         return this.uow.favoritePostService.existsItemSalve(id, idPost);
     }
 
     @DeleteMapping("{id}")
     @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
-    public ResponseEntity<?> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         FavoritePost favoritePost = this.uow.favoritePostService.Delete(id);
         this.uow.postMetricsService.sumOrReduceFavorite(favoritePost.getPost(), ActionSumOrReduceComment.REDUCE);
         this.uow.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.REDUCE);
 
-        return ResponseEntity.ok().body("Removed");
+        var response = this.uow.responseDefault.response("Removed",200,request.getRequestURL().toString(), null, true);
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("GetAllFavoritePostOfUser")
     @Transactional(readOnly = true)
+    @ResponseStatus(HttpStatus.OK)
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
-    public ResponseEntity<?> GetAllFavoritePostOfUser(
+    public Page<FavoritePost> GetAllFavoritePostOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -64,7 +67,8 @@ public class FavoritePostController {
         this.uow.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.SUM);
         this.uow.postMetricsService.sumOrReduceFavorite(favoritePost.getPost(), ActionSumOrReduceComment.SUM);
 
-        return new ResponseEntity<>("Favorited", HttpStatus.CREATED);
+        var response = this.uow.responseDefault.response("Favorited",200,request.getRequestURL().toString(), favoritePost, true);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 }

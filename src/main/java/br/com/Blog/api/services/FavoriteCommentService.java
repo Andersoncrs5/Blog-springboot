@@ -21,15 +21,12 @@ public class FavoriteCommentService {
     private final FavoriteCommentRepository repository;
     private final UserService userService;
     private final CommentService commentService;
-    private final CommentMetricsService commentMetricsService;
-    private final UserMetricsService userMetricsService;
 
     @Async
     @Transactional
-    public ResponseEntity<?> GetAllFavoriteOfUser(Long userId, Pageable pageable){
+    public Page<FavoriteComment> GetAllFavoriteOfUser(Long userId, Pageable pageable){
         User user = this.userService.get(userId);
-        Page<FavoriteComment> page = this.repository.findAllByUser(user, pageable);
-        return new ResponseEntity<>(page, HttpStatus.OK);
+        return this.repository.findAllByUser(user, pageable);
     }
 
     @Async
@@ -61,6 +58,7 @@ public class FavoriteCommentService {
     }
 
     @Async
+    @Transactional
     public Boolean existsItemSalve(Long userId, Long commentId){
         User user = this.userService.get(userId);
         Comment comment = this.commentService.Get(commentId);
@@ -68,6 +66,8 @@ public class FavoriteCommentService {
         return this.repository.existsByUserAndComment(user, comment);
     }
 
+    @Async
+    @Transactional
     public FavoriteComment get(Long favoriteId) {
         FavoriteComment favorite = this.repository.findById(favoriteId).orElse(null);
 

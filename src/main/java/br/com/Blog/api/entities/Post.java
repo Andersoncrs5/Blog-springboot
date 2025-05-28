@@ -58,7 +58,7 @@ public class Post {
     private User user;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category", nullable = false)
     private Category category;
 

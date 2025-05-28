@@ -39,7 +39,9 @@ public class FollowersController {
                 follower.getFollowed(), FollowerOrFollowering.FOLLOWER
         );
 
-        return new ResponseEntity<>("You are follower this the " + follower.getFollower().getName(), HttpStatus.CREATED );
+        var response = this.uow.responseDefault.response("You are follower this the " + follower.getFollower().getName(),200,request.getRequestURL().toString(), null, true);
+
+        return new ResponseEntity<>(response, HttpStatus.CREATED );
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
@@ -65,7 +67,8 @@ public class FollowersController {
                 unfollowed.getFollowed(), FollowerOrFollowering.UNFOLLOWER
         );
 
-        return ResponseEntity.ok("You have unfollowed " + unfollowed.getFollowed().getName());
+        var response = this.uow.responseDefault.response("You have unfollowed " + unfollowed.getFollowed().getName(),200,request.getRequestURL().toString(), null, true);
+        return ResponseEntity.ok(response);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)

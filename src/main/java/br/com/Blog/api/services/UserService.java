@@ -2,6 +2,7 @@ package br.com.Blog.api.services;
 
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.entities.Comment;
+import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.CommentRepository;
 import br.com.Blog.api.repositories.PostRepository;
@@ -11,6 +12,7 @@ import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -35,6 +37,7 @@ public class UserService {
     private final CommentRepository commentRepository;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
+    private final UserMetricsService metricsService;
     private final PasswordEncoder passwordEncoder;
     private final CustomUserDetailsService userDetailsService;
 
@@ -81,19 +84,14 @@ public class UserService {
 
     @Async
     @Transactional(readOnly = true)
-    public ResponseEntity<?> listPostsOfUser(Long id, Pageable pageable){
-        User user = this.get(id);
-        return new ResponseEntity<>(this.postRepository.findAllByUser(user, pageable), HttpStatus.OK);
-    }
-
-    @Async
-    @Transactional(readOnly = true)
-    public ResponseEntity<?> listCommentsOfUser(Long id, Pageable pageable){
+    public Page<Post> listPostsOfUser(Long id, Pageable pageable, Specification<Post> spec){
         User user = this.get(id);
 
-        Page<Comment> list = this.commentRepository.findAllByUser(user, pageable);
+        Specification<Post> specification = spec.and((root, query, cb) ->
+            cb.equal(root.get("user"), user)
+        );
 
-        return new ResponseEntity<>(list, HttpStatus.OK);
+        return postRepository.findAll(specification, pageable);
     }
 
     @Async

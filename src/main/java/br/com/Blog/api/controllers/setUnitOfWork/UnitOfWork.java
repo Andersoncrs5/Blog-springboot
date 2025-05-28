@@ -2,6 +2,7 @@ package br.com.Blog.api.controllers.setUnitOfWork;
 
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.services.*;
+import br.com.Blog.api.services.response.ResponseDefault;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,5 +25,6 @@ public class UnitOfWork {
     public final JwtService jwtService;
     public final CommentLikeService commentLikeService;
     public final NotificationsService notificationsService;
+    public final ResponseDefault responseDefault;
 
 }

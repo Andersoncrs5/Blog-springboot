@@ -33,13 +33,13 @@ public class PostMetricsService {
     @Transactional(readOnly = true)
     public PostMetrics get(Post post) {
         if (post == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Post is required!");
         }
 
         PostMetrics metric = this.repository.findByPost(post);
 
         if (metric == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Metric not found");
         }
 
         return metric;

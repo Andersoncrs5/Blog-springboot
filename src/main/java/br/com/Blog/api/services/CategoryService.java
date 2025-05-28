@@ -50,6 +50,12 @@ public class CategoryService {
     public Category create(Category category, Long userId){
         User user = this.userService.get(userId);
 
+        boolean check = this.repository.existsByName(category.getName());
+
+        if (check) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Name in used! Try another name");
+        }
+
         category.setUser(user);
         return this.repository.save(category);
     }
@@ -59,10 +65,9 @@ public class CategoryService {
     public Category update(Long id, Category category){
         Category categoryToUpdate = this.get(id);
 
-        category.setUser(categoryToUpdate.getUser());
-        category.setId(categoryToUpdate.getId());
+        categoryToUpdate.setName(category.getName());
 
-        return this.repository.save(category);
+        return this.repository.save(categoryToUpdate);
     }
 
 }

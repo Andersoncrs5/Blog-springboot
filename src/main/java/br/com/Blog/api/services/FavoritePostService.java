@@ -5,6 +5,7 @@ import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.FavoritePostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,9 +25,10 @@ public class FavoritePostService {
     private final UserMetricsService userMetricsService;
 
     @Async
-    public ResponseEntity<?> GetAllFavoritePostOfUser(Long userId, Pageable pageable){
+    @Transactional
+    public Page<FavoritePost> GetAllFavoritePostOfUser(Long userId, Pageable pageable){
         User user = this.userService.get(userId);
-        return new ResponseEntity<>(this.repository.findAllByUser(user, pageable), HttpStatus.OK);
+        return this.repository.findAllByUser(user, pageable);
     }
 
     @Async
@@ -59,15 +61,13 @@ public class FavoritePostService {
     }
 
     @Async
-    public ResponseEntity<?> existsItemSalve(Long idUser, Long idPost){
-        boolean check = this.repository.existsByUserIdAndPostId(idUser, idPost);
-
-        if (!check)
-            return new ResponseEntity<>(false, HttpStatus.NOT_FOUND );
-
-        return new ResponseEntity<>(true, HttpStatus.FOUND );
+    @Transactional
+    public boolean existsItemSalve(Long idUser, Long idPost){
+        return this.repository.existsByUserIdAndPostId(idUser, idPost);
     }
 
+    @Async
+    @Transactional
     private FavoritePost get(Long id) {
         if (id == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");

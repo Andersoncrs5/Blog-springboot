@@ -25,19 +25,15 @@ public class UserMetricsService {
     @Transactional(readOnly = true)
     public UserMetrics get(User user) {
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User must not be null");
         }
 
-        Optional<UserMetrics> metric = this.repository.findByUser(user);
-
-        if (metric.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-
-        return metric.get();
+        return this.repository.findByUser(user)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User metrics not found"));
     }
 
     @Async
-    @Transactional(readOnly = true)
+    @Transactional
     public void create(User user) {
         UserMetrics metric = new UserMetrics();
         metric.setUser(user);
@@ -164,7 +160,4 @@ public class UserMetricsService {
 
         this.repository.save(metrics);
     }
-
-
-
 }

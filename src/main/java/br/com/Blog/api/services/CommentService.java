@@ -8,6 +8,7 @@ import br.com.Blog.api.repositories.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
@@ -73,17 +74,26 @@ public class CommentService {
     }
 
     @Async
-    @Transactional
-    public ResponseEntity<?> GetAllCommentsOfPost(Long postId, Pageable pageable){
+    @Transactional(readOnly = true)
+    public Page<Comment> GetAllCommentsOfPost(Long postId, Pageable pageable){
         Post post = this.postService.Get(postId);
 
-        Page<Comment> comments = this.repository.findAllByPost(post, pageable);
-
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+        return this.repository.findAllByPost(post, pageable);
     }
 
     @Async
-    @Transactional
+    @Transactional(readOnly = true)
+    public Page<Comment> getAllCommentOfUser(User user, Specification<Comment> specs, Pageable pageable) {
+
+        Specification<Comment> specWithUser = specs.and((root, query, cb) ->
+                cb.equal(root.get("user"), user)
+        );
+
+        return this.repository.findAll(specWithUser, pageable);
+    }
+
+    @Async
+    @Transactional(readOnly = true)
     public CommentMetrics getMetric(Long commentId) {
         Comment comment = this.Get(commentId);
 

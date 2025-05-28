@@ -8,6 +8,7 @@ import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,17 +33,19 @@ public class FavoriteCommentController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 15)
     @DeleteMapping("{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         FavoriteComment favorite = this.uow.favoriteCommentService.Delete(id);
         this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.REDUCE);
         this.uow.userMetricsService.sumOrRedSavedCommentsCount(favorite.getUser(), SumOrReduce.REDUCE);
 
-        return ResponseEntity.ok().body("Removed");
+        var response = this.uow.responseDefault.response("Removed",201,request.getRequestURL().toString(), null, true);
+
+        return ResponseEntity.ok().body(response);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 15)
     @GetMapping("GetAllFavoriteOfUser")
-    public ResponseEntity<?> GetAllFavoriteOfUser(
+    public Page<FavoriteComment> GetAllFavoriteOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -63,6 +66,7 @@ public class FavoriteCommentController {
         this.uow.userMetricsService.sumOrRedSavedCommentsCount(favorite.getUser(), SumOrReduce.SUM);
         this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.SUM);
 
-        return new ResponseEntity<>("Comment favorited!", HttpStatus.CREATED);
+        var response = this.uow.responseDefault.response("Comment add how favorite!!",201,request.getRequestURL().toString(), null, true);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
