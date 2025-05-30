@@ -81,11 +81,14 @@ public class UserMetricsService {
     public void sumOrRedPostsCount(User user, SumOrReduce action) {
         UserMetrics metrics = this.get(user);
 
-        if (action == SumOrReduce.SUM)
+        if (action == SumOrReduce.SUM) {
             metrics.setPostsCount(metrics.getPostsCount() + 1);
+            metrics.setPostsCountCreateByDay(metrics.getPostsCountCreateByDay() + 1 );
+        }
 
         if (action == SumOrReduce.REDUCE)
             metrics.setPostsCount(metrics.getPostsCount() - 1);
+        metrics.setPostsCountCreateByDay(metrics.getPostsCountCreateByDay() - 1 );
 
         this.repository.save(metrics);
     }
@@ -95,11 +98,15 @@ public class UserMetricsService {
     public void sumOrRedCommentsCount(User user, SumOrReduce action) {
         UserMetrics metrics = this.get(user);
 
-        if (action == SumOrReduce.SUM)
+        if (action == SumOrReduce.SUM) {
             metrics.setCommentsCount(metrics.getCommentsCount() + 1);
+            metrics.setCommentsCountCreateByDay(metrics.getCommentsCountCreateByDay() + 1 );
+        }
 
-        if (action == SumOrReduce.REDUCE)
+        if (action == SumOrReduce.REDUCE) {
             metrics.setCommentsCount(metrics.getCommentsCount() - 1);
+            metrics.setCommentsCountCreateByDay(metrics.getCommentsCountCreateByDay() - 1 );
+        }
 
         this.repository.save(metrics);
     }
@@ -109,11 +116,15 @@ public class UserMetricsService {
     public void sumOrRedLikesGivenCount(User user, SumOrReduce action) {
         UserMetrics metrics = this.get(user);
 
-        if (action == SumOrReduce.SUM)
+        if (action == SumOrReduce.SUM) {
             metrics.setLikesGivenCount(metrics.getLikesGivenCount() + 1);
+            metrics.setLikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() + 1);
+        }
 
-        if (action == SumOrReduce.REDUCE)
+        if (action == SumOrReduce.REDUCE) {
             metrics.setLikesGivenCount(metrics.getLikesGivenCount() - 1);
+            metrics.setLikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() - 1);
+        }
 
         this.repository.save(metrics);
     }
@@ -123,11 +134,15 @@ public class UserMetricsService {
     public void sumOrRedDisikesGivenCount(User user, SumOrReduce action) {
         UserMetrics metrics = this.get(user);
 
-        if (action == SumOrReduce.SUM)
+        if (action == SumOrReduce.SUM) {
             metrics.setDeslikesGivenCount(metrics.getDeslikesGivenCount() + 1);
+            metrics.setDeslikesGivenCountCreateByDay(metrics.getDeslikesGivenCountCreateByDay() + 1);
+        }
 
-        if (action == SumOrReduce.REDUCE)
+        if (action == SumOrReduce.REDUCE) {
             metrics.setDeslikesGivenCount(metrics.getDeslikesGivenCount() - 1);
+            metrics.setDeslikesGivenCountCreateByDay(metrics.getDeslikesGivenCountCreateByDay() - 1);
+        }
 
         this.repository.save(metrics);
     }
@@ -137,12 +152,15 @@ public class UserMetricsService {
     public void sumOrRedSavedPostsCount(User user, SumOrReduce action) {
         UserMetrics metrics = this.get(user);
 
-        if (action == SumOrReduce.SUM)
+        if (action == SumOrReduce.SUM) {
             metrics.setSavedPostsCount(metrics.getSavedPostsCount() + 1);
+            metrics.setSavedPostsCountCreateByDay(metrics.getSavedPostsCountCreateByDay() + 1);
 
-        if (action == SumOrReduce.REDUCE)
+        }
+        if (action == SumOrReduce.REDUCE) {
             metrics.setSavedPostsCount(metrics.getSavedPostsCount() - 1);
-
+            metrics.setSavedPostsCountCreateByDay(metrics.getSavedPostsCountCreateByDay() - 1);
+        }
 
         this.repository.save(metrics);
     }
@@ -152,11 +170,15 @@ public class UserMetricsService {
     public void sumOrRedSavedCommentsCount(User user, SumOrReduce action) {
         UserMetrics metrics = this.get(user);
 
-        if (action == SumOrReduce.SUM)
+        if (action == SumOrReduce.SUM) {
             metrics.setSavedCommentsCount(metrics.getSavedCommentsCount() + 1);
+            metrics.setSavedCommentsCountCreateByDay(metrics.getSavedCommentsCountCreateByDay() + 1);
+        }
 
-        if (action == SumOrReduce.REDUCE)
+        if (action == SumOrReduce.REDUCE) {
             metrics.setSavedCommentsCount(metrics.getSavedCommentsCount() - 1);
+            metrics.setSavedCommentsCountCreateByDay(metrics.getSavedCommentsCountCreateByDay() - 1);
+        }
 
         this.repository.save(metrics);
     }

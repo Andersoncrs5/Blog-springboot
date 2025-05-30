@@ -6,10 +6,7 @@ import br.com.Blog.api.Specifications.PostSpecification;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
-import br.com.Blog.api.entities.Comment;
-import br.com.Blog.api.entities.CommentMetrics;
-import br.com.Blog.api.entities.Post;
-import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.services.CommentMetricsService;
@@ -31,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/comment")
@@ -80,46 +78,68 @@ public class CommentController {
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request){
         Comment comment = this.uow.commentService.Get(id);
         this.uow.commentMetricsService.sumView(comment);
 
-        var response = this.uow.responseDefault.response("Comment found with successfully",201,request.getRequestURL().toString(), comment, true);
+        var response = this.uow.responseDefault.response(
+                "Comment found with successfully",
+                200,
+                request.getRequestURL().toString(),
+                comment,
+                true
+        );
 
         return new ResponseEntity<>( response, HttpStatus.OK);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 15)
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         Comment comment = this.uow.commentService.Delete(id);
         this.uow.userMetricsService.sumOrRedCommentsCount(comment.getUser(), SumOrReduce.REDUCE);
-        this.uow.postMetricsService.sumOrReduceComments(comment.getPost(), ActionSumOrReduceComment.REDUCE);
+        PostMetrics metrics = this.uow.postMetricsService.get(comment.getPost());
+        this.uow.postMetricsService.sumOrReduceComments(metrics, ActionSumOrReduceComment.REDUCE);
 
-        var response = this.uow.responseDefault.response("Comment deleted with successfully",200,request.getRequestURL().toString(), null, true);
+        Map<String, Object> response = this.uow.responseDefault.response(
+                "Comment deleted with successfully",
+                200,
+                request.getRequestURL().toString(),
+                null,
+                true
+        );
 
         return new ResponseEntity<>( response, HttpStatus.OK);
     }
 
     @PostMapping("/{postId}")
     @SecurityRequirement(name = "bearerAuth")
-    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 15)
+    @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 15)
     public ResponseEntity<?> Create(
             @RequestBody @Valid CommentDTO dto,
             @PathVariable Long postId,
             HttpServletRequest request
     ) {
-        Long id = this.uow.jwtService.extractId(request);
+        Long userId = this.uow.jwtService.extractId(request);
+        User user = this.uow.userService.get(userId);
+        Post post = this.uow.postService.Get(postId);
 
-        Comment comment = this.uow.commentService.Create(dto.MappearToComment(), id, postId);
+        Comment comment = this.uow.commentService.Create(dto.MappearToComment(), user, post);
         this.uow.commentMetricsService.create(comment);
         this.uow.userMetricsService.sumOrRedCommentsCount(comment.getUser(), SumOrReduce.SUM);
-        this.uow.postMetricsService.sumOrReduceComments(comment.getPost(), ActionSumOrReduceComment.SUM);
+        PostMetrics metrics = this.uow.postMetricsService.get(comment.getPost());
+        this.uow.postMetricsService.sumOrReduceComments(metrics, ActionSumOrReduceComment.SUM);
 
-        var response = this.uow.responseDefault.response("Comment created with successfully",200,request.getRequestURL().toString(), comment, true);
+        var response = this.uow.responseDefault.response(
+                "Comment created with successfully",
+                200,
+                request.getRequestURL().toString(),
+                comment,
+                true
+        );
         return new ResponseEntity<>(response,HttpStatus.CREATED);
     }
 
@@ -130,20 +150,27 @@ public class CommentController {
 
         Comment comment = this.uow.commentService.Update(id, dto.MappearToComment());
         this.uow.commentMetricsService.sumEdited(comment);
-        var response = this.uow.responseDefault.response("Comment updated with successfully",200,request.getRequestURL().toString(), comment, true);
+        var response = this.uow.responseDefault.response(
+                "Comment updated with successfully",
+                200,
+                request.getRequestURL().toString(),
+                comment,
+                true
+        );
 
         return new ResponseEntity<>(response,HttpStatus.OK);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 8)
-    @GetMapping("/GetAllCommentsOfPost/{id}")
+    @GetMapping("/GetAllCommentsOfPost/{postId}")
     @SecurityRequirement(name = "bearerAuth")
     public Page<Comment> GetAllCommentsOfPost(
-            @PathVariable Long id,
+            @PathVariable Long postId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return this.uow.commentService.GetAllCommentsOfPost(id, PageRequest.of(page, size));
+        Post post = this.uow.postService.Get(postId);
+        return this.uow.commentService.GetAllCommentsOfPost(post, PageRequest.of(page, size));
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)

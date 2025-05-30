@@ -2,6 +2,7 @@ package br.com.Blog.api.integration;
 
 import br.com.Blog.api.DTOs.LoginDTO;
 import br.com.Blog.api.DTOs.UserDTO;
+import br.com.Blog.api.integration.utils.UserTestUtils;
 import br.com.Blog.api.repositories.setUnitOfWorkRepository.UnitOfWorkRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -92,33 +95,8 @@ public class UserControllerTest {
 
     @Test
     public void shouldGetMetricOfUser() throws Exception {
-        UserDTO dto = new UserDTO(
-                "user",
-                "testOfSilva@gmail.com",
-                "12345678"
-        );
-
-        mockMvc.perform(post("/v1/user/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated());
-
-        LoginDTO loginDTO = new LoginDTO(
-                "testOfSilva@gmail.com".toLowerCase().trim(),
-                "12345678"
-        );
-
-        MvcResult result = mockMvc.perform(post("/v1/user/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginDTO)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String json = result.getResponse().getContentAsString();
-        JsonNode node = objectMapper.readTree(json);
-        String token = node.get("token").asText();
-
-        assertNotNull(token);
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
+        String token = tokens.get("token");
 
         mockMvc.perform(get("/v1/user/getMetric")
                 .header("Authorization", "Bearer " + token))
@@ -130,31 +108,9 @@ public class UserControllerTest {
 
     @Test
     public void shouldGetTheUser() throws Exception {
-        UserDTO dto = new UserDTO(
-                "user",
-                "testOfSilva@gmail.com",
-                "12345678"
-        );
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
 
-        mockMvc.perform(post("/v1/user/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isCreated());
-
-        LoginDTO loginDTO = new LoginDTO(
-                "testOfSilva@gmail.com".toLowerCase().trim(),
-                "12345678"
-        );
-
-        MvcResult result = mockMvc.perform(post("/v1/user/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDTO)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String json = result.getResponse().getContentAsString();
-        JsonNode node = objectMapper.readTree(json);
-        String token = node.get("token").asText();
+        String token = tokens.get("token");
 
         assertNotNull(token);
 
@@ -163,11 +119,9 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User found with successfully"))
                 .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.result.email").value(loginDTO.email()))
+                .andExpect(jsonPath("$.result.email").value("testOfSilva@gmail.com"))
                 .andExpect(jsonPath("$.result.id").exists())
                 .andExpect(jsonPath("$.result.id").isNumber());
-
-
     }
 
     @Test
@@ -217,40 +171,11 @@ public class UserControllerTest {
 
     @Test
     public void shouldDeleteUser() throws Exception {
-        UserDTO userDto = new UserDTO(
-                "user",
-                "testofsilva@gmail.com",
-                "12345678"
-        );
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
 
-        mockMvc.perform(post("/v1/user/register").
-                contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isCreated());
+        String token = tokens.get("token");
 
-        LoginDTO loginDTO = new LoginDTO(
-                "testofsilva@gmail.com",
-                "12345678"
-        );
-
-        MvcResult loginResult = mockMvc.perform(post("/v1/user/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginDTO)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String loginJson = loginResult.getResponse().getContentAsString();
-        JsonNode loginNode = objectMapper.readTree(loginJson);
-        String token = loginNode.get("token").asText();
-
-        assertNotNull(token);
-
-        mockMvc.perform(get("/v1/user/me")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.email").value(loginDTO.email()))
-                .andExpect(jsonPath("$.result.id").exists())
-                .andExpect(jsonPath("$.result.id").isNumber());
+        UserTestUtils.getUserAndReturnMvc(mockMvc, token);
 
         mockMvc.perform(delete("/v1/user/")
                 .header("Authorization", "Bearer " + token))
@@ -262,33 +187,11 @@ public class UserControllerTest {
 
     @Test
     public void shouldUpdateUser() throws Exception {
-        UserDTO userDTO = new UserDTO(
-                "user",
-                "testofsilva@gmail.com",
-                "12345678"
-        );
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
 
-        mockMvc.perform(post("/v1/user/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userDTO)))
-                .andExpect(status().isCreated());
+        String token = tokens.get("token");
 
-        LoginDTO loginDTO = new LoginDTO(
-                "testofsilva@gmail.com",
-                "12345678"
-        );
-
-        MvcResult loginResult = mockMvc.perform(post("/v1/user/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginDTO)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String loginJson = loginResult.getResponse().getContentAsString();
-        JsonNode loginNode = objectMapper.readTree(loginJson);
-        String token = loginNode.get("token").asText();
-
-        assertNotNull(token);
+        UserTestUtils.getUserAndReturnMvc(mockMvc, token);
 
         UserDTO userDTOToUpdate = new UserDTO(
                 "user update",
@@ -308,33 +211,11 @@ public class UserControllerTest {
 
     @Test
     public void shouldMakeLogout() throws Exception {
-        UserDTO userDTO = new UserDTO(
-                "user",
-                "testofsilva@gmail.com",
-                "12345678"
-        );
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
 
-        mockMvc.perform(post("/v1/user/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDTO)))
-                .andExpect(status().isCreated());
+        String token = tokens.get("token");
 
-        LoginDTO loginDTO = new LoginDTO(
-                "testofsilva@gmail.com",
-                "12345678"
-        );
-
-        MvcResult loginResult = mockMvc.perform(post("/v1/user/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDTO)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String loginJson = loginResult.getResponse().getContentAsString();
-        JsonNode loginNode = objectMapper.readTree(loginJson);
-        String token = loginNode.get("token").asText();
-
-        assertNotNull(token);
+        UserTestUtils.getUserAndReturnMvc(mockMvc, token);
 
         mockMvc.perform(get("/v1/user/logout")
                 .header("Authorization", "Bearer " + token))
@@ -344,34 +225,12 @@ public class UserControllerTest {
 
     @Test
     public void shouldMakeRefresh() throws Exception {
-        UserDTO userDTO = new UserDTO(
-                "user",
-                "testofsilva@gmail.com",
-                "12345678"
-        );
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
 
-        mockMvc.perform(post("/v1/user/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDTO)))
-                .andExpect(status().isCreated());
+        String token = tokens.get("token");
+        String refresh = tokens.get("refresh");
 
-        LoginDTO loginDTO = new LoginDTO(
-                "testofsilva@gmail.com",
-                "12345678"
-        );
-
-        MvcResult loginResult = mockMvc.perform(post("/v1/user/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginDTO)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String loginJson = loginResult.getResponse().getContentAsString();
-        JsonNode loginNode = objectMapper.readTree(loginJson);
-        String token = loginNode.get("token").asText();
-        String refresh = loginNode.get("refresh").asText();
-
-        assertNotNull(token);
+        UserTestUtils.getUserAndReturnMvc(mockMvc, token);
 
         mockMvc.perform(post("/v1/user/refresh/" + refresh )
                         .header("Authorization", "Bearer " + token))
@@ -380,7 +239,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.token").isString())
                 .andExpect(jsonPath("$.refresh").exists())
                 .andExpect(jsonPath("$.refresh").isString());
-
     }
 
 }

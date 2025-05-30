@@ -19,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/notification")
@@ -77,7 +76,8 @@ public class NotificationController {
     @GetMapping("/markHowRead/{notId}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> markHowRead(@PathVariable Long notId, HttpServletRequest request) {
-        this.uow.notificationsService.markHowRead(notId);
+        Notification notification = this.uow.notificationsService.get(notId);
+        this.uow.notificationsService.markHowRead(notification);
 
         var response = this.uow.responseDefault.response(
                 "Notification marked with read!!",

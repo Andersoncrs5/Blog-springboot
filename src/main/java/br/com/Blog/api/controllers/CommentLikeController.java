@@ -2,6 +2,8 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
+import br.com.Blog.api.entities.Comment;
+import br.com.Blog.api.entities.User;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,8 +42,10 @@ public class CommentLikeController {
 
         Long userId = extractUserId(request);
         LikeOrUnLike action;
+        User user = this.uow.userService.get(userId);
+        Comment comment = this.uow.commentService.Get(commentId);
         action = LikeOrUnLike.valueOf(type.toUpperCase());
-        return this.uow.commentLikeService.reactToComment(userId, commentId, action);
+        return this.uow.commentLikeService.reactToComment(user, comment, action);
     }
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
@@ -71,7 +75,8 @@ public class CommentLikeController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Long userId = extractUserId(request);
+        User user = this.uow.userService.get(userId);
         Pageable pageable = PageRequest.of(page, size);
-        return this.uow.commentLikeService.getAllByUser(userId, pageable);
+        return this.uow.commentLikeService.getAllByUser(user, pageable);
     }
 }

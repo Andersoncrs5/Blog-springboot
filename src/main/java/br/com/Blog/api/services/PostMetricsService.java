@@ -24,6 +24,42 @@ public class PostMetricsService {
 
     @Async
     @Transactional
+    public void sumOrReduceLike(Post post, ActionSumOrReduceComment action) {
+        PostMetrics metric = this.get(post);
+
+        if (action == ActionSumOrReduceComment.SUM) {
+            metric.setLikes(metric.getLikes() + 1);
+            metric.setLikesCountByDay(metric.getLikesCountByDay() + 1);
+        }
+
+        if(action == ActionSumOrReduceComment.REDUCE) {
+            metric.setLikes(metric.getLikes() - 1);
+            metric.setLikesCountByDay(metric.getLikesCountByDay() - 1);
+        }
+
+        this.repository.save(metric);
+    }
+
+    @Async
+    @Transactional
+    public void sumOrReduceDislike(Post post, ActionSumOrReduceComment action) {
+        PostMetrics metric = this.get(post);
+
+        if (action == ActionSumOrReduceComment.SUM) {
+            metric.setDislikes(metric.getDislikes() + 1);
+            metric.setDisLikesCountByDay(metric.getDisLikesCountByDay() + 1);
+        }
+
+        if(action == ActionSumOrReduceComment.REDUCE) {
+            metric.setDislikes(metric.getDislikes() - 1);
+            metric.setDisLikesCountByDay(metric.getDisLikesCountByDay() - 1);
+        }
+
+        this.repository.save(metric);
+    }
+
+    @Async
+    @Transactional
     public void create(Post post) {
         PostMetrics metrics = new PostMetrics();
         metrics.setPost(post);
@@ -50,9 +86,7 @@ public class PostMetricsService {
 
     @Async
     @Transactional
-    public void sumOrReduceComments(Post post, ActionSumOrReduceComment action) {
-        PostMetrics metric = this.get(post);
-
+    public void sumOrReduceComments(PostMetrics metric, ActionSumOrReduceComment action) {
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setComments(metric.getComments() + 1);
         } else {
@@ -67,12 +101,13 @@ public class PostMetricsService {
 
     @Async
     @Transactional
-    public void sumOrReduceFavorite(Post post, ActionSumOrReduceComment action) {
-        PostMetrics metric = this.get(post);
+    public void sumOrReduceFavorite(PostMetrics metric, ActionSumOrReduceComment action) {
 
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setFavorites(metric.getFavorites() + 1);
-        } else {
+        }
+
+        if (action == ActionSumOrReduceComment.REDUCE) {
             metric.setFavorites(metric.getFavorites() - 1);
         }
 
@@ -83,9 +118,7 @@ public class PostMetricsService {
 
     @Async
     @Transactional
-    public void clicks(Post post){
-        PostMetrics metric = this.get(post);
-
+    public void clicks(PostMetrics metric) {
         metric.setClicks(metric.getClicks() + 1);
         metric.setEditedTimes(metric.getEditedTimes() + 1);
 
@@ -95,9 +128,7 @@ public class PostMetricsService {
 
     @Async
     @Transactional
-    public void viewed(Post post){
-        PostMetrics metric = this.get(post);
-
+    public void viewed(PostMetrics metric){
         metric.setViewed(metric.getViewed() + 1);
         metric.setEditedTimes(metric.getEditedTimes() + 1);
 

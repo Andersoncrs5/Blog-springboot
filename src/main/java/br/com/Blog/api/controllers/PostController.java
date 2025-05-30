@@ -4,8 +4,10 @@ import br.com.Blog.api.DTOs.PostDTO;
 import br.com.Blog.api.Specifications.PostSpecification;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
+import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.PostMetrics;
+import br.com.Blog.api.entities.User;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -42,7 +44,8 @@ public class PostController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request){
         Post post = this.uow.postService.Get(id);
-        this.uow.postMetricsService.viewed(post);
+        PostMetrics metrics = this.uow.postMetricsService.get(post);
+        this.uow.postMetricsService.viewed(metrics);
 
         var response = this.uow.responseDefault.response(
                 "Post found with successfully",
@@ -124,8 +127,10 @@ public class PostController {
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
-        Post post = this.uow.postService.Delete(id);
-        this.uow.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.REDUCE);
+        Post post = this.uow.postService.Get(id);
+        Post postDeleted = this.uow.postService.Delete(post);
+        this.uow.userMetricsService.sumOrRedPostsCount(postDeleted.getUser(), SumOrReduce.REDUCE);
+
         var response = this.uow.responseDefault.response(
                 "Post deleted with successfully",
                 200,
@@ -147,7 +152,11 @@ public class PostController {
     ) {
 
         Long userId = this.uow.jwtService.extractId(request);
-        Post post = this.uow.postService.Create(dto.MappearToPost(), userId, categoryId);
+
+        User user = this.uow.userService.get(userId);
+        Category category = this.uow.categoryService.get(categoryId);
+
+        Post post = this.uow.postService.Create(dto.MappearToPost(), user, category);
         this.uow.postMetricsService.create(post);
         this.uow.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.SUM);
         this.uow.notificationsService.notifyFollowersAboutPostCreated(post);
@@ -170,7 +179,8 @@ public class PostController {
             @RequestBody @Valid PostDTO dto,
             HttpServletRequest request
     ){
-        Post post = this.uow.postService.Update(postId, dto.MappearToPost());
+        Post postExist = this.uow.postService.Get(postId);
+        Post post = this.uow.postService.Update(postExist, dto.MappearToPost());
 
         var response = this.uow.responseDefault.response(
                 "Post updated with successfully",
@@ -192,7 +202,8 @@ public class PostController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return this.uow.postService.GetAllByCategory(categoryId, pageable);
+        Category category = this.uow.categoryService.get(categoryId);
+        return this.uow.postService.GetAllByCategory(category, pageable);
     }
 
     @GetMapping("/filterByTitle/{title}")

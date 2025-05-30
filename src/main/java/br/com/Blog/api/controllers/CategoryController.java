@@ -5,6 +5,7 @@ import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Category;
+import br.com.Blog.api.entities.User;
 import br.com.Blog.api.services.CategoryService;
 import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -73,8 +74,8 @@ public class CategoryController {
             HttpServletRequest request
     ){
         Long id = this.uow.jwtService.extractId(request);
-
-        Category result = this.uow.categoryService.create(dto.MappearToCategory(), id);
+        User user = this.uow.userService.get(id);
+        Category result = this.uow.categoryService.create(dto.MappearToCategory(), user);
         var response = this.responseDefault.response(
                 "Category created with successfully",
                 201,

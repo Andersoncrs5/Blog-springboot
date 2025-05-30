@@ -41,10 +41,7 @@ public class CommentService {
 
     @Async
     @Transactional
-    public Comment Create(Comment comment, Long userId, Long postId){
-        User user = this.userService.get(userId);
-        Post post = this.postService.Get(postId);
-
+    public Comment Create(Comment comment, User user, Post post){
         comment.setName(user.getName());
         comment.setUser(user);
         comment.setPost(post);
@@ -75,9 +72,7 @@ public class CommentService {
 
     @Async
     @Transactional(readOnly = true)
-    public Page<Comment> GetAllCommentsOfPost(Long postId, Pageable pageable){
-        Post post = this.postService.Get(postId);
-
+    public Page<Comment> GetAllCommentsOfPost(Post post, Pageable pageable){
         return this.repository.findAllByPost(post, pageable);
     }
 

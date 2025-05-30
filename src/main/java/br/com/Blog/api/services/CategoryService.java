@@ -47,9 +47,7 @@ public class CategoryService {
 
     @Async
     @Transactional
-    public Category create(Category category, Long userId){
-        User user = this.userService.get(userId);
-
+    public Category create(Category category, User user){
         boolean check = this.repository.existsByName(category.getName());
 
         if (check) {

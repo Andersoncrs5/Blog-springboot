@@ -63,16 +63,13 @@ public class UserService {
 
     @Async
     @Transactional
-    public void delete(Long id){
-        User user = this.get(id);
+    public void delete(User user){
         this.repository.delete(user);
     }
 
     @Async
     @Transactional
-    public User update(Long id, User user){
-        User userForUpdate = this.get(id);
-
+    public User update(User userForUpdate, User user){
         userForUpdate.setName(user.getName());
         userForUpdate.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -81,9 +78,7 @@ public class UserService {
 
     @Async
     @Transactional(readOnly = true)
-    public Page<Post> listPostsOfUser(Long id, Pageable pageable, Specification<Post> spec){
-        User user = this.get(id);
-
+    public Page<Post> listPostsOfUser(User user, Pageable pageable, Specification<Post> spec){
         Specification<Post> specification = spec.and((root, query, cb) ->
             cb.equal(root.get("user"), user)
         );
@@ -119,8 +114,7 @@ public class UserService {
 
     @Async
     @Transactional
-    public User logout(Long id) {
-        User user = this.get(id);
+    public User logout(User user) {
         user.setRefreshToken("");
         return this.repository.save(user);
     }

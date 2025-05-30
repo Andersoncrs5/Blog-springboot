@@ -3,18 +3,19 @@ package br.com.Blog.api.controllers;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.FavoritePost;
+import br.com.Blog.api.entities.Post;
+import br.com.Blog.api.entities.PostMetrics;
+import br.com.Blog.api.entities.User;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @SecurityRequirement(name = "bearerAuth")
@@ -38,7 +39,8 @@ public class FavoritePostController {
     @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         FavoritePost favoritePost = this.uow.favoritePostService.Delete(id);
-        this.uow.postMetricsService.sumOrReduceFavorite(favoritePost.getPost(), ActionSumOrReduceComment.REDUCE);
+        PostMetrics metrics = this.uow.postMetricsService.get(favoritePost.getPost());
+        this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.REDUCE);
         this.uow.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.REDUCE);
 
         var response = this.uow.responseDefault.response("Removed",200,request.getRequestURL().toString(), null, true);
@@ -56,8 +58,9 @@ public class FavoritePostController {
         ) {
         Pageable pageable = PageRequest.of(page, size);
         Long id = this.uow.jwtService.extractId(request);
+        User user = this.uow.userService.get(id);
 
-        return this.uow.favoritePostService.GetAllFavoritePostOfUser(id, pageable);
+        return this.uow.favoritePostService.GetAllFavoritePostOfUser(user, pageable);
     }
 
     @PostMapping("/{postId}")
@@ -66,10 +69,13 @@ public class FavoritePostController {
     public ResponseEntity<?> create(@PathVariable Long postId , HttpServletRequest request) {
 
         Long id = this.uow.jwtService.extractId(request);
-        FavoritePost favoritePost = this.uow.favoritePostService.create(postId, id);
+        User user = this.uow.userService.get(id);
+        Post post = this.uow.postService.Get(postId);
 
+        FavoritePost favoritePost = this.uow.favoritePostService.create(post, user);
+        PostMetrics metrics = this.uow.postMetricsService.get(favoritePost.getPost());
         this.uow.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.SUM);
-        this.uow.postMetricsService.sumOrReduceFavorite(favoritePost.getPost(), ActionSumOrReduceComment.SUM);
+        this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.SUM);
 
         var response = this.uow.responseDefault.response("Favorited",200,request.getRequestURL().toString(), favoritePost, true);
         return new ResponseEntity<>(response, HttpStatus.CREATED);

@@ -19,15 +19,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class FavoritePostService {
 
     private final FavoritePostRepository repository;
-    private final UserService userService;
-    private final PostService postService;
-    private final PostMetricsService postMetricsService;
-    private final UserMetricsService userMetricsService;
 
     @Async
     @Transactional
-    public Page<FavoritePost> GetAllFavoritePostOfUser(Long userId, Pageable pageable){
-        User user = this.userService.get(userId);
+    public Page<FavoritePost> GetAllFavoritePostOfUser(User user, Pageable pageable){
         return this.repository.findAllByUser(user, pageable);
     }
 
@@ -43,9 +38,7 @@ public class FavoritePostService {
 
     @Async
     @Transactional
-    public FavoritePost create(Long postId, Long userId){
-        User user = this.userService.get(userId);
-        Post post = this.postService.Get(postId);
+    public FavoritePost create(Post post, User user){
 
         boolean check = this.repository.existsByUserAndPost(user, post);
 

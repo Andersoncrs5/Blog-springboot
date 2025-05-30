@@ -20,13 +20,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class FollowersService {
 
     private final FollowersRepository repository;
-    private final UserService userService;
 
     @Async
     @Transactional
-    public Followers follow(Long userId, Long followedId) {
-        User user = userService.get(userId);
-        User followed = userService.get(followedId);
+    public Followers follow(User user, User followed) {
 
         boolean alreadyFollowing = repository.existsByFollowerAndFollowed(user, followed);
 
@@ -43,10 +40,7 @@ public class FollowersService {
 
     @Async
     @Transactional
-    public Followers unfollow(Long userId, Long followedId) {
-        User user = userService.get(userId);
-        User followed = userService.get(followedId);
-
+    public Followers unfollow(User user, User followed) {
         Followers followerRecord = repository.findByFollowerAndFollowed(user, followed);
 
         if (followerRecord == null) {
@@ -59,26 +53,20 @@ public class FollowersService {
 
     @Async
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getAllFollowed(Long userId, Pageable pageable) {
-        User user = userService.get(userId);
+    public ResponseEntity<?> getAllFollowed(User user, Pageable pageable) {
         Page<Followers> followed = repository.findAllByFollowed(user, pageable);
         return ResponseEntity.ok(followed);
     }
 
     @Async
     @Transactional(readOnly = true)
-    public Boolean areFollowing(Long userId, Long followedId) {
-        User user = userService.get(userId);
-        User followed = userService.get(followedId);
+    public Boolean areFollowing(User user, User followed) {
         return repository.existsByFollowerAndFollowed(user, followed);
     }
 
     @Async
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getMutualFollowed(Long user1Id, Long user2Id, Pageable pageable) {
-        User user1 = userService.get(user1Id);
-        User user2 = userService.get(user2Id);
-
+    public ResponseEntity<?> getMutualFollowed(User user1, User user2, Pageable pageable) {
         Page<User> mutuals = repository.findMutualFollowed(user1, user2, pageable);
         return ResponseEntity.ok(mutuals);
     }

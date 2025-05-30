@@ -21,15 +21,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class PostService {
 
     private final PostRepository repository;
-    private final UserService userService;
-    private final CategoryService categoryService;
 
     @Async
     @Transactional
-    public Post Create(Post post, Long userId, Long categoryId){
-        Category category = this.categoryService.get(categoryId);
-        User user = this.userService.get(userId);
-
+    public Post Create(Post post, User user, Category category){
         post.setUser(user);
         post.setCategory(category);
         post.setId(null);
@@ -45,11 +40,10 @@ public class PostService {
 
     @Async
     @Transactional
-    public Post Update(Long postId, Post post){
-        Post postExist = this.Get(postId);
+    public Post Update(Post postExist, Post post){
 
         post.setUser(postExist.getUser());
-        post.setId(postId);
+        post.setId(postExist.getId());
         post.setVersion(postExist.getVersion());
         post.setCategory(postExist.getCategory());
 
@@ -72,9 +66,7 @@ public class PostService {
 
     @Async
     @Transactional
-    public Post Delete(Long id){
-        Post post = this.Get(id);
-
+    public Post Delete(Post post){
         this.repository.delete(post);
         return post;
     }
@@ -87,9 +79,7 @@ public class PostService {
 
     @Async
     @Transactional
-    public Page<Post> GetAllByCategory(Long categoryId, Pageable pageable){
-        Category category = this.categoryService.get(categoryId);
-
+    public Page<Post> GetAllByCategory(Category category, Pageable pageable){
         return this.repository.findAllByCategory(category ,pageable);
     }
 

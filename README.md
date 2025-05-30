@@ -1,4 +1,4 @@
-# RESTful Blog Application In Spring boot with Java
+# RESTFUL Blog Application In Spring boot with Java
 
 ## Overview:
 
@@ -32,5 +32,6 @@
 
 # Updates
 
-date 5/28 :
-    Integration test in user, category and post
+date 5/29 :
+    Integration test in comment
+    improvement in Integration test

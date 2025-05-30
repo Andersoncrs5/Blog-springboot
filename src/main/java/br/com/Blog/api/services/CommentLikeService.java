@@ -19,16 +19,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class CommentLikeService {
 
     private final CommentLikeRepository repository;
-    private final UserService userService;
-    private final CommentService commentService;
     private final CommentMetricsRepository metricsRepository;
     private final CommentMetricsService metricsService;
 
     @Async
     @Transactional
-    public ResponseEntity<?> reactToComment(Long userId, Long commentId, LikeOrUnLike action) {
-        User user = userService.get(userId);
-        Comment comment = commentService.Get(commentId);
+    public ResponseEntity<?> reactToComment(User user, Comment comment, LikeOrUnLike action) {
         CommentMetrics metrics = metricsService.get(comment);
 
         boolean alreadyReacted = repository.existsByUserAndComment(user, comment);
@@ -86,8 +82,7 @@ public class CommentLikeService {
 
     @Async
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getAllByUser(Long userId, Pageable pageable) {
-        User user = userService.get(userId);
+    public ResponseEntity<?> getAllByUser(User user, Pageable pageable) {
         Page<CommentLike> likes = repository.findAllByUser(user, pageable);
         return new ResponseEntity<>(likes, HttpStatus.OK);
     }

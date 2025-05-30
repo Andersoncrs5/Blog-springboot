@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +18,10 @@ import org.springframework.web.server.ResponseStatusException;
 public class FavoriteCommentService {
 
     private final FavoriteCommentRepository repository;
-    private final UserService userService;
-    private final CommentService commentService;
 
     @Async
     @Transactional
-    public Page<FavoriteComment> GetAllFavoriteOfUser(Long userId, Pageable pageable){
-        User user = this.userService.get(userId);
+    public Page<FavoriteComment> GetAllFavoriteOfUser(User user, Pageable pageable){
         return this.repository.findAllByUser(user, pageable);
     }
 
@@ -40,10 +36,7 @@ public class FavoriteCommentService {
 
     @Async
     @Transactional
-    public FavoriteComment create(Long commentId, Long userId){
-        User user = this.userService.get(userId);
-        Comment comment = this.commentService.Get(commentId);
-
+    public FavoriteComment create(Comment comment, User user){
         Boolean check = this.repository.existsByUserAndComment(user, comment);
 
         if (check)
@@ -59,10 +52,7 @@ public class FavoriteCommentService {
 
     @Async
     @Transactional
-    public Boolean existsItemSalve(Long userId, Long commentId){
-        User user = this.userService.get(userId);
-        Comment comment = this.commentService.Get(commentId);
-
+    public Boolean existsItemSalve(User user, Comment comment){
         return this.repository.existsByUserAndComment(user, comment);
     }
 

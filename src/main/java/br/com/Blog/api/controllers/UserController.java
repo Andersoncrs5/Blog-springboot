@@ -142,10 +142,9 @@ public class UserController {
                 viewed
         );
 
-        String authHeader = request.getHeader("Authorization");
-        String token = authHeader.substring(7);
-        Long id = this.uow.jwtService.extractUserId(token);
-        return this.uow.userService.listPostsOfUser(id, pageable, spec);
+        Long id = this.uow.jwtService.extractId(request);
+        User user = this.uow.userService.get(id);
+        return this.uow.userService.listPostsOfUser(user, pageable, spec);
     }
 
     @PostMapping("/register")
@@ -170,7 +169,8 @@ public class UserController {
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> delete(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        this.uow.userService.delete(id);
+        User user = this.uow.userService.get(id);
+        this.uow.userService.delete(user);
         var response = responseDefault.response(
                 "User deleted with successfully",
                 200,
@@ -186,8 +186,9 @@ public class UserController {
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> update(@RequestBody @Valid UserDTO dto, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
+        User userExist = this.uow.userService.get(id);
 
-        var user = this.uow.userService.update(id, dto.MappearToUser());
+        var user = this.uow.userService.update(userExist, dto.MappearToUser());
         var response = responseDefault.response(
                 "User update with successfully",
                 200,
@@ -211,8 +212,8 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-
-        User user = this.uow.userService.logout(id);
+        User userExist = this.uow.userService.get(id);
+        User user = this.uow.userService.logout(userExist);
         this.uow.userMetricsService.setLastLogin(user);
         var response = responseDefault.response(
                 "Logout make with successfully",

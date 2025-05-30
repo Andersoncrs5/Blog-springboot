@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
 import java.util.List;
 
 @Service
@@ -77,9 +76,7 @@ public class NotificationsService {
 
     @Async
     @Transactional
-    public void markHowRead(Long notiId) {
-        Notification notification = this.get(notiId);
-
+    public void markHowRead(Notification notification) {
         notification.setRead(true);
 
         this.repository.save(notification);

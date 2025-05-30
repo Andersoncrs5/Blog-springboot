@@ -4,6 +4,7 @@ import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.PostLike;
 import br.com.Blog.api.entities.PostMetrics;
 import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.PostLikeRepository;
@@ -23,19 +24,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class PostLikeService {
 
     private final PostLikeRepository repository;
-    private final UserService userService;
-    private final PostService postService;
     private final PostMetricsService metricsService;
-    private final PostMetricsRepository metricsRepository;
     private final UserMetricsService userMetricsService;
 
     @Async
     @Transactional
-    public String reactToPost(Long userId, Long postId, LikeOrUnLike action) {
-        User user = userService.get(userId);
-        Post post = this.postService.Get(postId);
-        PostMetrics metrics = this.metricsService.get(post);
-
+    public String reactToPost(User user, Post post, LikeOrUnLike action) {
         boolean alreadyReacted = this.repository.existsByUserAndPost(user, post);
 
         if (alreadyReacted) {
@@ -49,17 +43,16 @@ public class PostLikeService {
         like.setStatus(action);
 
         if (action == LikeOrUnLike.LIKE) {
-            metrics.setLikes(metrics.getLikes() + 1);
+            this.metricsService.sumOrReduceLike(post, ActionSumOrReduceComment.SUM);
             this.userMetricsService.sumOrRedLikesGivenCount(user, SumOrReduce.SUM);
         }
 
         if (action == LikeOrUnLike.UNLIKE) {
             this.userMetricsService.sumOrRedDisikesGivenCount(user, SumOrReduce.SUM);
-            metrics.setDislikes(metrics.getDislikes() + 1);
+            this.metricsService.sumOrReduceDislike(post, ActionSumOrReduceComment.SUM);
         }
 
         this.repository.save(like);
-        this.metricsRepository.save(metrics);
 
         return "Reaction added successfully";
     }
@@ -80,29 +73,24 @@ public class PostLikeService {
         if (like.getStatus() == LikeOrUnLike.LIKE) {
             this.userMetricsService.sumOrRedLikesGivenCount(like.getUser(), SumOrReduce.REDUCE);
             metrics.setLikes(Math.max(0, metrics.getLikes() - 1));
+            this.metricsService.sumOrReduceLike(like.getPost(), ActionSumOrReduceComment.REDUCE);
         } else {
             this.userMetricsService.sumOrRedDisikesGivenCount(like.getUser(), SumOrReduce.REDUCE);
-            metrics.setDislikes(Math.max(0, metrics.getDislikes() - 1));
+            this.metricsService.sumOrReduceDislike(like.getPost(), ActionSumOrReduceComment.REDUCE);
         }
 
         this.repository.delete(like);
-        this.metricsRepository.save(metrics);
     }
 
     @Async
-    @Transactional
-    public boolean exists(Long userId, Long postId) {
-        User user = this.userService.get(userId);
-        Post post = this.postService.Get(postId);
-
+    @Transactional(readOnly = true)
+    public boolean exists(User user, Post post) {
         return this.repository.existsByUserAndPost(user, post);
     }
 
     @Async
     @Transactional
-    public Page<PostLike> getAllByUser(Long userId, Pageable pageable) {
-        User user = this.userService.get(userId);
-
+    public Page<PostLike> getAllByUser(User user, Pageable pageable) {
         return this.repository.findAllByUser(user, pageable);
     }
 

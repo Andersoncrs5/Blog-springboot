@@ -1,7 +1,7 @@
 package br.com.Blog.api.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -9,6 +9,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "post_metrics")
@@ -28,11 +29,23 @@ public class PostMetrics {
     @Column(nullable = false)
     private Long likes = 0L;
 
+    @Column(name = "likes_count_day")
+    private Long likesCountByDay = 0L;
+
     @Column(nullable = false)
     private Long dislikes = 0L;
 
+    @Column(name = "dislikes_count_day")
+    private Long disLikesCountByDay = 0L;
+
     @Column(nullable = false)
     private Long shares = 0L;
+
+    @Column(nullable = false)
+    private Double recommendationScore = 0.0D; // =
+
+    @Column(nullable = false)
+    private Double plagiarismScore = 0.0D; // =
 
     @Column(nullable = false)
     private Long comments = 0L;
@@ -71,27 +84,5 @@ public class PostMetrics {
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @Override
-    public String toString() {
-        return "PostMetrics{" +
-                "likes=" + likes +
-                ", dislikes=" + dislikes +
-                ", shares=" + shares +
-                ", comments=" + comments +
-                ", favorites=" + favorites +
-                ", bookmarks=" + bookmarks +
-                ", clicks=" + clicks +
-                ", viewed=" + viewed +
-                ", lastInteractionAt=" + lastInteractionAt +
-                ", engagementScore=" + engagementScore +
-                ", reportCount=" + reportCount +
-                ", editedTimes=" + editedTimes +
-                ", version=" + version +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", id=" + id +
-                '}';
-    }
 }
 

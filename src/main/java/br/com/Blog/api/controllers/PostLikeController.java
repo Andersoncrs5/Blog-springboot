@@ -3,7 +3,9 @@ package br.com.Blog.api.controllers;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
+import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.PostLike;
+import br.com.Blog.api.entities.User;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.services.PostLikeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -37,8 +39,10 @@ public class PostLikeController {
 
         action = LikeOrUnLike.valueOf(type.toUpperCase());
         Long id = this.uow.jwtService.extractId(request);
+        User user = this.uow.userService.get(id);
+        Post post = this.uow.postService.Get(postId);
 
-        String e = this.uow.postLikeService.reactToPost(id, postId, action);
+        String e = this.uow.postLikeService.reactToPost(user, post, action);
         var response = this.uow.responseDefault.response(e,200,request.getRequestURL().toString(), null, true);
         return ResponseEntity.ok(response);
     }
@@ -61,8 +65,10 @@ public class PostLikeController {
             HttpServletRequest request
     ) {
         Long id = this.uow.jwtService.extractId(request);
+        User user = this.uow.userService.get(id);
+        Post post = this.uow.postService.Get(postId);
 
-        return this.uow.postLikeService.exists(id, postId);
+        return this.uow.postLikeService.exists(user, post);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
@@ -75,8 +81,9 @@ public class PostLikeController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Long id = this.uow.jwtService.extractId(request);
+        User user = this.uow.userService.get(id);
 
-        return this.uow.postLikeService.getAllByUser(id, pageable);
+        return this.uow.postLikeService.getAllByUser(user, pageable);
     }
 
 }
