@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/v1/comment")
+@RequestMapping("/v1/comment/")
 @RequiredArgsConstructor
 public class CommentController {
 

@@ -29,12 +29,10 @@ public class PostMetricsService {
 
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setLikes(metric.getLikes() + 1);
-            metric.setLikesCountByDay(metric.getLikesCountByDay() + 1);
         }
 
         if(action == ActionSumOrReduceComment.REDUCE) {
             metric.setLikes(metric.getLikes() - 1);
-            metric.setLikesCountByDay(metric.getLikesCountByDay() - 1);
         }
 
         this.repository.save(metric);
@@ -47,12 +45,10 @@ public class PostMetricsService {
 
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setDislikes(metric.getDislikes() + 1);
-            metric.setDisLikesCountByDay(metric.getDisLikesCountByDay() + 1);
         }
 
         if(action == ActionSumOrReduceComment.REDUCE) {
             metric.setDislikes(metric.getDislikes() - 1);
-            metric.setDisLikesCountByDay(metric.getDisLikesCountByDay() - 1);
         }
 
         this.repository.save(metric);
@@ -93,7 +89,6 @@ public class PostMetricsService {
             metric.setComments(metric.getComments() - 1);
         }
 
-        metric.setEditedTimes(metric.getEditedTimes() + 1);
         metric.setLastInteractionAt(LocalDateTime.now());
 
         this.repository.save(metric);
@@ -111,7 +106,6 @@ public class PostMetricsService {
             metric.setFavorites(metric.getFavorites() - 1);
         }
 
-        metric.setEditedTimes(metric.getEditedTimes() + 1);
         metric.setLastInteractionAt(LocalDateTime.now());
         this.repository.save(metric);
     }
@@ -130,7 +124,6 @@ public class PostMetricsService {
     @Transactional
     public void viewed(PostMetrics metric){
         metric.setViewed(metric.getViewed() + 1);
-        metric.setEditedTimes(metric.getEditedTimes() + 1);
 
         metric.setLastInteractionAt(LocalDateTime.now());
         this.repository.save(metric);

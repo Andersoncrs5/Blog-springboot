@@ -44,7 +44,7 @@ public class FavoritePostController {
         FavoritePost favoritePost = this.uow.favoritePostService.Delete(id);
         PostMetrics metrics = this.uow.postMetricsService.get(favoritePost.getPost());
         this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.REDUCE);
-        this.uow.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.REDUCE);
+        this.uow.userMetricsService.sumOrRedSavedPostsCountFavorite(favoritePost.getUser(), SumOrReduce.REDUCE);
 
         var response = this.uow.responseDefault.response(
                 "Post removed with favorite!",
@@ -82,7 +82,8 @@ public class FavoritePostController {
 
         FavoritePost favoritePost = this.uow.favoritePostService.create(post, user);
         PostMetrics metrics = this.uow.postMetricsService.get(post);
-        this.uow.userMetricsService.sumOrRedSavedPostsCount(user, SumOrReduce.SUM);
+
+        this.uow.userMetricsService.sumOrRedSavedPostsCountFavorite(user, SumOrReduce.SUM);
         this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.SUM);
 
         Map<String, Object> response = this.uow.responseDefault.response(

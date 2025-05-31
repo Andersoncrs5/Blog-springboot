@@ -3,6 +3,7 @@ package br.com.Blog.api.services;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.UserMetrics;
 import br.com.Blog.api.repositories.CommentRepository;
 import br.com.Blog.api.repositories.PostRepository;
 import br.com.Blog.api.repositories.UserRepository;

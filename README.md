@@ -33,5 +33,5 @@
 # Updates
 
 date 5/30 :
-    Integration tests in follower, postLike, postFavorite, commentFavorite, commentLike
+    Integration test completed
     fix bugs

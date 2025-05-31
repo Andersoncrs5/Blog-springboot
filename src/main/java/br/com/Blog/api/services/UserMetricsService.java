@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class UserMetricsService {
@@ -83,12 +82,11 @@ public class UserMetricsService {
 
         if (action == SumOrReduce.SUM) {
             metrics.setPostsCount(metrics.getPostsCount() + 1);
-            metrics.setPostsCountCreateByDay(metrics.getPostsCountCreateByDay() + 1 );
         }
 
-        if (action == SumOrReduce.REDUCE)
+        if (action == SumOrReduce.REDUCE) {
             metrics.setPostsCount(metrics.getPostsCount() - 1);
-        metrics.setPostsCountCreateByDay(metrics.getPostsCountCreateByDay() - 1 );
+        }
 
         this.repository.save(metrics);
     }
@@ -100,12 +98,10 @@ public class UserMetricsService {
 
         if (action == SumOrReduce.SUM) {
             metrics.setCommentsCount(metrics.getCommentsCount() + 1);
-            metrics.setCommentsCountCreateByDay(metrics.getCommentsCountCreateByDay() + 1 );
         }
 
         if (action == SumOrReduce.REDUCE) {
             metrics.setCommentsCount(metrics.getCommentsCount() - 1);
-            metrics.setCommentsCountCreateByDay(metrics.getCommentsCountCreateByDay() - 1 );
         }
 
         this.repository.save(metrics);
@@ -149,17 +145,15 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void sumOrRedSavedPostsCount(User user, SumOrReduce action) {
+    public void sumOrRedSavedPostsCountFavorite(User user, SumOrReduce action) {
         UserMetrics metrics = this.get(user);
 
         if (action == SumOrReduce.SUM) {
             metrics.setSavedPostsCount(metrics.getSavedPostsCount() + 1);
-            metrics.setSavedPostsCountCreateByDay(metrics.getSavedPostsCountCreateByDay() + 1);
-
         }
+
         if (action == SumOrReduce.REDUCE) {
             metrics.setSavedPostsCount(metrics.getSavedPostsCount() - 1);
-            metrics.setSavedPostsCountCreateByDay(metrics.getSavedPostsCountCreateByDay() - 1);
         }
 
         this.repository.save(metrics);
@@ -172,12 +166,12 @@ public class UserMetricsService {
 
         if (action == SumOrReduce.SUM) {
             metrics.setSavedCommentsCount(metrics.getSavedCommentsCount() + 1);
-            metrics.setSavedCommentsCountCreateByDay(metrics.getSavedCommentsCountCreateByDay() + 1);
+
         }
 
         if (action == SumOrReduce.REDUCE) {
             metrics.setSavedCommentsCount(metrics.getSavedCommentsCount() - 1);
-            metrics.setSavedCommentsCountCreateByDay(metrics.getSavedCommentsCountCreateByDay() - 1);
+
         }
 
         this.repository.save(metrics);

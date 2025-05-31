@@ -38,7 +38,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/getMetric")
-    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
+    @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> getMetric(HttpServletRequest request) {
         Long userId = this.uow.jwtService.extractId(request);
         User user = this.uow.userService.get(userId);
@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @GetMapping("/getMetricOfUser/{userId}")
-    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
+    @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> getMetricOfUser(
@@ -71,7 +71,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/me")
-    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
+    @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> get(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
@@ -90,7 +90,7 @@ public class UserController {
 
     @GetMapping("/getProfile/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
+    @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> getProfile(@PathVariable Long id , HttpServletRequest request) {
 
@@ -101,7 +101,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/ListPostsOfUser")
-    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
+    @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)
     public Page<Post> ListPostsOfUser(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
@@ -148,7 +148,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @RateLimit(capacity = 16, refillTokens = 2, refillSeconds = 14)
+    @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 14)
     public ResponseEntity<?> register(@RequestBody @Valid UserDTO dto, HttpServletRequest request){
         User user = this.uow.userService.create(dto.MappearToUser());
 
@@ -166,7 +166,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/")
-    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> delete(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
         User user = this.uow.userService.get(id);
@@ -183,7 +183,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/")
-    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> update(@RequestBody @Valid UserDTO dto, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
         User userExist = this.uow.userService.get(id);
@@ -200,7 +200,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
+    @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> Login(@RequestBody @Valid LoginDTO dto){
         Map<String, String> res = this.uow.userService.login(dto.email().trim().toLowerCase(), dto.password());
 
@@ -208,7 +208,7 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 16)
+    @RateLimit(capacity = 6, refillTokens = 2, refillSeconds = 14)
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);

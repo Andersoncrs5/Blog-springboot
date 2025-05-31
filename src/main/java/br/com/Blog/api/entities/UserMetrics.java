@@ -35,14 +35,8 @@ public class UserMetrics {
     @Column(name = "posts_count")
     private Long postsCount = 0L;
 
-    @Column(name = "posts_count_create_day")
-    private Long postsCountCreateByDay = 0L;
-
     @Column(name = "comments_count")
     private Long commentsCount = 0L;
-
-    @Column(name = "comments_count_create_day")
-    private Long commentsCountCreateByDay = 0L;
 
     @Column(name = "likes_given_count")
     private Long likesGivenCount = 0L;
@@ -71,14 +65,8 @@ public class UserMetrics {
     @Column(name = "saved_posts_count")
     private Long savedPostsCount = 0L;
 
-    @Column(name = "saved_posts_count_create_day")
-    private Long savedPostsCountCreateByDay = 0L;
-
     @Column(name = "saved_comments_count")
     private Long savedCommentsCount = 0L;
-
-    @Column(name = "saved_comments_count_create_day")
-    private Long savedCommentsCountCreateByDay = 0L; // =
 
     @Column(name = "saved_media_count")
     private Long savedMediaCount = 0L;

@@ -1,6 +1,5 @@
 package br.com.Blog.api.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,23 +28,17 @@ public class PostMetrics {
     @Column(nullable = false)
     private Long likes = 0L;
 
-    @Column(name = "likes_count_day")
-    private Long likesCountByDay = 0L;
-
     @Column(nullable = false)
     private Long dislikes = 0L;
-
-    @Column(name = "dislikes_count_day")
-    private Long disLikesCountByDay = 0L;
 
     @Column(nullable = false)
     private Long shares = 0L;
 
     @Column(nullable = false)
-    private Double recommendationScore = 0.0D; // =
+    private Double recommendationScore = 0.0D;
 
     @Column(nullable = false)
-    private Double plagiarismScore = 0.0D; // =
+    private Double plagiarismScore = 0.0D;
 
     @Column(nullable = false)
     private Long comments = 0L;
