@@ -18,7 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@SecurityRequirement(name = "bearerAuth")
+import java.util.Map;
+
 @RestController
 @RequestMapping("/v1/favoritePost")
 public class FavoritePostController {
@@ -29,12 +30,14 @@ public class FavoritePostController {
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 8)
     @GetMapping("exists/{idPost}")
     @SecurityRequirement(name = "bearerAuth")
-    public boolean exists(@PathVariable Long idPost, HttpServletRequest request) {
+    public Map<String, Boolean> exists(@PathVariable Long idPost, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        return this.uow.favoritePostService.existsItemSalve(id, idPost);
+        var result = this.uow.favoritePostService.existsItemSalve(id, idPost);
+
+        return Map.of("result", result);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
@@ -43,11 +46,17 @@ public class FavoritePostController {
         this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.REDUCE);
         this.uow.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.REDUCE);
 
-        var response = this.uow.responseDefault.response("Removed",200,request.getRequestURL().toString(), null, true);
+        var response = this.uow.responseDefault.response(
+                "Post removed with favorite!",
+                200,
+                request.getRequestURL().toString(),
+                null,
+                true
+        );
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("GetAllFavoritePostOfUser")
+    @GetMapping("/GetAllFavoritePostOfUser")
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
@@ -63,21 +72,27 @@ public class FavoritePostController {
         return this.uow.favoritePostService.GetAllFavoritePostOfUser(user, pageable);
     }
 
-    @PostMapping("/{postId}")
-    @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 10)
+    @PostMapping("/add/{postId}")
+    @RateLimit(capacity = 14, refillTokens = 2, refillSeconds = 8)
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> create(@PathVariable Long postId , HttpServletRequest request) {
-
         Long id = this.uow.jwtService.extractId(request);
         User user = this.uow.userService.get(id);
         Post post = this.uow.postService.Get(postId);
 
         FavoritePost favoritePost = this.uow.favoritePostService.create(post, user);
-        PostMetrics metrics = this.uow.postMetricsService.get(favoritePost.getPost());
-        this.uow.userMetricsService.sumOrRedSavedPostsCount(favoritePost.getUser(), SumOrReduce.SUM);
+        PostMetrics metrics = this.uow.postMetricsService.get(post);
+        this.uow.userMetricsService.sumOrRedSavedPostsCount(user, SumOrReduce.SUM);
         this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.SUM);
 
-        var response = this.uow.responseDefault.response("Favorited",200,request.getRequestURL().toString(), favoritePost, true);
+        Map<String, Object> response = this.uow.responseDefault.response(
+                "Post has been favorited successfully",
+                201,
+                request.getRequestURL().toString(),
+                favoritePost,
+                true
+        );
+
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

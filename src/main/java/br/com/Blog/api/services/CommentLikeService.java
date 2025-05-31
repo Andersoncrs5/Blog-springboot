@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class CommentLikeService {
@@ -24,12 +26,12 @@ public class CommentLikeService {
 
     @Async
     @Transactional
-    public ResponseEntity<?> reactToComment(User user, Comment comment, LikeOrUnLike action) {
+    public CommentLike reactToComment(User user, Comment comment, LikeOrUnLike action) {
         CommentMetrics metrics = metricsService.get(comment);
 
         boolean alreadyReacted = repository.existsByUserAndComment(user, comment);
         if (alreadyReacted) {
-            return new ResponseEntity<>("User already reacted to this comment", HttpStatus.CONFLICT);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User already reacted to this comment");
         }
 
         CommentLike reaction = new CommentLike();
@@ -43,17 +45,15 @@ public class CommentLikeService {
             metrics.setDislikes(metrics.getDislikes() + 1);
         }
 
-        repository.save(reaction);
         metricsRepository.save(metrics);
-
-        return new ResponseEntity<>("Reaction added successfully", HttpStatus.OK);
+        return repository.save(reaction);
     }
 
     @Async
     @Transactional
-    public ResponseEntity<?> removeReaction(Long reactionId) {
+    public CommentLike removeReaction(Long reactionId) {
         if (reactionId == null || reactionId <= 0) {
-            return new ResponseEntity<>("Id is required", HttpStatus.BAD_REQUEST);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
         }
 
         CommentLike reaction = repository.findById(reactionId).orElseThrow(
@@ -68,10 +68,9 @@ public class CommentLikeService {
             metrics.setDislikes(Math.max(0, metrics.getDislikes() - 1));
         }
 
-        repository.delete(reaction);
         metricsRepository.save(metrics);
-
-        return new ResponseEntity<>("Reaction removed", HttpStatus.OK);
+        repository.delete(reaction);
+        return reaction;
     }
 
     @Async

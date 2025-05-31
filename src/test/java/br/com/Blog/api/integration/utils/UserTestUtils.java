@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -19,22 +20,25 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class UserTestUtils {
 
     public static Map<String, String> createAndLogUserAndReturnTokens(MockMvc mockMvc, ObjectMapper objectMapper) throws Exception {
+        Random random = new Random();
         UserDTO dto = new UserDTO(
                 "user",
-                "testOfSilva@gmail.com",
+                "testOfSilva" + random.nextInt(1000) + "@gmail.com",
                 "12345678"
         );
 
-        mockMvc.perform(post("/v1/user/register")
+        MvcResult resultRegitser = mockMvc.perform(post("/v1/user/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.result.email").value(dto.email().trim().toLowerCase()));
+                .andExpect(jsonPath("$.result.email").value(dto.email().trim().toLowerCase()))
+                .andReturn();
 
-        LoginDTO loginDTO = new LoginDTO(
-                dto.email().trim().toLowerCase(),
-                dto.password()
-        );
+        String responseCreateUser = resultRegitser.getResponse().getContentAsString();
+        JsonNode responseCreateUserJson = objectMapper.readTree(responseCreateUser);
+        String userId = responseCreateUserJson.get("result").get("id").asText();
+
+        LoginDTO loginDTO = new LoginDTO(dto.email().trim().toLowerCase(),dto.password());
 
         MvcResult loginResult = mockMvc.perform(post("/v1/user/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -49,8 +53,25 @@ public class UserTestUtils {
         Map<String, String> tokens = new HashMap<>();
         tokens.put("token", node.get("token").asText());
         tokens.put("refresh", node.get("refresh").asText());
+        tokens.put("id", userId);
 
         return tokens;
+    }
+
+    public static void createMultiUser(MockMvc mockMvc, ObjectMapper objectMapper, int  amount) throws Exception {
+        for (int i = 0; i < amount; i++) {
+            UserDTO dto = new UserDTO(
+                    "user",
+                    "testOfSilva" + i + "@gmail.com",
+                    "12345678"
+            );
+
+            mockMvc.perform(post("/v1/user/register")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(dto)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.result.email").value(dto.email().trim().toLowerCase()));
+        }
     }
 
     public static MvcResult getUserAndReturnMvc(MockMvc mockMvc, String token) throws Exception {

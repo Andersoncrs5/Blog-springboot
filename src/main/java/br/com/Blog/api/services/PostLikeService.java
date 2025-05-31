@@ -29,7 +29,7 @@ public class PostLikeService {
 
     @Async
     @Transactional
-    public String reactToPost(User user, Post post, LikeOrUnLike action) {
+    public PostLike reactToPost(User user, Post post, LikeOrUnLike action) {
         boolean alreadyReacted = this.repository.existsByUserAndPost(user, post);
 
         if (alreadyReacted) {
@@ -52,9 +52,7 @@ public class PostLikeService {
             this.metricsService.sumOrReduceDislike(post, ActionSumOrReduceComment.SUM);
         }
 
-        this.repository.save(like);
-
-        return "Reaction added successfully";
+        return this.repository.save(like);
     }
 
     @Async

@@ -41,6 +41,25 @@ public class CommentControllerTest {
     }
 
     @Test
+    public void shouldGetTheMetricComment() throws Exception {
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
+
+        String token = tokens.get("token");
+
+        long categoryId = CategoryTestUtils.createCategoryAndReturnId(mockMvc, objectMapper, token);
+        long postId = PostTestUtil.createPostAndReturnId(mockMvc, objectMapper, categoryId, token);
+        long commentId = CommentTestUtil.createCommentAndReturnCommentId(mockMvc, objectMapper, token, categoryId, postId);
+
+        CommentTestUtil.getCommentAndReturnMockResult(mockMvc, token, commentId);
+
+        mockMvc.perform(get("/v1/comment/getMetric/" + commentId)
+                .header("Authorization", "Bearer " + token))
+                .andExpect(jsonPath("$.message").value("Metric got with successfully"))
+                .andExpect(jsonPath("$.result.id").exists())
+                .andExpect(jsonPath("$.result.id").isNumber());
+    }
+
+    @Test
     public void shouldCreateNewComment() throws Exception {
         Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
 

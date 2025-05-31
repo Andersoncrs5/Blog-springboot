@@ -1,16 +1,13 @@
 package br.com.Blog.api.controllers;
 
-import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.PostLike;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
-import br.com.Blog.api.services.PostLikeService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/postLike")
@@ -42,8 +41,16 @@ public class PostLikeController {
         User user = this.uow.userService.get(id);
         Post post = this.uow.postService.Get(postId);
 
-        String e = this.uow.postLikeService.reactToPost(user, post, action);
-        var response = this.uow.responseDefault.response(e,200,request.getRequestURL().toString(), null, true);
+        PostLike e = this.uow.postLikeService.reactToPost(user, post, action);
+
+        var response = this.uow.responseDefault.response(
+                "Reaction added successfully",
+                200,
+                request.getRequestURL().toString(),
+                e,
+                true
+        );
+
         return ResponseEntity.ok(response);
     }
 
@@ -52,15 +59,21 @@ public class PostLikeController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> remove(@PathVariable Long likeId, HttpServletRequest request) {
         this.uow.postLikeService.removeReaction(likeId);
-        var response = this.uow.responseDefault.response("Removed",200,request.getRequestURL().toString(), null, true);
+        var response = this.uow.responseDefault.response(
+                "Action Removed",
+                200,
+                request.getRequestURL().toString(),
+                null,
+                true
+        );
         return ResponseEntity.ok(response);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
-    @GetMapping("/{postId}")
+    @GetMapping("exists/{postId}")
     @SecurityRequirement(name = "bearerAuth")
     @ResponseStatus(HttpStatus.OK)
-    public boolean exists(
+    public Map<String, Boolean> exists(
             @PathVariable Long postId,
             HttpServletRequest request
     ) {
@@ -68,7 +81,8 @@ public class PostLikeController {
         User user = this.uow.userService.get(id);
         Post post = this.uow.postService.Get(postId);
 
-        return this.uow.postLikeService.exists(user, post);
+        var result = this.uow.postLikeService.exists(user, post);
+        return Map.of("result", result);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)

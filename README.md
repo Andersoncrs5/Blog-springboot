@@ -32,6 +32,6 @@
 
 # Updates
 
-date 5/29 :
-    Integration test in comment
-    improvement in Integration test
+date 5/30 :
+    Integration tests in follower, postLike, postFavorite, commentFavorite, commentLike
+    fix bugs

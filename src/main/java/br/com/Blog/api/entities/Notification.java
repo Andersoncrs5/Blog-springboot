@@ -11,7 +11,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notifications") // Nome corrigido para condizer com o plural correto
+@Table(name = "notifications")
 @EntityListeners(AuditingEntityListener.class)
 @Setter
 @Getter

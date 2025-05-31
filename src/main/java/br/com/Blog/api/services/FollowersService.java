@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @RequestMapping("/v1/followers")
@@ -24,7 +26,6 @@ public class FollowersService {
     @Async
     @Transactional
     public Followers follow(User user, User followed) {
-
         boolean alreadyFollowing = repository.existsByFollowerAndFollowed(user, followed);
 
         if (alreadyFollowing) {
@@ -34,6 +35,7 @@ public class FollowersService {
         Followers follower = new Followers();
         follower.setFollower(user);
         follower.setFollowed(followed);
+        follower.setId(null);
 
         return repository.save(follower);
     }
@@ -53,9 +55,8 @@ public class FollowersService {
 
     @Async
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getAllFollowed(User user, Pageable pageable) {
-        Page<Followers> followed = repository.findAllByFollowed(user, pageable);
-        return ResponseEntity.ok(followed);
+    public Page<Followers> getAllFollowed(User user, Pageable pageable) {
+        return repository.findAllByFollower(user, pageable);
     }
 
     @Async

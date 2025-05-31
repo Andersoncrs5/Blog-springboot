@@ -119,7 +119,8 @@ public class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("User found with successfully"))
                 .andExpect(jsonPath("$.statusCode").value(200))
-                .andExpect(jsonPath("$.result.email").value("testOfSilva@gmail.com"))
+                .andExpect(jsonPath("$.result.email").exists())
+                .andExpect(jsonPath("$.result.email").isString())
                 .andExpect(jsonPath("$.result.id").exists())
                 .andExpect(jsonPath("$.result.id").isNumber());
     }

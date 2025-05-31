@@ -46,11 +46,11 @@ public class Comment {
     private Long version;
 
     @JsonIgnore
-    @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "comment", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private CommentMetrics metrics;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentLike> likes;
 
     @CreatedDate

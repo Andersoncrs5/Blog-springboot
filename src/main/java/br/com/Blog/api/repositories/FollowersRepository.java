@@ -24,5 +24,7 @@ public interface FollowersRepository extends JpaRepository<Followers, Long> {
 
     @Query("SELECT f1.followed FROM Followers f1 JOIN Followers f2 ON f1.followed = f2.followed WHERE f1.follower = :user1 AND f2.follower = :user2")
     Page<User> findMutualFollowed(@Param("user1") User user1, @Param("user2") User user2, Pageable pageable);
+
+    Page<Followers> findAllByFollower(User user, Pageable pageable);
 }
 

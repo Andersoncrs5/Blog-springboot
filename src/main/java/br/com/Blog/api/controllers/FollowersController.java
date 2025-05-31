@@ -8,11 +8,14 @@ import br.com.Blog.api.entities.enums.FollowerOrFollowering;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/followers")
@@ -42,7 +45,13 @@ public class FollowersController {
                 follower.getFollowed(), FollowerOrFollowering.FOLLOWER
         );
 
-        var response = this.uow.responseDefault.response("You are follower this the " + follower.getFollower().getName(),200,request.getRequestURL().toString(), null, true);
+        var response = this.uow.responseDefault.response(
+                "You are follower this the " + follower.getFollower().getName(),
+                200,
+                request.getRequestURL().toString(),
+                follower,
+                true
+        );
 
         return new ResponseEntity<>(response, HttpStatus.CREATED );
     }
@@ -72,14 +81,22 @@ public class FollowersController {
                 unfollowed.getFollowed(), FollowerOrFollowering.UNFOLLOWER
         );
 
-        var response = this.uow.responseDefault.response("You have unfollowed " + unfollowed.getFollowed().getName(),200,request.getRequestURL().toString(), null, true);
+        var response = this.uow.responseDefault.response(
+                "You have unfollowed " + unfollowed.getFollowed().getName(),
+                200,
+                request.getRequestURL().toString(),
+                null,
+                true
+        );
+
         return ResponseEntity.ok(response);
     }
 
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 8)
     @GetMapping("/")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getAllFollowed(
+    @ResponseStatus(HttpStatus.OK)
+    public Page<Followers> getAllFollowed(
             HttpServletRequest request,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -94,12 +111,13 @@ public class FollowersController {
     @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 20, refillTokens = 2, refillSeconds = 6)
     @ResponseStatus(HttpStatus.OK)
-    public Boolean areFollowing(@PathVariable Long followedId, HttpServletRequest request){
+    public Map<String, Boolean> areFollowing(@PathVariable Long followedId, HttpServletRequest request){
         Long id = this.uow.jwtService.extractId(request);
         User user = this.uow.userService.get(id);
         User followed = this.uow.userService.get(followedId);
 
-        return this.uow.followersService.areFollowing(user, followed);
+        Boolean result = this.uow.followersService.areFollowing(user, followed);
+        return Map.of("result", result);
     }
 
     @PostMapping("/mutual/{followedId}")
@@ -118,7 +136,5 @@ public class FollowersController {
 
         return this.uow.followersService.getMutualFollowed(user, followed, pageable);
     }
-
-
 
 }

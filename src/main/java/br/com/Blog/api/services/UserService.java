@@ -48,6 +48,7 @@ public class UserService {
     }
 
     @Async
+    @Transactional(readOnly = true)
     public User get(Long id){
         if (id == null || id <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
