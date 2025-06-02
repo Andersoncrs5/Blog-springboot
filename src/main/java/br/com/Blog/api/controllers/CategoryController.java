@@ -95,7 +95,8 @@ public class CategoryController {
             HttpServletRequest request
             ){
 
-        var result = this.uow.categoryService.update(id, dto.MappearToCategory());
+        Category category = this.uow.categoryService.get(id);
+        var result = this.uow.categoryService.update(category, dto.MappearToCategory());
         var response = this.responseDefault.response(
                 "Category update with successfully",
                 200,

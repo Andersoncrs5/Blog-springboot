@@ -5,7 +5,7 @@
     This project is a RESTful API built with Spring Boot 3.4.2, designed for managing blog posts, 
     users, categories, and comments. It includes a favorite posts system, allowing users to save their 
     favorite blog posts. The application follows CRUD principles and uses Spring Data JPA for database 
-    interactions, with system of recover password by email
+    interactions, with system of recover password by email, integration test full
 
 ## Technologies Used:
 
@@ -33,6 +33,6 @@
 
 # Updates
 
-date 5/30 :
-    e2e test in user, category
-    fix bugs
+date 6/2 :
+    unitary test in user, category, post
+    

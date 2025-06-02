@@ -6,6 +6,7 @@ import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.PostMetricsRepository;
 import br.com.Blog.api.repositories.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -17,10 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-@RequiredArgsConstructor
 public class PostService {
 
-    private final PostRepository repository;
+    @Autowired
+    private PostRepository repository;
 
     @Async
     @Transactional
@@ -34,18 +35,6 @@ public class PostService {
         if(checkSlug) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Slug in used!! try another");
         }
-
-        return this.repository.save(post);
-    }
-
-    @Async
-    @Transactional
-    public Post Update(Post postExist, Post post){
-
-        post.setUser(postExist.getUser());
-        post.setId(postExist.getId());
-        post.setVersion(postExist.getVersion());
-        post.setCategory(postExist.getCategory());
 
         return this.repository.save(post);
     }
@@ -87,6 +76,18 @@ public class PostService {
     @Transactional
     public Page<Post> filterByTitle(String title, Pageable pageable) {
         return this.repository.findByTitleContainingIgnoreCase(title, pageable);
+    }
+
+    @Async
+    @Transactional
+    public Post Update(Post postExist, Post post){
+
+        post.setUser(postExist.getUser());
+        post.setId(postExist.getId());
+        post.setVersion(postExist.getVersion());
+        post.setCategory(postExist.getCategory());
+
+        return this.repository.save(post);
     }
 
 }

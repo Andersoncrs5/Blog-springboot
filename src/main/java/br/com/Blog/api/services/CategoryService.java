@@ -4,6 +4,7 @@ import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.CategoryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -13,14 +14,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class CategoryService {
 
-    private final CategoryRepository repository;
-    private final UserService userService;
+    @Autowired
+    private CategoryRepository repository;
 
     @Async
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Category> getAll(){
         return this.repository.findAll();
     }
@@ -49,9 +49,8 @@ public class CategoryService {
     public Category create(Category category, User user){
         boolean check = this.repository.existsByName(category.getName());
 
-        if (check) {
+        if (check)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Name in used! Try another name");
-        }
 
         category.setUser(user);
         return this.repository.save(category);
@@ -59,9 +58,7 @@ public class CategoryService {
 
     @Async
     @Transactional
-    public Category update(Long id, Category category){
-        Category categoryToUpdate = this.get(id);
-
+    public Category update(Category categoryToUpdate, Category category){
         categoryToUpdate.setName(category.getName());
 
         return this.repository.save(categoryToUpdate);
