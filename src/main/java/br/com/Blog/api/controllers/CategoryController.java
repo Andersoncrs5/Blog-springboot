@@ -54,7 +54,8 @@ public class CategoryController {
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
-        this.uow.categoryService.delete(id);
+        Category category = this.uow.categoryService.get(id);
+        this.uow.categoryService.delete(category);
 
         var response = this.responseDefault.response(
                 "Task deleted with successfully",

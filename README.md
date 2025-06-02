@@ -29,9 +29,10 @@
     crypto
     Recover Password
     Filter System
+    integration test full
 
 # Updates
 
 date 5/30 :
-    Integration test completed
+    e2e test in user, category
     fix bugs

@@ -101,6 +101,7 @@ public class UserController {
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/ListPostsOfUser")
+    @ResponseStatus(HttpStatus.OK)
     @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)
     public Page<Post> ListPostsOfUser(
             HttpServletRequest request,
@@ -175,7 +176,7 @@ public class UserController {
                 "User deleted with successfully",
                 200,
                 request.getRequestURL().toString(),
-                "",
+                null,
                 true
         );
         return new ResponseEntity<>(response, HttpStatus.OK);

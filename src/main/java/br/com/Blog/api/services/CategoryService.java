@@ -27,7 +27,7 @@ public class CategoryService {
 
     @Async
     public Category get(Long id){
-        if (id == null)
+        if (id <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
 
         Category category = this.repository.findById(id).orElse(null);
@@ -40,8 +40,7 @@ public class CategoryService {
 
     @Async
     @Transactional
-    public void delete(Long id){
-        Category category = this.get(id);
+    public void delete(Category category){
         this.repository.delete(category);
     }
 

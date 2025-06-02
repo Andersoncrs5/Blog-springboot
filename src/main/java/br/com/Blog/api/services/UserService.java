@@ -10,6 +10,7 @@ import br.com.Blog.api.repositories.UserRepository;
 import br.com.Blog.api.services.response.ResponseTokens;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,18 +27,22 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository repository;
-    private final PostRepository postRepository;
-    private final AuthenticationManager authManager;
-    private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder;
-    private final CustomUserDetailsService userDetailsService;
+    @Autowired
+    private UserRepository repository;
+    @Autowired
+    private PostRepository postRepository;
+    @Autowired
+    private AuthenticationManager authManager;
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
 
     @Async
     @Transactional
@@ -51,9 +56,8 @@ public class UserService {
     @Async
     @Transactional(readOnly = true)
     public User get(Long id){
-        if (id == null || id <= 0)
+        if (id <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
-
 
         User user = this.repository.findById(id).orElse(null);
 
@@ -124,6 +128,10 @@ public class UserService {
     @Async
     @Transactional
     public Map<String, String> refreshToken(String refreshToken) {
+        if (refreshToken.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RefreshToken is required");
+        }
+
         Claims claims = jwtService.extractAllClaims(refreshToken);
 
         if (claims.getExpiration().before(new Date())) {
