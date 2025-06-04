@@ -24,7 +24,7 @@ public class UserMetricsService {
     @Async
     @Transactional(readOnly = true)
     public UserMetrics get(User user) {
-        if (user == null) {
+        if (user.getId() <= 0 ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User must not be null");
         }
 
@@ -34,31 +34,31 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void create(User user) {
+    public UserMetrics create(User user) {
         UserMetrics metric = new UserMetrics();
         metric.setUser(user);
         metric.setId(null);
 
-        this.repository.save(metric);
+        return this.repository.save(metric);
     }
 
     @Async
     @Transactional
-    public void setLastLogin(User user) {
+    public UserMetrics setLastLogin(User user) {
         UserMetrics metric = this.get(user);
         metric.setLastLogin(LocalDateTime.now());
-        this.repository.save(metric);
+        return this.repository.save(metric);
     }
 
     @Async
     @Transactional
-    public void incrementMetric(UserMetrics metrics, FollowerOrFollowering action) {
+    public UserMetrics incrementMetric(UserMetrics metrics, FollowerOrFollowering action) {
         switch (action) {
             case FOLLOWERING -> metrics.setFollowingCount(metrics.getFollowingCount() + 1);
             case FOLLOWER -> metrics.setFollowersCount(metrics.getFollowersCount() + 1);
         }
 
-        repository.save(metrics);
+        return repository.save(metrics);
     }
 
     @Async
@@ -75,7 +75,7 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void sumOrRedPostsCount(UserMetrics metrics, SumOrReduce action) {
+    public UserMetrics sumOrRedPostsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setPostsCount(metrics.getPostsCount() + 1);
         }
@@ -84,12 +84,12 @@ public class UserMetricsService {
             metrics.setPostsCount(metrics.getPostsCount() - 1);
         }
 
-        this.repository.save(metrics);
+        return this.repository.save(metrics);
     }
 
     @Async
     @Transactional
-    public void sumOrRedCommentsCount(UserMetrics metrics, SumOrReduce action) {
+    public UserMetrics sumOrRedCommentsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setCommentsCount(metrics.getCommentsCount() + 1);
         }
@@ -98,12 +98,12 @@ public class UserMetricsService {
             metrics.setCommentsCount(metrics.getCommentsCount() - 1);
         }
 
-        this.repository.save(metrics);
+        return this.repository.save(metrics);
     }
 
     @Async
     @Transactional
-    public void sumOrRedLikesOrDislikeGivenCount(UserMetrics metrics, SumOrReduce action, LikeOrUnLike likeOrUnLike) {
+    public UserMetrics sumOrRedLikesOrDislikeGivenCount(UserMetrics metrics, SumOrReduce action, LikeOrUnLike likeOrUnLike) {
         if (action == SumOrReduce.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
             metrics.setLikesGivenCount(metrics.getLikesGivenCount() + 1);
             metrics.setLikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() + 1);
@@ -124,12 +124,12 @@ public class UserMetricsService {
             metrics.setDeslikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() - 1);
         }
 
-        this.repository.save(metrics);
+        return this.repository.save(metrics);
     }
 
     @Async
     @Transactional
-    public void sumOrRedSavedPostsCountFavorite(UserMetrics metrics, SumOrReduce action) {
+    public UserMetrics sumOrRedSavedPostsCountFavorite(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setSavedPostsCount(metrics.getSavedPostsCount() + 1);
         }
@@ -138,22 +138,20 @@ public class UserMetricsService {
             metrics.setSavedPostsCount(metrics.getSavedPostsCount() - 1);
         }
 
-        this.repository.save(metrics);
+        return this.repository.save(metrics);
     }
 
     @Async
     @Transactional
-    public void sumOrRedSavedCommentsCount(UserMetrics metrics, SumOrReduce action) {
+    public UserMetrics sumOrRedSavedCommentsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setSavedCommentsCount(metrics.getSavedCommentsCount() + 1);
-
         }
 
         if (action == SumOrReduce.REDUCE) {
             metrics.setSavedCommentsCount(metrics.getSavedCommentsCount() - 1);
-
         }
 
-        this.repository.save(metrics);
+        return this.repository.save(metrics);
     }
 }

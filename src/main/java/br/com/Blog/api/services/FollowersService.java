@@ -4,6 +4,7 @@ import br.com.Blog.api.entities.Followers;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.FollowersRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,7 +22,8 @@ import java.util.Objects;
 @RequestMapping("/v1/followers")
 public class FollowersService {
 
-    private final FollowersRepository repository;
+    @Autowired
+    private FollowersRepository repository;
 
     @Async
     @Transactional

@@ -36,4 +36,4 @@
 # Updates
 
 date 6/3 :
-    unitary test in favoriteComment and PostMetrics
+    unitary test in UserMetrics and PostLike

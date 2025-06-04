@@ -43,7 +43,7 @@ public class PostLikeService {
     @Async
     @Transactional
     public PostLike removeReaction(Long id) {
-        if (id == null || id <= 0 ) {
+        if (id <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
         }
 
@@ -62,7 +62,7 @@ public class PostLikeService {
     }
 
     @Async
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<PostLike> getAllByUser(User user, Pageable pageable) {
         return this.repository.findAllByUser(user, pageable);
     }
