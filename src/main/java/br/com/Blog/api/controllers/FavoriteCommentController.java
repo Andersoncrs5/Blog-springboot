@@ -10,7 +10,6 @@ import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -46,7 +45,8 @@ public class FavoriteCommentController {
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
-        FavoriteComment favorite = this.uow.favoriteCommentService.Delete(id);
+        var item = this.uow.favoriteCommentService.get(id);
+        FavoriteComment favorite = this.uow.favoriteCommentService.Delete(item);
         this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.REDUCE);
         UserMetrics userMetrics = this.uow.userMetricsService.get(favorite.getUser());
         this.uow.userMetricsService.sumOrRedSavedCommentsCount(userMetrics, SumOrReduce.REDUCE);

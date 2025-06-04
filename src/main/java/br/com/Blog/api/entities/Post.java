@@ -21,7 +21,7 @@ public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id = 0L;
 
     @Column(length = 255, nullable = false)
     @NotBlank(message = "Field title is required")

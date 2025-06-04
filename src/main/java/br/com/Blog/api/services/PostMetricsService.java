@@ -6,6 +6,7 @@ import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.repositories.PostMetricsRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -17,14 +18,30 @@ import java.util.Optional;
 
 
 @Service
-@RequiredArgsConstructor
 public class PostMetricsService {
 
-    private final PostMetricsRepository repository;
+    @Autowired
+    private PostMetricsRepository repository;
+
+    @Async
+    @Transactional(readOnly = true)
+    public PostMetrics get(Post post) {
+        if (post.getId() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Post is required!");
+        }
+
+        Optional<PostMetrics> metric = this.repository.findByPost(post);
+
+        if (metric.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post metric not found");
+        }
+
+        return metric.get();
+    }
 
     @Async
     @Transactional
-    public void sumOrReduceLikeOrDislike(PostMetrics metric, ActionSumOrReduceComment action, LikeOrUnLike likeOrUnLike) {
+    public PostMetrics sumOrReduceLikeOrDislike(PostMetrics metric, ActionSumOrReduceComment action, LikeOrUnLike likeOrUnLike) {
         if (action == ActionSumOrReduceComment.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
             metric.setLikes(metric.getLikes() + 1);
         }
@@ -41,52 +58,38 @@ public class PostMetricsService {
             metric.setDislikes(metric.getDislikes() - 1);
         }
 
-        this.repository.save(metric);
+        return this.repository.save(metric);
     }
 
     @Async
     @Transactional
-    public void create(Post post) {
+    public PostMetrics create(Post post) {
         PostMetrics metrics = new PostMetrics();
         metrics.setPost(post);
         metrics.setId(null);
 
-        this.repository.save(metrics);
-    }
-
-    @Async
-    @Transactional(readOnly = true)
-    public PostMetrics get(Post post) {
-        if (post == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Post is required!");
-        }
-
-        Optional<PostMetrics> metric = this.repository.findByPost(post);
-
-        if (metric.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post metric not found");
-        }
-
-        return metric.get();
+        return this.repository.save(metrics);
     }
 
     @Async
     @Transactional
-    public void sumOrReduceComments(PostMetrics metric, ActionSumOrReduceComment action) {
+    public PostMetrics sumOrReduceComments(PostMetrics metric, ActionSumOrReduceComment action) {
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setComments(metric.getComments() + 1);
-        } else {
+        }
+
+        if (action == ActionSumOrReduceComment.REDUCE) {
             metric.setComments(metric.getComments() - 1);
         }
 
         metric.setLastInteractionAt(LocalDateTime.now());
 
-        this.repository.save(metric);
+        return this.repository.save(metric);
     }
 
     @Async
     @Transactional
-    public void sumOrReduceFavorite(PostMetrics metric, ActionSumOrReduceComment action) {
+    public PostMetrics sumOrReduceFavorite(PostMetrics metric, ActionSumOrReduceComment action) {
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setFavorites(metric.getFavorites() + 1);
         }
@@ -96,26 +99,25 @@ public class PostMetricsService {
         }
 
         metric.setLastInteractionAt(LocalDateTime.now());
-        this.repository.save(metric);
+        return this.repository.save(metric);
     }
 
     @Async
     @Transactional
-    public void clicks(PostMetrics metric) {
+    public PostMetrics clicks(PostMetrics metric) {
         metric.setClicks(metric.getClicks() + 1);
-        metric.setEditedTimes(metric.getEditedTimes() + 1);
 
         metric.setLastInteractionAt(LocalDateTime.now());
-        this.repository.save(metric);
+        return this.repository.save(metric);
     }
 
     @Async
     @Transactional
-    public void viewed(PostMetrics metric){
+    public PostMetrics viewed(PostMetrics metric){
         metric.setViewed(metric.getViewed() + 1);
 
         metric.setLastInteractionAt(LocalDateTime.now());
-        this.repository.save(metric);
+        return this.repository.save(metric);
     }
 
 }
