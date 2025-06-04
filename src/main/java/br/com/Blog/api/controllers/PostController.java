@@ -4,10 +4,7 @@ import br.com.Blog.api.DTOs.PostDTO;
 import br.com.Blog.api.Specifications.PostSpecification;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
-import br.com.Blog.api.entities.Category;
-import br.com.Blog.api.entities.Post;
-import br.com.Blog.api.entities.PostMetrics;
-import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -129,7 +126,8 @@ public class PostController {
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         Post post = this.uow.postService.Get(id);
         Post postDeleted = this.uow.postService.Delete(post);
-        this.uow.userMetricsService.sumOrRedPostsCount(postDeleted.getUser(), SumOrReduce.REDUCE);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(postDeleted.getUser());
+        this.uow.userMetricsService.sumOrRedPostsCount(userMetrics, SumOrReduce.REDUCE);
 
         var response = this.uow.responseDefault.response(
                 "Post deleted with successfully",
@@ -158,7 +156,8 @@ public class PostController {
 
         Post post = this.uow.postService.Create(dto.MappearToPost(), user, category);
         this.uow.postMetricsService.create(post);
-        this.uow.userMetricsService.sumOrRedPostsCount(post.getUser(), SumOrReduce.SUM);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(post.getUser());
+        this.uow.userMetricsService.sumOrRedPostsCount(userMetrics, SumOrReduce.SUM);
         this.uow.notificationsService.notifyFollowersAboutPostCreated(post);
 
         var response = this.uow.responseDefault.response(

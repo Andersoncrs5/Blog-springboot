@@ -46,7 +46,7 @@ public class FollowersService {
         Followers followerRecord = repository.findByFollowerAndFollowed(user, followed);
 
         if (followerRecord == null) {
-            return null;
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"You are not following this user");
         }
 
         repository.delete(followerRecord);

@@ -5,6 +5,7 @@ import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.FavoritePostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,10 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-@RequiredArgsConstructor
 public class FavoritePostService {
 
-    private final FavoritePostRepository repository;
+    @Autowired
+    private FavoritePostRepository repository;
 
     @Async
     @Transactional
@@ -27,9 +28,7 @@ public class FavoritePostService {
 
     @Async
     @Transactional
-    public FavoritePost Delete(Long idItem){
-        FavoritePost favoritePost = this.get(idItem);
-
+    public FavoritePost Delete(FavoritePost favoritePost){
         this.repository.delete(favoritePost);
 
         return favoritePost;
@@ -53,14 +52,14 @@ public class FavoritePostService {
 
     @Async
     @Transactional
-    public boolean existsItemSalve(Long idUser, Long idPost){
-        return this.repository.existsByUserIdAndPostId(idUser, idPost);
+    public boolean existsItemSalve(User user, Post post){
+        return this.repository.existsByUserAndPost(user, post);
     }
 
     @Async
     @Transactional
-    private FavoritePost get(Long id) {
-        if (id == null)
+    public FavoritePost get(Long id) {
+        if (id <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
 
         FavoritePost favoritePost = this.repository.findById(id).orElse(null);

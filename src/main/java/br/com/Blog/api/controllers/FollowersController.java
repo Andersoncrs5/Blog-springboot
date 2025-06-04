@@ -4,6 +4,7 @@ import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Followers;
 import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.UserMetrics;
 import br.com.Blog.api.entities.enums.FollowerOrFollowering;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,12 +38,13 @@ public class FollowersController {
 
         Followers follower = this.uow.followersService.follow(user, followed);
 
+        UserMetrics metrics = this.uow.userMetricsService.get(follower.getFollower());
         this.uow.userMetricsService.incrementMetric(
-                follower.getFollower(), FollowerOrFollowering.FOLLOWERING
+                metrics, FollowerOrFollowering.FOLLOWERING
         );
 
         this.uow.userMetricsService.incrementMetric(
-                follower.getFollowed(), FollowerOrFollowering.FOLLOWER
+                this.uow.userMetricsService.get(follower.getFollowed()), FollowerOrFollowering.FOLLOWER
         );
 
         var response = this.uow.responseDefault.response(
@@ -69,16 +71,13 @@ public class FollowersController {
 
         Followers unfollowed = this.uow.followersService.unfollow(user, followed);
 
-        if (unfollowed == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("You are not following this user");
-        }
-
-        this.uow.userMetricsService.incrementMetric(
-                unfollowed.getFollower(), FollowerOrFollowering.UNFOLLOWERING
+        UserMetrics metrics = this.uow.userMetricsService.get(unfollowed.getFollower());
+        this.uow.userMetricsService.decrementMetric(
+                metrics, FollowerOrFollowering.UNFOLLOWERING
         );
 
-        this.uow.userMetricsService.incrementMetric(
-                unfollowed.getFollowed(), FollowerOrFollowering.UNFOLLOWER
+        this.uow.userMetricsService.decrementMetric(
+                this.uow.userMetricsService.get(unfollowed.getFollowed()), FollowerOrFollowering.UNFOLLOWER
         );
 
         var response = this.uow.responseDefault.response(

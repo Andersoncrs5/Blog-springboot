@@ -3,9 +3,9 @@ package br.com.Blog.api.services;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.PostMetrics;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
+import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.repositories.PostMetricsRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,30 +24,20 @@ public class PostMetricsService {
 
     @Async
     @Transactional
-    public void sumOrReduceLike(Post post, ActionSumOrReduceComment action) {
-        PostMetrics metric = this.get(post);
-
-        if (action == ActionSumOrReduceComment.SUM) {
+    public void sumOrReduceLikeOrDislike(PostMetrics metric, ActionSumOrReduceComment action, LikeOrUnLike likeOrUnLike) {
+        if (action == ActionSumOrReduceComment.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
             metric.setLikes(metric.getLikes() + 1);
         }
 
-        if(action == ActionSumOrReduceComment.REDUCE) {
+        if(action == ActionSumOrReduceComment.REDUCE && likeOrUnLike == LikeOrUnLike.LIKE ) {
             metric.setLikes(metric.getLikes() - 1);
         }
 
-        this.repository.save(metric);
-    }
-
-    @Async
-    @Transactional
-    public void sumOrReduceDislike(Post post, ActionSumOrReduceComment action) {
-        PostMetrics metric = this.get(post);
-
-        if (action == ActionSumOrReduceComment.SUM) {
+        if (action == ActionSumOrReduceComment.SUM && likeOrUnLike == LikeOrUnLike.UNLIKE ) {
             metric.setDislikes(metric.getDislikes() + 1);
         }
 
-        if(action == ActionSumOrReduceComment.REDUCE) {
+        if(action == ActionSumOrReduceComment.REDUCE && likeOrUnLike == LikeOrUnLike.UNLIKE ) {
             metric.setDislikes(metric.getDislikes() - 1);
         }
 
@@ -61,7 +51,7 @@ public class PostMetricsService {
         metrics.setPost(post);
         metrics.setId(null);
 
-        var result = this.repository.save(metrics);
+        this.repository.save(metrics);
     }
 
     @Async
@@ -97,7 +87,6 @@ public class PostMetricsService {
     @Async
     @Transactional
     public void sumOrReduceFavorite(PostMetrics metric, ActionSumOrReduceComment action) {
-
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setFavorites(metric.getFavorites() + 1);
         }

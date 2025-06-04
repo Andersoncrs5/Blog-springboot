@@ -30,9 +30,11 @@
     Recover Password
     Filter System
     integration test full
+    unitary test
+    e2e test
 
 # Updates
 
-date 6/2 :
-    unitary test in user, category, post
+date 6/3 :
+    unitary test in comment and favoritePost
     

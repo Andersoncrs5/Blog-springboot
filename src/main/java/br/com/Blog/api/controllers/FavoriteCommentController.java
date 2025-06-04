@@ -5,6 +5,7 @@ import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Comment;
 import br.com.Blog.api.entities.FavoriteComment;
 import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.UserMetrics;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,7 +48,8 @@ public class FavoriteCommentController {
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         FavoriteComment favorite = this.uow.favoriteCommentService.Delete(id);
         this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.REDUCE);
-        this.uow.userMetricsService.sumOrRedSavedCommentsCount(favorite.getUser(), SumOrReduce.REDUCE);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(favorite.getUser());
+        this.uow.userMetricsService.sumOrRedSavedCommentsCount(userMetrics, SumOrReduce.REDUCE);
 
         Map<String, Object> response = this.uow.responseDefault.response(
                 "Comment removed with favorite!",
@@ -86,7 +88,8 @@ public class FavoriteCommentController {
         Comment comment = this.uow.commentService.Get(commentId);
         FavoriteComment favorite = this.uow.favoriteCommentService.create(comment, user);
 
-        this.uow.userMetricsService.sumOrRedSavedCommentsCount(favorite.getUser(), SumOrReduce.SUM);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(favorite.getUser());
+        this.uow.userMetricsService.sumOrRedSavedCommentsCount(userMetrics, SumOrReduce.SUM);
         this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.SUM);
 
         Map<String, Object> response = this.uow.responseDefault.response(

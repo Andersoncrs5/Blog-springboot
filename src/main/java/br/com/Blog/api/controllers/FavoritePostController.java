@@ -2,10 +2,7 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
-import br.com.Blog.api.entities.FavoritePost;
-import br.com.Blog.api.entities.Post;
-import br.com.Blog.api.entities.PostMetrics;
-import br.com.Blog.api.entities.User;
+import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -32,7 +29,9 @@ public class FavoritePostController {
     @SecurityRequirement(name = "bearerAuth")
     public Map<String, Boolean> exists(@PathVariable Long idPost, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        var result = this.uow.favoritePostService.existsItemSalve(id, idPost);
+        User user = this.uow.userService.get(id);
+        Post post = this.uow.postService.Get(idPost);
+        var result = this.uow.favoritePostService.existsItemSalve(user, post);
 
         return Map.of("result", result);
     }
@@ -41,10 +40,13 @@ public class FavoritePostController {
     @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 15, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
-        FavoritePost favoritePost = this.uow.favoritePostService.Delete(id);
+        FavoritePost favoritePost = this.uow.favoritePostService.Delete(
+                this.uow.favoritePostService.get(id)
+        );
         PostMetrics metrics = this.uow.postMetricsService.get(favoritePost.getPost());
         this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.REDUCE);
-        this.uow.userMetricsService.sumOrRedSavedPostsCountFavorite(favoritePost.getUser(), SumOrReduce.REDUCE);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(favoritePost.getUser());
+        this.uow.userMetricsService.sumOrRedSavedPostsCountFavorite(userMetrics, SumOrReduce.REDUCE);
 
         var response = this.uow.responseDefault.response(
                 "Post removed with favorite!",
@@ -83,7 +85,8 @@ public class FavoritePostController {
         FavoritePost favoritePost = this.uow.favoritePostService.create(post, user);
         PostMetrics metrics = this.uow.postMetricsService.get(post);
 
-        this.uow.userMetricsService.sumOrRedSavedPostsCountFavorite(user, SumOrReduce.SUM);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(user);
+        this.uow.userMetricsService.sumOrRedSavedPostsCountFavorite(userMetrics, SumOrReduce.SUM);
         this.uow.postMetricsService.sumOrReduceFavorite(metrics, ActionSumOrReduceComment.SUM);
 
         Map<String, Object> response = this.uow.responseDefault.response(

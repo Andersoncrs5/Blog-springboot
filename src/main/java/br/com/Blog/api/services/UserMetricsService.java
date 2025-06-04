@@ -3,6 +3,7 @@ package br.com.Blog.api.services;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.entities.UserMetrics;
 import br.com.Blog.api.entities.enums.FollowerOrFollowering;
+import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.UserMetricsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +52,7 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void incrementMetric(User user, FollowerOrFollowering action) {
-        UserMetrics metrics = this.get(user);
-
+    public void incrementMetric(UserMetrics metrics, FollowerOrFollowering action) {
         switch (action) {
             case FOLLOWERING -> metrics.setFollowingCount(metrics.getFollowingCount() + 1);
             case FOLLOWER -> metrics.setFollowersCount(metrics.getFollowersCount() + 1);
@@ -64,8 +63,7 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void decrementMetric(User user, FollowerOrFollowering action) {
-        UserMetrics metrics = this.get(user);
+    public void decrementMetric(UserMetrics metrics, FollowerOrFollowering action) {
 
         switch (action) {
             case FOLLOWERING -> metrics.setFollowingCount(metrics.getFollowingCount() - 1);
@@ -77,9 +75,7 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void sumOrRedPostsCount(User user, SumOrReduce action) {
-        UserMetrics metrics = this.get(user);
-
+    public void sumOrRedPostsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setPostsCount(metrics.getPostsCount() + 1);
         }
@@ -93,9 +89,7 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void sumOrRedCommentsCount(User user, SumOrReduce action) {
-        UserMetrics metrics = this.get(user);
-
+    public void sumOrRedCommentsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setCommentsCount(metrics.getCommentsCount() + 1);
         }
@@ -109,35 +103,25 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void sumOrRedLikesGivenCount(User user, SumOrReduce action) {
-        UserMetrics metrics = this.get(user);
-
-        if (action == SumOrReduce.SUM) {
+    public void sumOrRedLikesOrDislikeGivenCount(UserMetrics metrics, SumOrReduce action, LikeOrUnLike likeOrUnLike) {
+        if (action == SumOrReduce.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
             metrics.setLikesGivenCount(metrics.getLikesGivenCount() + 1);
             metrics.setLikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() + 1);
         }
 
-        if (action == SumOrReduce.REDUCE) {
+        if (action == SumOrReduce.REDUCE && likeOrUnLike == LikeOrUnLike.LIKE ) {
             metrics.setLikesGivenCount(metrics.getLikesGivenCount() - 1);
             metrics.setLikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() - 1);
         }
 
-        this.repository.save(metrics);
-    }
-
-    @Async
-    @Transactional
-    public void sumOrRedDisikesGivenCount(User user, SumOrReduce action) {
-        UserMetrics metrics = this.get(user);
-
-        if (action == SumOrReduce.SUM) {
-            metrics.setDeslikesGivenCount(metrics.getDeslikesGivenCount() + 1);
-            metrics.setDeslikesGivenCountCreateByDay(metrics.getDeslikesGivenCountCreateByDay() + 1);
+        if (action == SumOrReduce.SUM && likeOrUnLike == LikeOrUnLike.UNLIKE ) {
+            metrics.setDeslikesGivenCount(metrics.getLikesGivenCount() + 1);
+            metrics.setDeslikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() + 1);
         }
 
-        if (action == SumOrReduce.REDUCE) {
-            metrics.setDeslikesGivenCount(metrics.getDeslikesGivenCount() - 1);
-            metrics.setDeslikesGivenCountCreateByDay(metrics.getDeslikesGivenCountCreateByDay() - 1);
+        if (action == SumOrReduce.REDUCE && likeOrUnLike == LikeOrUnLike.UNLIKE ) {
+            metrics.setDeslikesGivenCount(metrics.getLikesGivenCount() - 1);
+            metrics.setDeslikesGivenCountCreateByDay(metrics.getLikesGivenCountCreateByDay() - 1);
         }
 
         this.repository.save(metrics);
@@ -145,9 +129,7 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void sumOrRedSavedPostsCountFavorite(User user, SumOrReduce action) {
-        UserMetrics metrics = this.get(user);
-
+    public void sumOrRedSavedPostsCountFavorite(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setSavedPostsCount(metrics.getSavedPostsCount() + 1);
         }
@@ -161,9 +143,7 @@ public class UserMetricsService {
 
     @Async
     @Transactional
-    public void sumOrRedSavedCommentsCount(User user, SumOrReduce action) {
-        UserMetrics metrics = this.get(user);
-
+    public void sumOrRedSavedCommentsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setSavedCommentsCount(metrics.getSavedCommentsCount() + 1);
 

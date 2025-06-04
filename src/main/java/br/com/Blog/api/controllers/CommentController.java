@@ -99,9 +99,11 @@ public class CommentController {
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
-        Comment comment = this.uow.commentService.Delete(id);
-        this.uow.userMetricsService.sumOrRedCommentsCount(comment.getUser(), SumOrReduce.REDUCE);
-        PostMetrics metrics = this.uow.postMetricsService.get(comment.getPost());
+        Comment comment = this.uow.commentService.Get(id);
+        Comment commentDeleted = this.uow.commentService.Delete(comment);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(commentDeleted.getUser());
+        this.uow.userMetricsService.sumOrRedCommentsCount(userMetrics, SumOrReduce.REDUCE);
+        PostMetrics metrics = this.uow.postMetricsService.get(commentDeleted.getPost());
         this.uow.postMetricsService.sumOrReduceComments(metrics, ActionSumOrReduceComment.REDUCE);
 
         Map<String, Object> response = this.uow.responseDefault.response(
@@ -129,7 +131,8 @@ public class CommentController {
 
         Comment comment = this.uow.commentService.Create(dto.MappearToComment(), user, post);
         this.uow.commentMetricsService.create(comment);
-        this.uow.userMetricsService.sumOrRedCommentsCount(comment.getUser(), SumOrReduce.SUM);
+        UserMetrics userMetrics = this.uow.userMetricsService.get(comment.getUser());
+        this.uow.userMetricsService.sumOrRedCommentsCount(userMetrics, SumOrReduce.SUM);
         PostMetrics metrics = this.uow.postMetricsService.get(comment.getPost());
         this.uow.postMetricsService.sumOrReduceComments(metrics, ActionSumOrReduceComment.SUM);
 
@@ -147,8 +150,8 @@ public class CommentController {
     @PutMapping("/{id}")
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 15)
     public ResponseEntity<?> Update(@RequestBody @Valid CommentDTO dto, @PathVariable Long id, HttpServletRequest request){
-
-        Comment comment = this.uow.commentService.Update(id, dto.MappearToComment());
+        Comment commentToUpdate = this.uow.commentService.Get(id);
+        Comment comment = this.uow.commentService.Update(commentToUpdate, dto.MappearToComment());
         this.uow.commentMetricsService.sumEdited(comment);
         var response = this.uow.responseDefault.response(
                 "Comment updated with successfully",
@@ -181,11 +184,12 @@ public class CommentController {
             @PathVariable Long id,
             HttpServletRequest request
     ){
+        Comment comment = this.uow.commentService.Get(id);
         var response = responseDefault.response(
                 "Metric got with successfully",
                 201,
                 request.getRequestURL().toString(),
-                this.uow.commentService.getMetric(id),
+                this.uow.commentMetricsService.get(comment),
                 true
         );
         return new ResponseEntity<>(response, HttpStatus.OK);
