@@ -4,6 +4,7 @@ import br.com.Blog.api.entities.Comment;
 import br.com.Blog.api.entities.CommentMetrics;
 import br.com.Blog.api.entities.PostMetrics;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
+import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.repositories.CommentMetricsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,28 @@ public class CommentMetricsService {
 
     @Autowired
     private CommentMetricsRepository metricsRepository;
+
+    @Async
+    @Transactional
+    public CommentMetrics sumOrRedLikeOrDislike(CommentMetrics metrics, ActionSumOrReduceComment action, LikeOrUnLike likeOrUnLike) {
+        if (action == ActionSumOrReduceComment.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
+            metrics.setLikes(metrics.getLikes() + 1);
+        }
+
+        if (action == ActionSumOrReduceComment.SUM && likeOrUnLike == LikeOrUnLike.UNLIKE ) {
+            metrics.setDislikes(metrics.getDislikes() + 1);
+        }
+
+        if (action == ActionSumOrReduceComment.REDUCE && likeOrUnLike == LikeOrUnLike.LIKE ) {
+            metrics.setLikes(metrics.getLikes() - 1);
+        }
+
+        if (action == ActionSumOrReduceComment.REDUCE && likeOrUnLike == LikeOrUnLike.UNLIKE ) {
+            metrics.setDislikes(metrics.getDislikes() - 1);
+        }
+
+        return this.metricsRepository.save(metrics);
+    }
 
     @Async
     @Transactional(readOnly = true)

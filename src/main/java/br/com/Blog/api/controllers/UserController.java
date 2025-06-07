@@ -161,7 +161,7 @@ public class UserController {
                 user,
                 true
         );
-//        this.uow.recoverEmailService.messageWelcome(user.getEmail());
+       this.uow.recoverEmailService.messageWelcome(user.getEmail());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

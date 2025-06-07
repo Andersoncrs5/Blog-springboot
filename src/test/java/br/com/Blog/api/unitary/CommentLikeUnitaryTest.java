@@ -12,6 +12,7 @@ import br.com.Blog.api.services.CommentMetricsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -34,46 +35,34 @@ import static org.mockito.Mockito.*;
 public class CommentLikeUnitaryTest {
 
     @Mock
-    private CommentMetricsService metricsService;
-
-    @Mock
-    private CommentMetricsRepository metricsRepository;
-
-    @Mock
-    private CommentLikeRepository commentLikeRepository;
+    private CommentLikeRepository repository;
 
     @InjectMocks
     private CommentLikeService service;
 
+    private User user;
+    private Comment comment;
+    private CommentLike like;
+
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this);
+        user = new User();
+        user.setId(1L);
+
+        comment = new Comment();
+        comment.setId(1L);
+
+        like = new CommentLike();
+        like.setId(1L);
+        like.setUser(user);
+        like.setComment(comment);
+        like.setStatus(LikeOrUnLike.LIKE);
     }
 
     @Test
-    void testReactToCommentLikeSuccessfully() {
-        User user = new User();
-        user.setId(1L);
-
-        Comment comment = new Comment();
-        comment.setId(1L);
-
-        CommentMetrics metrics = new CommentMetrics();
-        metrics.setId(1L);
-        metrics.setLikes(0L);
-        metrics.setDislikes(0L);
-
-        CommentLike savedLike = new CommentLike();
-        savedLike.setId(1L);
-        savedLike.setUser(user);
-        savedLike.setComment(comment);
-        savedLike.setStatus(LikeOrUnLike.LIKE);
-
-        // mocks
-        when(metricsService.get(comment)).thenReturn(metrics);
-        when(commentLikeRepository.existsByUserAndComment(user, comment)).thenReturn(false);
-        when(commentLikeRepository.save(any(CommentLike.class))).thenReturn(savedLike);
-        when(metricsRepository.save(metrics)).thenReturn(metrics);
+    void testReactToCommentSuccessfully() {
+        when(repository.existsByUserAndComment(user, comment)).thenReturn(false);
+        when(repository.save(any(CommentLike.class))).thenReturn(like);
 
         CommentLike result = service.reactToComment(user, comment, LikeOrUnLike.LIKE);
 
@@ -82,146 +71,83 @@ public class CommentLikeUnitaryTest {
         assertEquals(comment, result.getComment());
         assertEquals(LikeOrUnLike.LIKE, result.getStatus());
 
-        assertEquals(1, metrics.getLikes());
-        assertEquals(0, metrics.getDislikes());
+        verify(repository).existsByUserAndComment(user, comment);
+        verify(repository).save(any(CommentLike.class));
 
-        verify(metricsService).get(comment);
-        verify(commentLikeRepository).existsByUserAndComment(user, comment);
-        verify(metricsRepository).save(metrics);
-        verify(commentLikeRepository).save(any(CommentLike.class));
+        InOrder inOrder = inOrder(repository);
+
+        inOrder.verify(repository).existsByUserAndComment(user, comment);
+        inOrder.verify(repository).save(any(CommentLike.class));
     }
 
     @Test
     void testReactToCommentAlreadyReactedThrowsConflict() {
-        User user = new User();
-        user.setId(1L);
+        when(repository.existsByUserAndComment(user, comment)).thenReturn(true);
 
-        Comment comment = new Comment();
-        comment.setId(1L);
-
-        CommentMetrics metrics = new CommentMetrics();
-
-        when(metricsService.get(comment)).thenReturn(metrics);
-        when(commentLikeRepository.existsByUserAndComment(user, comment)).thenReturn(true);
-
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> {
             service.reactToComment(user, comment, LikeOrUnLike.LIKE);
         });
 
-        assertEquals(HttpStatus.CONFLICT, exception.getStatusCode());
-        verify(commentLikeRepository, never()).save(any());
-        verify(metricsRepository, never()).save(any());
-    }
-
-    @Test
-    void testReactToCommentDislikeSuccessfully() {
-        User user = new User();
-        Comment comment = new Comment();
-
-        CommentMetrics metrics = new CommentMetrics();
-        metrics.setLikes(3L);
-        metrics.setDislikes(1L);
-
-        CommentLike savedDislike = new CommentLike();
-        savedDislike.setUser(user);
-        savedDislike.setComment(comment);
-        savedDislike.setStatus(LikeOrUnLike.UNLIKE);
-
-        when(metricsService.get(comment)).thenReturn(metrics);
-        when(commentLikeRepository.existsByUserAndComment(user, comment)).thenReturn(false);
-        when(commentLikeRepository.save(any(CommentLike.class))).thenReturn(savedDislike);
-
-        CommentLike result = service.reactToComment(user, comment, LikeOrUnLike.UNLIKE);
-
-        assertNotNull(result);
-        assertEquals(2, metrics.getDislikes());
-        assertEquals(3, metrics.getLikes());
-
-        verify(metricsRepository).save(metrics);
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+        verify(repository, never()).save(any());
     }
 
     @Test
     void testRemoveReactionSuccessfully() {
         Long reactionId = 1L;
-        User user = new User();
-        Comment comment = new Comment();
-
-        CommentLike reaction = new CommentLike();
-        reaction.setId(reactionId);
-        reaction.setStatus(LikeOrUnLike.LIKE);
-        reaction.setComment(comment);
-        reaction.setUser(user);
-
-        CommentMetrics metrics = new CommentMetrics();
-        metrics.setLikes(5L);
-        metrics.setDislikes(3L);
-
-        when(commentLikeRepository.findById(reactionId)).thenReturn(Optional.of(reaction));
-        when(metricsService.get(comment)).thenReturn(metrics);
+        when(repository.findById(reactionId)).thenReturn(Optional.of(like));
 
         CommentLike result = service.removeReaction(reactionId);
 
-        assertNotNull(result);
-        assertEquals(reactionId, result.getId());
-        assertEquals(4, metrics.getLikes()); // decrementado
-
-        verify(metricsService).get(comment);
-        verify(metricsRepository).save(metrics);
-        verify(commentLikeRepository).delete(reaction);
+        assertEquals(like, result);
+        verify(repository).delete(like);
     }
 
     @Test
     void testRemoveReactionWithInvalidIdThrowsBadRequest() {
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> {
             service.removeReaction(0L);
         });
 
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatusCode());
-        verify(commentLikeRepository, never()).findById(any());
+        assertEquals(HttpStatus.BAD_REQUEST, ex.getStatusCode());
+        verify(repository, never()).findById(any());
     }
 
     @Test
     void testRemoveReactionNotFoundThrowsException() {
-        Long reactionId = 99L;
+        Long invalidId = 99L;
+        when(repository.findById(invalidId)).thenReturn(Optional.empty());
 
-        when(commentLikeRepository.findById(reactionId)).thenReturn(Optional.empty());
-
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
-            service.removeReaction(reactionId);
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class, () -> {
+            service.removeReaction(invalidId);
         });
 
-        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
     }
 
     @Test
     void testExistsReturnsTrue() {
         Long userId = 1L;
-        Long commentId = 2L;
+        Long commentId = 1L;
 
-        when(commentLikeRepository.existsByUserIdAndCommentId(userId, commentId)).thenReturn(true);
+        when(repository.existsByUserIdAndCommentId(userId, commentId)).thenReturn(true);
 
-        boolean result = service.exists(userId, commentId);
+        boolean exists = service.exists(userId, commentId);
 
-        assertTrue(result);
-        verify(commentLikeRepository).existsByUserIdAndCommentId(userId, commentId);
+        assertTrue(exists);
+        verify(repository).existsByUserIdAndCommentId(userId, commentId);
     }
 
     @Test
     void testGetAllByUserReturnsPage() {
-        User user = new User();
         Pageable pageable = PageRequest.of(0, 10);
+        Page<CommentLike> mockPage = new PageImpl<>(List.of(like));
 
-        Page<CommentLike> mockPage = new PageImpl<>(List.of(new CommentLike()));
-
-        when(commentLikeRepository.findAllByUser(user, pageable)).thenReturn(mockPage);
+        when(repository.findAllByUser(user, pageable)).thenReturn(mockPage);
 
         ResponseEntity<?> response = service.getAllByUser(user, pageable);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockPage, response.getBody());
-
-        verify(commentLikeRepository).findAllByUser(user, pageable);
     }
-
-
 }

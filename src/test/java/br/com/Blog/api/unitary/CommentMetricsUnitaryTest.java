@@ -2,6 +2,7 @@ package br.com.Blog.api.unitary;
 
 import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
+import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.repositories.CommentMetricsRepository;
 import br.com.Blog.api.services.CommentMetricsService;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,122 @@ public class CommentMetricsUnitaryTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testSumDislike() {
+        Comment comment = this.setComment();
+
+        CommentMetrics metricsSave = new CommentMetrics();
+        metricsSave.setId(1L);
+        metricsSave.setLikes(0L);
+        metricsSave.setDislikes(0L);
+        metricsSave.setComment(comment);
+
+        CommentMetrics metricsAfterChange = new CommentMetrics();
+        metricsAfterChange.setId(1L);
+        metricsAfterChange.setLikes(0L);
+        metricsAfterChange.setDislikes(1L);
+        metricsAfterChange.setComment(comment);
+
+        when(repository.save(any(CommentMetrics.class))).thenReturn(metricsAfterChange);
+
+        var result = this.service.sumOrRedLikeOrDislike(metricsSave, ActionSumOrReduceComment.SUM, LikeOrUnLike.UNLIKE);
+
+        assertNotNull(result);
+        assertEquals(metricsAfterChange.getLikes() ,result.getLikes());
+        assertEquals(metricsAfterChange.getDislikes() ,result.getDislikes());
+        assertEquals(metricsAfterChange.getId() ,result.getId());
+        assertEquals(metricsAfterChange.getComment() ,result.getComment());
+
+        verify(repository, times(1)).save(any(CommentMetrics.class));
+    }
+
+    @Test
+    public void testSumLike() {
+        Comment comment = this.setComment();
+
+        CommentMetrics metricsSave = new CommentMetrics();
+        metricsSave.setId(1L);
+        metricsSave.setLikes(0L);
+        metricsSave.setDislikes(0L);
+        metricsSave.setComment(comment);
+
+        CommentMetrics metricsAfterChange = new CommentMetrics();
+        metricsAfterChange.setId(1L);
+        metricsAfterChange.setLikes(1L);
+        metricsAfterChange.setDislikes(0L);
+        metricsAfterChange.setComment(comment);
+
+        when(repository.save(any(CommentMetrics.class))).thenReturn(metricsAfterChange);
+
+        var result = this.service.sumOrRedLikeOrDislike(metricsSave, ActionSumOrReduceComment.SUM, LikeOrUnLike.LIKE);
+
+        assertNotNull(result);
+        assertEquals(metricsAfterChange.getLikes() ,result.getLikes());
+        assertEquals(metricsAfterChange.getDislikes() ,result.getDislikes());
+        assertEquals(metricsAfterChange.getId() ,result.getId());
+        assertEquals(metricsAfterChange.getComment() ,result.getComment());
+
+        verify(repository, times(1)).save(any(CommentMetrics.class));
+    }
+
+    @Test
+    public void testRedDislike() {
+        Comment comment = this.setComment();
+
+        CommentMetrics metricsSave = new CommentMetrics();
+        metricsSave.setId(1L);
+        metricsSave.setLikes(0L);
+        metricsSave.setDislikes(1L);
+        metricsSave.setComment(comment);
+
+        CommentMetrics metricsAfterChange = new CommentMetrics();
+        metricsAfterChange.setId(1L);
+        metricsAfterChange.setLikes(0L);
+        metricsAfterChange.setDislikes(0L);
+        metricsAfterChange.setComment(comment);
+
+        when(repository.save(any(CommentMetrics.class))).thenReturn(metricsAfterChange);
+
+        var result = this.service.sumOrRedLikeOrDislike(metricsSave, ActionSumOrReduceComment.REDUCE, LikeOrUnLike.UNLIKE);
+
+        assertNotNull(result);
+        assertEquals(metricsAfterChange.getLikes() ,result.getLikes());
+        assertEquals(metricsAfterChange.getDislikes() ,result.getDislikes());
+        assertEquals(metricsAfterChange.getId() ,result.getId());
+        assertEquals(metricsAfterChange.getComment() ,result.getComment());
+
+        verify(repository, times(1)).save(any(CommentMetrics.class));
+    }
+
+    @Test
+    public void testRedLike() {
+        Comment comment = this.setComment();
+
+        CommentMetrics metricsSave = new CommentMetrics();
+        metricsSave.setId(1L);
+        metricsSave.setLikes(1L);
+        metricsSave.setDislikes(0L);
+        metricsSave.setComment(comment);
+
+        CommentMetrics metricsAfterChange = new CommentMetrics();
+        metricsAfterChange.setId(1L);
+        metricsAfterChange.setLikes(0L);
+        metricsAfterChange.setDislikes(0L);
+        metricsAfterChange.setComment(comment);
+
+        when(repository.save(any(CommentMetrics.class))).thenReturn(metricsAfterChange);
+
+        var result = this.service.sumOrRedLikeOrDislike(metricsSave, ActionSumOrReduceComment.REDUCE, LikeOrUnLike.LIKE);
+
+        assertNotNull(result);
+        assertEquals(metricsAfterChange.getLikes() ,result.getLikes());
+        assertEquals(metricsAfterChange.getDislikes() ,result.getDislikes());
+        assertEquals(metricsAfterChange.getId() ,result.getId());
+        assertEquals(metricsAfterChange.getComment() ,result.getComment());
+
+        verify(repository, times(1)).save(any(CommentMetrics.class));
     }
 
     @Test

@@ -3,8 +3,7 @@ package br.com.Blog.api.services;
 import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.repositories.CommentLikeRepository;
-import br.com.Blog.api.repositories.CommentMetricsRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,21 +13,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
-
 @Service
-@RequiredArgsConstructor
 public class CommentLikeService {
 
-    private final CommentLikeRepository repository;
-    private final CommentMetricsRepository metricsRepository;
-    private final CommentMetricsService metricsService;
+    @Autowired
+    private CommentLikeRepository repository;
 
     @Async
     @Transactional
     public CommentLike reactToComment(User user, Comment comment, LikeOrUnLike action) {
-        CommentMetrics metrics = metricsService.get(comment);
-
         boolean alreadyReacted = repository.existsByUserAndComment(user, comment);
         if (alreadyReacted) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "User already reacted to this comment");
@@ -39,13 +32,6 @@ public class CommentLikeService {
         reaction.setComment(comment);
         reaction.setStatus(action);
 
-        if (action == LikeOrUnLike.LIKE) {
-            metrics.setLikes(metrics.getLikes() + 1);
-        } else {
-            metrics.setDislikes(metrics.getDislikes() + 1);
-        }
-
-        metricsRepository.save(metrics);
         return repository.save(reaction);
     }
 
@@ -60,15 +46,6 @@ public class CommentLikeService {
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND)
         );
 
-        CommentMetrics metrics = metricsService.get(reaction.getComment());
-
-        if (reaction.getStatus() == LikeOrUnLike.LIKE) {
-            metrics.setLikes(Math.max(0, metrics.getLikes() - 1));
-        } else {
-            metrics.setDislikes(Math.max(0, metrics.getDislikes() - 1));
-        }
-
-        metricsRepository.save(metrics);
         repository.delete(reaction);
         return reaction;
     }
