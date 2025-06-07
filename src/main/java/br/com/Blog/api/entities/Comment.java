@@ -22,11 +22,11 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id = 0L;
 
     @Column(nullable = false)
     @NotBlank(message = "Field content is required")
-    private String content;
+    private String content = "";
 
     @Size(max = 150)
     private String name;

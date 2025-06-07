@@ -63,14 +63,14 @@ public class FollowersService {
 
     @Async
     @Transactional(readOnly = true)
-    public Boolean areFollowing(User user, User followed) {
-        return repository.existsByFollowerAndFollowed(user, followed);
+    public ResponseEntity<?> getMutualFollowed(User user1, User user2, Pageable pageable) {
+        Page<User> mutuals = repository.findMutualFollowed(user1, user2, pageable);
+        return ResponseEntity.ok(mutuals);
     }
 
     @Async
     @Transactional(readOnly = true)
-    public ResponseEntity<?> getMutualFollowed(User user1, User user2, Pageable pageable) {
-        Page<User> mutuals = repository.findMutualFollowed(user1, user2, pageable);
-        return ResponseEntity.ok(mutuals);
+    public Boolean areFollowing(User user, User followed) {
+        return repository.existsByFollowerAndFollowed(user, followed);
     }
 }

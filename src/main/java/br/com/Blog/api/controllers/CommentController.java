@@ -152,7 +152,7 @@ public class CommentController {
     public ResponseEntity<?> Update(@RequestBody @Valid CommentDTO dto, @PathVariable Long id, HttpServletRequest request){
         Comment commentToUpdate = this.uow.commentService.Get(id);
         Comment comment = this.uow.commentService.Update(commentToUpdate, dto.MappearToComment());
-        this.uow.commentMetricsService.sumEdited(comment);
+        this.uow.commentMetricsService.sumEdited(comment.getMetrics());
         var response = this.uow.responseDefault.response(
                 "Comment updated with successfully",
                 200,

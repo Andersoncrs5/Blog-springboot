@@ -2,10 +2,7 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
-import br.com.Blog.api.entities.Comment;
-import br.com.Blog.api.entities.FavoriteComment;
-import br.com.Blog.api.entities.User;
-import br.com.Blog.api.entities.UserMetrics;
+import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,7 +44,8 @@ public class FavoriteCommentController {
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         var item = this.uow.favoriteCommentService.get(id);
         FavoriteComment favorite = this.uow.favoriteCommentService.Delete(item);
-        this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.REDUCE);
+        CommentMetrics commentMetrics = this.uow.commentMetricsService.get(favorite.getComment());
+        this.uow.commentMetricsService.sumOrReduceFavorite(commentMetrics, ActionSumOrReduceComment.REDUCE);
         UserMetrics userMetrics = this.uow.userMetricsService.get(favorite.getUser());
         this.uow.userMetricsService.sumOrRedSavedCommentsCount(userMetrics, SumOrReduce.REDUCE);
 
@@ -90,7 +88,8 @@ public class FavoriteCommentController {
 
         UserMetrics userMetrics = this.uow.userMetricsService.get(favorite.getUser());
         this.uow.userMetricsService.sumOrRedSavedCommentsCount(userMetrics, SumOrReduce.SUM);
-        this.uow.commentMetricsService.sumOrReduceFavorite(favorite.getComment(), ActionSumOrReduceComment.SUM);
+        CommentMetrics commentMetrics = this.uow.commentMetricsService.get(favorite.getComment());
+        this.uow.commentMetricsService.sumOrReduceFavorite(commentMetrics, ActionSumOrReduceComment.SUM);
 
         Map<String, Object> response = this.uow.responseDefault.response(
                 "Comment has been favorited successfully!!",

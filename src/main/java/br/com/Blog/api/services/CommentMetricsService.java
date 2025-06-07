@@ -23,15 +23,17 @@ public class CommentMetricsService {
     @Autowired
     private CommentMetricsRepository metricsRepository;
 
+    @Async
+    @Transactional(readOnly = true)
     public CommentMetrics get(Comment comment) {
-        if (comment == null ) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        if (comment.getId() <= 0 ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Comment is required");
         }
 
         Optional<CommentMetrics> metrics = this.metricsRepository.findByComment(comment);
 
         if (metrics.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Metric not found");
         }
 
         return metrics.get();
@@ -39,17 +41,17 @@ public class CommentMetricsService {
 
     @Async
     @Transactional
-    public void create(Comment comment) {
+    public CommentMetrics create(Comment comment) {
         CommentMetrics metrics = new CommentMetrics();
         metrics.setComment(comment);
 
-        this.metricsRepository.save(metrics);
+        return this.metricsRepository.save(metrics);
     }
 
     @Async
     @Transactional
-    public void sumView(Comment comment) {
-        if (comment == null ) {
+    public CommentMetrics sumView(Comment comment) {
+        if (comment.getId() <= 0) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
@@ -64,14 +66,12 @@ public class CommentMetricsService {
         metrics.setLastInteractionAt(LocalDateTime.now());
         metrics.setViewsCount(metrics.getViewsCount() + 1);
 
-        this.metricsRepository.save(metrics);
+        return this.metricsRepository.save(metrics);
     }
 
     @Async
     @Transactional
-    public void sumEdited(Comment comment) {
-        CommentMetrics metrics = this.get(comment);
-
+    public void sumEdited(CommentMetrics metrics) {
         metrics.setLastEditedAt(LocalDateTime.now());
         metrics.setEditedTimes(metrics.getEditedTimes() + 1);
 
@@ -80,8 +80,10 @@ public class CommentMetricsService {
 
     @Async
     @Transactional
-    public void sumOrReduceFavorite(Comment comment, ActionSumOrReduceComment action) {
-        CommentMetrics metric = this.get(comment);
+    public CommentMetrics sumOrReduceFavorite(CommentMetrics metric, ActionSumOrReduceComment action) {
+        if (metric.getId() <= 0L) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
 
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setFavorites(metric.getFavorites() + 1);
@@ -92,6 +94,6 @@ public class CommentMetricsService {
         }
 
         metric.setLastInteractionAt(LocalDateTime.now());
-        this.metricsRepository.save(metric);
+        return this.metricsRepository.save(metric);
     }
 }
