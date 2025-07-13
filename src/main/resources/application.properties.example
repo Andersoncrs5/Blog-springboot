@@ -29,3 +29,6 @@ spring.mail.properties.mail.smtp.writetimeout=5000
 app.jwt.secret=5784395473894542765583672314654567378241234436658798023432467808908909234387989435465890
 app.jwt.expiration=40200
 app.jwt.expiration.refresh_token=600000
+
+spring.redis.host=localhost
+spring.redis.port=6379

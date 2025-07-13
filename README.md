@@ -4,7 +4,7 @@
 
 ##  Overview
 
-    This project is a RESTful API developed using Spring Boot 3.4.5, designed for managing blog posts, users,
+    This project is a RESTful API developed using Spring Boot 3.4.7, designed for managing blog posts, users,
     categories, and comments. It includes features such as a favorite posts system, JWT-based authentication, 
     password recovery via email, and robust testing coverage (unit, integration, and partial E2E).
     
@@ -15,7 +15,7 @@
 
     Java JDK 23 – Programming language.
 
-    Spring Boot 3.4.5 – Core framework for building RESTful APIs.
+    Spring Boot 3.4.7 – Core framework for building RESTful APIs.
 
     Spring Data JPA – ORM for database interaction.
 
@@ -28,6 +28,8 @@
     JWT (JSON Web Token) – Token-based user authentication.
 
     Swagger 2.8.8 – API documentation (Springdoc OpenAPI).
+
+    Redis 
 
 ## Features
 
