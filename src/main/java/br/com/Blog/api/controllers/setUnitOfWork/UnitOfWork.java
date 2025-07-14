@@ -27,5 +27,6 @@ public class UnitOfWork {
     public final NotificationsService notificationsService;
     public final ResponseDefault responseDefault;
     public final RedisService redisService;
+    public final UserPreferenceService userPreferenceService;
 
 }
