@@ -104,6 +104,4 @@ public class UserPreferenceController {
 
         return new ResponseEntity<>(allOfUser, HttpStatus.OK);
     }
-
-
 }
