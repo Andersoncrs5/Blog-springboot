@@ -2,14 +2,17 @@ package br.com.Blog.api.integration;
 
 import br.com.Blog.api.DTOs.LoginDTO;
 import br.com.Blog.api.DTOs.UserDTO;
+import br.com.Blog.api.config.TestJacksonConfig;
 import br.com.Blog.api.integration.utils.UserTestUtils;
 import br.com.Blog.api.repositories.setUnitOfWorkRepository.UnitOfWorkRepository;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+//@Import(TestJacksonConfig.class)
 public class UserControllerTest {
 
     @Autowired
@@ -94,21 +98,24 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldGetMetricOfUser() throws Exception {
-        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
-        String token = tokens.get("token");
+    public void shouldGetMetricOfUser() {
+        try {
+            Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokensV2(mockMvc, objectMapper);
+            String token = tokens.get("token");
 
-        mockMvc.perform(get("/v1/user/getMetric")
-                .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("User metric found with successfully"))
-                .andExpect(jsonPath("$.statusCode").value(200));
-
+            mockMvc.perform(get("/v1/user/getMetric")
+                    .header("Authorization", "Bearer " + token))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.message").value("User metric found with successfully"))
+                    .andExpect(jsonPath("$.statusCode").value(200));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
     public void shouldGetTheUser() throws Exception {
-        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokensV2(mockMvc, objectMapper);
 
         String token = tokens.get("token");
 
@@ -127,6 +134,7 @@ public class UserControllerTest {
 
     @Test
     public void shouldGetUserProfileById() throws Exception {
+        objectMapper.registerModule(new JavaTimeModule());
         UserDTO dto = new UserDTO(
                 "user",
                 "testOfSilva@gmail.com",
@@ -172,7 +180,7 @@ public class UserControllerTest {
 
     @Test
     public void shouldDeleteUser() throws Exception {
-        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokensV2(mockMvc, objectMapper);
 
         String token = tokens.get("token");
 
@@ -188,7 +196,7 @@ public class UserControllerTest {
 
     @Test
     public void shouldUpdateUser() throws Exception {
-        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokensV2(mockMvc, objectMapper);
 
         String token = tokens.get("token");
 
@@ -212,7 +220,7 @@ public class UserControllerTest {
 
     @Test
     public void shouldMakeLogout() throws Exception {
-        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokensV2(mockMvc, objectMapper);
 
         String token = tokens.get("token");
 
@@ -226,7 +234,7 @@ public class UserControllerTest {
 
     @Test
     public void shouldMakeRefresh() throws Exception {
-        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokens(mockMvc, objectMapper);
+        Map<String, String> tokens = UserTestUtils.createAndLogUserAndReturnTokensV2(mockMvc, objectMapper);
 
         String token = tokens.get("token");
         String refresh = tokens.get("refresh");

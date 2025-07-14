@@ -24,10 +24,7 @@ public class UserMetricsService {
 
     @Autowired
     private UserMetricsRepository repository;
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
 
-    @Async
     @Transactional(readOnly = true)
     public UserMetrics get(User user) {
         if (user.getId() <= 0 ) {
@@ -36,29 +33,6 @@ public class UserMetricsService {
 
         return this.repository.findByUser(user)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User metrics not found"));
-    }
-
-    @Async
-    @Transactional(readOnly = true)
-    public UserMetrics getV2(User user) {
-        if (user.getId() <= 0 ) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User must not be null");
-        }
-
-        UserMetrics metricInCache = (UserMetrics) this.redisTemplate.opsForValue().get(user.getId().toString());
-
-        if (metricInCache != null)
-            return metricInCache;
-
-        Optional<UserMetrics> byUser = this.repository.findByUser(user);
-
-        if (byUser.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User metrics not found");
-        }
-
-        this.redisTemplate.opsForValue().set(user.getId().toString(), byUser.get(), Duration.ofMinutes(2));
-
-        return byUser.get();
     }
 
     @Transactional
@@ -71,12 +45,18 @@ public class UserMetricsService {
     }
 
     @Transactional
-    @CachePut(value = "metricChanged", key = "#user.id")
+    @Deprecated
     public UserMetrics setLastLogin(User user) {
         UserMetrics metric = this.get(user);
         metric.setLastLogin(LocalDateTime.now());
         UserMetrics metricChanged = this.repository.save(metric);
         return metricChanged;
+    }
+
+    @Transactional
+    public UserMetrics setLastLoginV2(UserMetrics metric) {
+        metric.setLastLogin(LocalDateTime.now());
+        return this.repository.save(metric);
     }
 
     @Transactional

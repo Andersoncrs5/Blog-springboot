@@ -1,5 +1,6 @@
 package br.com.Blog.api.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,9 +30,11 @@ public class User {
     private String email;
 
     @Column(length = 100, nullable = false)
+    @JsonIgnore
     private String password = "";
 
     @Column
+    @JsonIgnore
     private String refreshToken = "";
 
     private Boolean isAdm = false;
@@ -40,11 +43,9 @@ public class User {
     private Long version;
 
     @CreatedDate
-    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @JsonIgnore

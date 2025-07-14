@@ -6,6 +6,7 @@ import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.PostRepository;
 import br.com.Blog.api.repositories.UserRepository;
 import br.com.Blog.api.services.response.ResponseTokens;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -46,6 +47,8 @@ public class UserService {
     private CustomUserDetailsService userDetailsService;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Transactional
     public User create(User user){
@@ -72,22 +75,28 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getV2(Long id) {
-        if (id == null || id <= 0)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
+        try {
+            if (id <= 0)
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
 
-        User userCached = (User) redisTemplate.opsForValue().get(id.toString());
+            Object objCached = redisTemplate.opsForValue().get(id.toString());
 
-        if (userCached != null)
-            return userCached;
+            User userCached = objectMapper.convertValue(objCached, User.class);
 
-        User user = this.repository.findById(id).orElse(null);
+            if (userCached != null)
+                return userCached;
 
-        if (user == null)
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+            User user = this.repository.findById(id).orElse(null);
 
-        redisTemplate.opsForValue().set(id.toString(), user, Duration.ofMinutes(15));
+            if (user == null)
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        return user;
+            redisTemplate.opsForValue().set(id.toString(), user, Duration.ofMinutes(15));
+
+            return user;
+        } catch (ResponseStatusException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR ,e.toString());
+        }
     }
 
     @Transactional
@@ -138,9 +147,19 @@ public class UserService {
     }
 
     @Transactional
+    @Deprecated
     public User logout(User user) {
         user.setRefreshToken("");
+
         return this.repository.save(user);
+    }
+
+    @Transactional
+    public User logoutV2(User user) {
+        user.setRefreshToken("");
+        User user1 = this.repository.save(user);
+        redisTemplate.opsForValue().set(user1.getId().toString(), user1, Duration.ofMinutes(1));
+        return user1;
     }
 
     @Transactional

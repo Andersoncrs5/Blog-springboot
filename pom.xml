@@ -5,8 +5,8 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.7</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.4.5</version>
+		<relativePath/>
 	</parent>
 	<groupId>br.com.blog</groupId>
 	<artifactId>api</artifactId>
@@ -135,6 +135,10 @@
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+		</dependency>
 
 		<!--		<dependency>-->
 <!--			<groupId>com.h2database</groupId>-->
