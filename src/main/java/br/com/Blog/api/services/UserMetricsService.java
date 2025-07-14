@@ -170,4 +170,17 @@ public class UserMetricsService {
 
         return this.repository.save(metrics);
     }
+
+    @Transactional
+    public UserMetrics sumOrRedPreferenceCount(UserMetrics metrics, SumOrReduce action) {
+        if (action == SumOrReduce.SUM) {
+            metrics.setPreferenceCount(metrics.getPreferenceCount() + 1);
+        }
+
+        if (action == SumOrReduce.REDUCE) {
+            metrics.setPreferenceCount(metrics.getPreferenceCount() - 1);
+        }
+
+        return this.repository.save(metrics);
+    }
 }
