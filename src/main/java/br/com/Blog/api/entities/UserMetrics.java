@@ -71,6 +71,9 @@ public class UserMetrics {
     @Column(name = "saved_media_count")
     private Long savedMediaCount = 0L;
 
+    @Column(name = "preference_count")
+    private Long preferenceCount = 0L;
+
     @Version
     private Long version;
 
