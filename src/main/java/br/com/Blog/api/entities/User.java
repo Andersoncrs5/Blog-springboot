@@ -53,6 +53,10 @@ public class User {
     private List<Followers> followers;
 
     @JsonIgnore
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UserPreference> preferences;
+
+    @JsonIgnore
     @OneToMany(mappedBy = "followed", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Followers> followeds;
 

@@ -35,6 +35,20 @@ public class UserMetricsService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User metrics not found"));
     }
 
+    @Transactional(readOnly = true)
+    public UserMetrics getV2(User user) {
+        if (user.getId() <= 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User must not be null");
+        }
+
+        Optional<UserMetrics> byUser = this.repository.findByUser(user);
+
+        if (byUser.isEmpty())
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User metrics not found");
+
+        return byUser.get();
+    }
+
     @Transactional
     public UserMetrics create(User user) {
         UserMetrics metric = new UserMetrics();

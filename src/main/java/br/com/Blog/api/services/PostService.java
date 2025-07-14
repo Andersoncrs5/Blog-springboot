@@ -23,6 +23,11 @@ public class PostService {
     @Autowired
     private PostRepository repository;
 
+    @Transactional(readOnly = true)
+    public Page<Post> GetAllToMe(Pageable pageable, Specification<Post> spec){
+        return this.repository.findAll(spec, pageable);
+    }
+
     @Transactional
     public Post Create(Post post, User user, Category category){
         post.setUser(user);
@@ -56,7 +61,6 @@ public class PostService {
         this.repository.delete(post);
         return post;
     }
-
 
     @Transactional(readOnly = true)
     public Page<Post> GetAll(Pageable pageable, Specification<Post> spec){

@@ -33,7 +33,7 @@ public class Post {
     private String content;
 
     @Column(nullable = false)
-    private Integer readingTime;
+    private Integer readingTime = 0;
 
     @Lob
     @Column

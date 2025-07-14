@@ -215,8 +215,7 @@ public class UserController {
     public ResponseEntity<?> logout(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
         User userExist = this.uow.userService.getV2(id);
-        User user = this.uow.userService.logoutV2(userExist);
-        this.uow.userMetricsService.setLastLogin(user);
+        User _ = this.uow.userService.logoutV2(userExist);
         var response = responseDefault.response(
                 "Logout make with successfully",
                 200,
