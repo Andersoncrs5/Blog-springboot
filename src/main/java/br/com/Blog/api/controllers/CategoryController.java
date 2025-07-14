@@ -1,18 +1,15 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.CategoryDTO;
-import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.User;
-import br.com.Blog.api.services.CategoryService;
 import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,7 +55,7 @@ public class CategoryController {
         this.uow.categoryService.delete(category);
 
         var response = this.responseDefault.response(
-                "Task deleted with successfully",
+                "Category deleted with successfully",
                 200,
                 request.getRequestURL().toString(),
                 "",
