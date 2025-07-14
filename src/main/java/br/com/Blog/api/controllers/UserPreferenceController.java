@@ -104,4 +104,22 @@ public class UserPreferenceController {
 
         return new ResponseEntity<>(allOfUser, HttpStatus.OK);
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getAllOfAnotherUser(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @PathVariable Long userId,
+            HttpServletRequest request
+    ) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        User user = this.unit.userService.get(userId);
+
+        Page<UserPreference> allOfUser = this.unit.userPreferenceService.getAllOfUser(user, pageable);
+
+        return new ResponseEntity<>(allOfUser, HttpStatus.OK);
+    }
 }
