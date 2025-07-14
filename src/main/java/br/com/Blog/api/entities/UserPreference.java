@@ -1,6 +1,7 @@
 package br.com.Blog.api.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,12 +15,10 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Setter
 @Getter
+@Builder
 public class UserPreference {
     @Id
     private Long Id;
-
-    @Version
-    private Long version;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user", nullable = false, updatable = false)
@@ -31,7 +30,4 @@ public class UserPreference {
 
     @CreatedDate
     private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    private LocalDateTime updatedAt;
 }
