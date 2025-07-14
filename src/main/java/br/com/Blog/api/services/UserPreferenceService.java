@@ -4,15 +4,19 @@ import br.com.Blog.api.entities.Category;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.entities.UserPreference;
 import br.com.Blog.api.repositories.UserPreferenceRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +26,8 @@ import java.util.Optional;
 public class UserPreferenceService {
 
     private final UserPreferenceRepository repository;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Transactional(readOnly = true)
     public UserPreference get(Long id) {
@@ -74,4 +80,27 @@ public class UserPreferenceService {
         log.info("Starting search by preferences of user listed");
         return this.repository.findAllByUser(user);
     }
+
+    @Transactional(readOnly = true)
+    public List<UserPreference> getAllOfUserInCache(User user) {
+        log.info("Starting search by preferences of user listed in cache");
+
+        String key = user.getId() + "_preference";
+
+        Object cached = redisTemplate.opsForValue().get(key);
+
+        if (cached != null) {
+            log.info("Preferences found in cache");
+            return objectMapper.convertValue(cached,new TypeReference<List<UserPreference>>() {});
+        }
+
+        log.info("Preferences not found in cache, querying database");
+
+        List<UserPreference> allByUser = this.repository.findAllByUser(user);
+        redisTemplate.opsForValue().set(key, allByUser, Duration.ofMinutes(5));
+
+        log.info("Preferences cached successfully for userId {}", user.getId());
+        return allByUser;
+    }
+
 }
