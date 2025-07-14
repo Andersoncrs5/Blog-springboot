@@ -33,8 +33,8 @@ public class FollowersController {
             HttpServletRequest request
     ) {
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
-        User followed = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(id);
+        User followed = this.uow.userService.getV2(userId);
 
         Followers follower = this.uow.followersService.follow(user, followed);
 
@@ -66,8 +66,8 @@ public class FollowersController {
             HttpServletRequest request
     ) {
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
-        User followed = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(id);
+        User followed = this.uow.userService.getV2(userId);
 
         Followers unfollowed = this.uow.followersService.unfollow(user, followed);
 
@@ -101,7 +101,7 @@ public class FollowersController {
             @RequestParam(defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
 
         return this.uow.followersService.getAllFollowed(user, pageable);
     }
@@ -112,8 +112,8 @@ public class FollowersController {
     @ResponseStatus(HttpStatus.OK)
     public Map<String, Boolean> areFollowing(@PathVariable Long followedId, HttpServletRequest request){
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
-        User followed = this.uow.userService.get(followedId);
+        User user = this.uow.userService.getV2(id);
+        User followed = this.uow.userService.getV2(followedId);
 
         Boolean result = this.uow.followersService.areFollowing(user, followed);
         return Map.of("result", result);
@@ -130,7 +130,7 @@ public class FollowersController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         User followed = this.uow.userService.get(followedId);
 
         return this.uow.followersService.getMutualFollowed(user, followed, pageable);

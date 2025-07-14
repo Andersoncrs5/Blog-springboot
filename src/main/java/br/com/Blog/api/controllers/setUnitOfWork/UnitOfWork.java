@@ -26,5 +26,6 @@ public class UnitOfWork {
     public final CommentLikeService commentLikeService;
     public final NotificationsService notificationsService;
     public final ResponseDefault responseDefault;
+    public final RedisService redisService;
 
 }

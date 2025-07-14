@@ -24,7 +24,6 @@ public class CommentService {
     @Autowired
     private CommentRepository repository;
 
-    @Async
     @Transactional
     public Comment Get(Long id){
         if (id <= 0)
@@ -38,7 +37,6 @@ public class CommentService {
         return comment;
     }
 
-    @Async
     @Transactional
     public Comment Create(Comment comment, User user, Post post){
         comment.setName(user.getName());
@@ -48,14 +46,12 @@ public class CommentService {
         return this.repository.save(comment);
     }
 
-    @Async
     @Transactional
     public Comment Delete(Comment comment){
         this.repository.delete(comment);
         return comment;
     }
 
-    @Async
     @Transactional
     public Comment Update(Comment commentToUpdate, Comment comment){
         commentToUpdate.setContent(comment.getContent());
@@ -65,13 +61,11 @@ public class CommentService {
         return this.repository.save(commentToUpdate);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public Page<Comment> GetAllCommentsOfPost(Post post, Pageable pageable){
         return this.repository.findAllByPost(post, pageable);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public Page<Comment> getAllCommentOfUser(User user, Specification<Comment> specs, Pageable pageable) {
         Specification<Comment> specWithUser = specs.and((root, query, cb) ->

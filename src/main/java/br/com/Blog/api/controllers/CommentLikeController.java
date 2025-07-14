@@ -37,7 +37,7 @@ public class CommentLikeController {
 
         Long userId = this.uow.jwtService.extractId(request);
         LikeOrUnLike action;
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         Comment comment = this.uow.commentService.Get(commentId);
         action = LikeOrUnLike.valueOf(type.toUpperCase());
         CommentLike commentLike = this.uow.commentLikeService.reactToComment(user, comment, action);
@@ -107,7 +107,7 @@ public class CommentLikeController {
             @RequestParam(defaultValue = "10") int size
     ) {
         Long userId = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         Pageable pageable = PageRequest.of(page, size);
         return this.uow.commentLikeService.getAllByUser(user, pageable);
     }

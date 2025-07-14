@@ -37,10 +37,10 @@ public class NotificationController {
         return ResponseEntity.ok().body(response);
     }
 
-    @PostMapping
+    @PostMapping("/{userId}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> create(@PathVariable Long userId, @RequestBody @Valid NotificationDto dto, HttpServletRequest request) {
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         Notification not = this.uow.notificationsService.create(user, dto.mappearToNotification());
 
         var response = this.uow.responseDefault.response(
@@ -69,7 +69,7 @@ public class NotificationController {
         Specification<Notification> specs = NotificationSpecification.filterBy(createdAtBefore, createdAtAfter, isRead, status);
         Pageable pageable = PageRequest.of(page, size);
         Long userId = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         return this.uow.notificationsService.getAllOfUser(user, pageable, specs);
     }
 

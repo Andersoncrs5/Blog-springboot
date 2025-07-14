@@ -28,7 +28,6 @@ public class RecoverEmailService {
     private final EmailService emailService;
     private final PasswordEncoder encoder;
 
-    @Async
     @Transactional
     public ResponseEntity<?> toCreateTokenOfRecover(String email) {
         try {
@@ -69,7 +68,6 @@ public class RecoverEmailService {
         }
     }
 
-    @Async
     @Transactional
     public ResponseEntity<?> toValidToken(RecoverPasswordDTO dto) {
         RecoverEmail recover = repository.findByToken(dto.getToken())
@@ -105,7 +103,7 @@ public class RecoverEmailService {
     @Async
     public void messageWelcome(String email) {
         try {
-            if (email == null || email.isBlank()) {
+            if (email.isBlank()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is required");
             }
 

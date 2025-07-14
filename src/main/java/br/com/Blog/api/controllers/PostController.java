@@ -151,7 +151,7 @@ public class PostController {
 
         Long userId = this.uow.jwtService.extractId(request);
 
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         Category category = this.uow.categoryService.get(categoryId);
 
         Post post = this.uow.postService.Create(dto.MappearToPost(), user, category);

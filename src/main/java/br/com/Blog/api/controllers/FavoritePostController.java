@@ -29,7 +29,7 @@ public class FavoritePostController {
     @SecurityRequirement(name = "bearerAuth")
     public Map<String, Boolean> exists(@PathVariable Long idPost, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         Post post = this.uow.postService.Get(idPost);
         var result = this.uow.favoritePostService.existsItemSalve(user, post);
 
@@ -69,7 +69,7 @@ public class FavoritePostController {
         ) {
         Pageable pageable = PageRequest.of(page, size);
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
 
         return this.uow.favoritePostService.GetAllFavoritePostOfUser(user, pageable);
     }
@@ -79,7 +79,7 @@ public class FavoritePostController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> create(@PathVariable Long postId , HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         Post post = this.uow.postService.Get(postId);
 
         FavoritePost favoritePost = this.uow.favoritePostService.create(post, user);

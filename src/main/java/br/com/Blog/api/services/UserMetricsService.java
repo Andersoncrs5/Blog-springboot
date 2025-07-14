@@ -7,19 +7,25 @@ import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.UserMetricsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class UserMetricsService {
 
     @Autowired
     private UserMetricsRepository repository;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Async
     @Transactional(readOnly = true)
@@ -33,6 +39,28 @@ public class UserMetricsService {
     }
 
     @Async
+    @Transactional(readOnly = true)
+    public UserMetrics getV2(User user) {
+        if (user.getId() <= 0 ) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User must not be null");
+        }
+
+        UserMetrics metricInCache = (UserMetrics) this.redisTemplate.opsForValue().get(user.getId().toString());
+
+        if (metricInCache != null)
+            return metricInCache;
+
+        Optional<UserMetrics> byUser = this.repository.findByUser(user);
+
+        if (byUser.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User metrics not found");
+        }
+
+        this.redisTemplate.opsForValue().set(user.getId().toString(), byUser.get(), Duration.ofMinutes(2));
+
+        return byUser.get();
+    }
+
     @Transactional
     public UserMetrics create(User user) {
         UserMetrics metric = new UserMetrics();
@@ -42,15 +70,15 @@ public class UserMetricsService {
         return this.repository.save(metric);
     }
 
-    @Async
     @Transactional
+    @CachePut(value = "metricChanged", key = "#user.id")
     public UserMetrics setLastLogin(User user) {
         UserMetrics metric = this.get(user);
         metric.setLastLogin(LocalDateTime.now());
-        return this.repository.save(metric);
+        UserMetrics metricChanged = this.repository.save(metric);
+        return metricChanged;
     }
 
-    @Async
     @Transactional
     public UserMetrics incrementMetric(UserMetrics metrics, FollowerOrFollowering action) {
         switch (action) {
@@ -61,7 +89,6 @@ public class UserMetricsService {
         return repository.save(metrics);
     }
 
-    @Async
     @Transactional
     public void decrementMetric(UserMetrics metrics, FollowerOrFollowering action) {
 
@@ -73,7 +100,6 @@ public class UserMetricsService {
         repository.save(metrics);
     }
 
-    @Async
     @Transactional
     public UserMetrics sumOrRedPostsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
@@ -87,7 +113,6 @@ public class UserMetricsService {
         return this.repository.save(metrics);
     }
 
-    @Async
     @Transactional
     public UserMetrics sumOrRedCommentsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
@@ -101,7 +126,6 @@ public class UserMetricsService {
         return this.repository.save(metrics);
     }
 
-    @Async
     @Transactional
     public UserMetrics sumOrRedLikesOrDislikeGivenCount(UserMetrics metrics, SumOrReduce action, LikeOrUnLike likeOrUnLike) {
         if (action == SumOrReduce.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
@@ -127,7 +151,6 @@ public class UserMetricsService {
         return this.repository.save(metrics);
     }
 
-    @Async
     @Transactional
     public UserMetrics sumOrRedSavedPostsCountFavorite(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
@@ -141,7 +164,6 @@ public class UserMetricsService {
         return this.repository.save(metrics);
     }
 
-    @Async
     @Transactional
     public UserMetrics sumOrRedSavedCommentsCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {

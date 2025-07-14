@@ -64,7 +64,7 @@ public class CommentController {
         }
 
         Long userId = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         Sort.Direction direction = sortDirection.equalsIgnoreCase("asc") ? Sort.Direction.ASC : Sort.Direction.DESC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 
@@ -126,7 +126,7 @@ public class CommentController {
             HttpServletRequest request
     ) {
         Long userId = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         Post post = this.uow.postService.Get(postId);
 
         Comment comment = this.uow.commentService.Create(dto.MappearToComment(), user, post);

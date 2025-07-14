@@ -23,7 +23,6 @@ public class PostMetricsService {
     @Autowired
     private PostMetricsRepository repository;
 
-    @Async
     @Transactional(readOnly = true)
     public PostMetrics get(Post post) {
         if (post.getId() <= 0) {
@@ -39,7 +38,6 @@ public class PostMetricsService {
         return metric.get();
     }
 
-    @Async
     @Transactional
     public PostMetrics sumOrReduceLikeOrDislike(PostMetrics metric, ActionSumOrReduceComment action, LikeOrUnLike likeOrUnLike) {
         if (action == ActionSumOrReduceComment.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
@@ -61,7 +59,6 @@ public class PostMetricsService {
         return this.repository.save(metric);
     }
 
-    @Async
     @Transactional
     public PostMetrics create(Post post) {
         PostMetrics metrics = new PostMetrics();
@@ -71,7 +68,6 @@ public class PostMetricsService {
         return this.repository.save(metrics);
     }
 
-    @Async
     @Transactional
     public PostMetrics sumOrReduceComments(PostMetrics metric, ActionSumOrReduceComment action) {
         if (action == ActionSumOrReduceComment.SUM) {
@@ -87,7 +83,6 @@ public class PostMetricsService {
         return this.repository.save(metric);
     }
 
-    @Async
     @Transactional
     public PostMetrics sumOrReduceFavorite(PostMetrics metric, ActionSumOrReduceComment action) {
         if (action == ActionSumOrReduceComment.SUM) {
@@ -102,7 +97,6 @@ public class PostMetricsService {
         return this.repository.save(metric);
     }
 
-    @Async
     @Transactional
     public PostMetrics clicks(PostMetrics metric) {
         metric.setClicks(metric.getClicks() + 1);
@@ -111,7 +105,6 @@ public class PostMetricsService {
         return this.repository.save(metric);
     }
 
-    @Async
     @Transactional
     public PostMetrics viewed(PostMetrics metric){
         metric.setViewed(metric.getViewed() + 1);

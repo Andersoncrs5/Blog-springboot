@@ -38,7 +38,7 @@ public class PostLikeController {
 
         action = LikeOrUnLike.valueOf(type.toUpperCase());
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         Post post = this.uow.postService.Get(postId);
 
         PostLike e = this.uow.postLikeService.reactToPost(user, post, action);
@@ -91,7 +91,7 @@ public class PostLikeController {
             HttpServletRequest request
     ) {
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         Post post = this.uow.postService.Get(postId);
 
         var result = this.uow.postLikeService.exists(user, post);
@@ -108,7 +108,7 @@ public class PostLikeController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
 
         return this.uow.postLikeService.getAllByUser(user, pageable);
     }

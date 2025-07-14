@@ -19,7 +19,6 @@ public class CommentLikeService {
     @Autowired
     private CommentLikeRepository repository;
 
-    @Async
     @Transactional
     public CommentLike reactToComment(User user, Comment comment, LikeOrUnLike action) {
         boolean alreadyReacted = repository.existsByUserAndComment(user, comment);
@@ -35,7 +34,6 @@ public class CommentLikeService {
         return repository.save(reaction);
     }
 
-    @Async
     @Transactional
     public CommentLike removeReaction(Long reactionId) {
         if (reactionId == null || reactionId <= 0) {
@@ -50,13 +48,11 @@ public class CommentLikeService {
         return reaction;
     }
 
-    @Async
     @Transactional(readOnly = true)
     public boolean exists(Long userId, Long commentId) {
         return repository.existsByUserIdAndCommentId(userId, commentId);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public ResponseEntity<?> getAllByUser(User user, Pageable pageable) {
         Page<CommentLike> likes = repository.findAllByUser(user, pageable);

@@ -8,9 +8,11 @@ import br.com.Blog.api.repositories.UserRepository;
 import br.com.Blog.api.services.response.ResponseTokens;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,8 +24,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -40,8 +44,9 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private CustomUserDetailsService userDetailsService;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
-    @Async
     @Transactional
     public User create(User user){
         user.setEmail(user.getEmail().trim().toLowerCase());
@@ -50,9 +55,8 @@ public class UserService {
         return this.repository.save(user);
     }
 
-    @Async
     @Transactional(readOnly = true)
-    public User get(Long id){
+    public User get(Long id) {
         if (id <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
 
@@ -61,16 +65,36 @@ public class UserService {
         if(user == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
+        redisTemplate.opsForValue().set(String.valueOf(id), user);
+
         return user;
     }
 
-    @Async
+    @Transactional(readOnly = true)
+    public User getV2(Long id) {
+        if (id == null || id <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
+
+        User userCached = (User) redisTemplate.opsForValue().get(id.toString());
+
+        if (userCached != null)
+            return userCached;
+
+        User user = this.repository.findById(id).orElse(null);
+
+        if (user == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+
+        redisTemplate.opsForValue().set(id.toString(), user, Duration.ofMinutes(15));
+
+        return user;
+    }
+
     @Transactional
     public void delete(User user){
         this.repository.delete(user);
     }
 
-    @Async
     @Transactional
     public User update(User userForUpdate, User user){
         userForUpdate.setName(user.getName());
@@ -79,7 +103,6 @@ public class UserService {
         return this.repository.save(userForUpdate);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public Page<Post> listPostsOfUser(User user, Pageable pageable, Specification<Post> spec){
         Specification<Post> specification = spec.and((root, query, cb) ->
@@ -89,7 +112,6 @@ public class UserService {
         return postRepository.findAll(specification, pageable);
     }
 
-    @Async
     @Transactional
     public Map<String, String> login(String email, String password){
         User user = this.repository.findByEmail(email);
@@ -115,14 +137,12 @@ public class UserService {
         return res.showTokens();
     }
 
-    @Async
     @Transactional
     public User logout(User user) {
         user.setRefreshToken("");
         return this.repository.save(user);
     }
 
-    @Async
     @Transactional
     public Map<String, String> refreshToken(String refreshToken) {
         if (refreshToken.isBlank()) {

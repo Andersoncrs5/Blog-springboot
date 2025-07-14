@@ -42,7 +42,7 @@ public class FavoriteCommentController {
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
-        var item = this.uow.favoriteCommentService.get(id);
+        FavoriteComment item = this.uow.favoriteCommentService.get(id);
         FavoriteComment favorite = this.uow.favoriteCommentService.Delete(item);
         CommentMetrics commentMetrics = this.uow.commentMetricsService.get(favorite.getComment());
         this.uow.commentMetricsService.sumOrReduceFavorite(commentMetrics, ActionSumOrReduceComment.REDUCE);
@@ -71,7 +71,7 @@ public class FavoriteCommentController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
 
         return this.uow.favoriteCommentService.GetAllFavoriteOfUser(user, pageable);
     }
@@ -82,7 +82,7 @@ public class FavoriteCommentController {
     public ResponseEntity<?> create(@PathVariable Long commentId , HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
 
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         Comment comment = this.uow.commentService.Get(commentId);
         FavoriteComment favorite = this.uow.favoriteCommentService.create(comment, user);
 

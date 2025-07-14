@@ -47,7 +47,7 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "bearerAuth")
     public List<Category> getAll(){
-        return this.uow.categoryService.getAll();
+        return this.uow.categoryService.getAllV2();
     }
 
     @RateLimit(capacity = 10, refillTokens = 5, refillSeconds = 10)
@@ -75,7 +75,7 @@ public class CategoryController {
             HttpServletRequest request
     ){
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         Category result = this.uow.categoryService.create(dto.MappearToCategory(), user);
         var response = this.responseDefault.response(
                 "Category created with successfully",

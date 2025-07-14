@@ -12,7 +12,6 @@ import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +40,7 @@ public class UserController {
     @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)
     public ResponseEntity<?> getMetric(HttpServletRequest request) {
         Long userId = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(userId);
+        User user = this.uow.userService.getV2(userId);
         UserMetrics metric = this.uow.userMetricsService.get(user);
 
         var response = this.uow.responseDefault.response(
@@ -76,7 +75,7 @@ public class UserController {
     public ResponseEntity<?> get(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
 
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         var response = responseDefault.response(
                 "User found with successfully",
                 200,
@@ -144,7 +143,7 @@ public class UserController {
         );
 
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         return this.uow.userService.listPostsOfUser(user, pageable, spec);
     }
 
@@ -161,7 +160,7 @@ public class UserController {
                 user,
                 true
         );
-       this.uow.recoverEmailService.messageWelcome(user.getEmail());
+//       this.uow.recoverEmailService.messageWelcome(user.getEmail());
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -170,8 +169,9 @@ public class UserController {
     @RateLimit(capacity = 12, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> delete(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        User user = this.uow.userService.get(id);
+        User user = this.uow.userService.getV2(id);
         this.uow.userService.delete(user);
+        this.uow.redisService.delete(user.getId().toString());
         var response = responseDefault.response(
                 "User deleted with successfully",
                 200,
@@ -187,9 +187,10 @@ public class UserController {
     @RateLimit(capacity = 10, refillTokens = 2, refillSeconds = 20)
     public ResponseEntity<?> update(@RequestBody @Valid UserDTO dto, HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        User userExist = this.uow.userService.get(id);
+        User userExist = this.uow.userService.getV2(id);
 
-        var user = this.uow.userService.update(userExist, dto.MappearToUser());
+        User user = this.uow.userService.update(userExist, dto.MappearToUser());
+        this.uow.redisService.save(user.getId().toString(), user, 10);
         var response = responseDefault.response(
                 "User update with successfully",
                 200,
@@ -213,7 +214,7 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
-        User userExist = this.uow.userService.get(id);
+        User userExist = this.uow.userService.getV2(id);
         User user = this.uow.userService.logout(userExist);
         this.uow.userMetricsService.setLastLogin(user);
         var response = responseDefault.response(

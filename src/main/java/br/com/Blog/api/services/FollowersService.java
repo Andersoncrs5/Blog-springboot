@@ -25,7 +25,6 @@ public class FollowersService {
     @Autowired
     private FollowersRepository repository;
 
-    @Async
     @Transactional
     public Followers follow(User user, User followed) {
         boolean alreadyFollowing = repository.existsByFollowerAndFollowed(user, followed);
@@ -42,7 +41,6 @@ public class FollowersService {
         return repository.save(follower);
     }
 
-    @Async
     @Transactional
     public Followers unfollow(User user, User followed) {
         Followers followerRecord = repository.findByFollowerAndFollowed(user, followed);
@@ -55,20 +53,17 @@ public class FollowersService {
         return followerRecord;
     }
 
-    @Async
     @Transactional(readOnly = true)
     public Page<Followers> getAllFollowed(User user, Pageable pageable) {
         return repository.findAllByFollower(user, pageable);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public ResponseEntity<?> getMutualFollowed(User user1, User user2, Pageable pageable) {
         Page<User> mutuals = repository.findMutualFollowed(user1, user2, pageable);
         return ResponseEntity.ok(mutuals);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public Boolean areFollowing(User user, User followed) {
         return repository.existsByFollowerAndFollowed(user, followed);

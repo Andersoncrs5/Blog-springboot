@@ -24,7 +24,6 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    @Async
     public void sendEmail(String to, String assunto, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -35,7 +34,6 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    @Async
     public void sendEmailWithHtml(String para, String assunto, String html) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
 
@@ -46,7 +44,6 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    @Async
     public String loadTemplateHtml(String nameFile, Map<String, String> variaveis) {
         try {
             ClassPathResource resource = new ClassPathResource("templates/" + nameFile);

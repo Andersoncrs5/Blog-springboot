@@ -23,7 +23,6 @@ public class PostService {
     @Autowired
     private PostRepository repository;
 
-    @Async
     @Transactional
     public Post Create(Post post, User user, Category category){
         post.setUser(user);
@@ -39,8 +38,7 @@ public class PostService {
         return this.repository.save(post);
     }
 
-    @Async
-    @Transactional
+    @Transactional(readOnly = true)
     public Post Get(Long id){
         if (id <= 0)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
@@ -53,32 +51,28 @@ public class PostService {
         return post;
     }
 
-    @Async
     @Transactional
     public Post Delete(Post post){
         this.repository.delete(post);
         return post;
     }
 
-    @Async
-    @Transactional
+
+    @Transactional(readOnly = true)
     public Page<Post> GetAll(Pageable pageable, Specification<Post> spec){
         return this.repository.findAll(spec, pageable);
     }
 
-    @Async
     @Transactional
     public Page<Post> GetAllByCategory(Category category, Pageable pageable){
         return this.repository.findAllByCategory(category ,pageable);
     }
 
-    @Async
     @Transactional
     public Page<Post> filterByTitle(String title, Pageable pageable) {
         return this.repository.findByTitleContainingIgnoreCase(title, pageable);
     }
 
-    @Async
     @Transactional
     public Post Update(Post postExist, Post post){
 

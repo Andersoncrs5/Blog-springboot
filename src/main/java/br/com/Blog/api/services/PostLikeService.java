@@ -22,7 +22,6 @@ public class PostLikeService {
     @Autowired
     private PostLikeRepository repository;
 
-    @Async
     @Transactional
     public PostLike reactToPost(User user, Post post, LikeOrUnLike action) {
         boolean alreadyReacted = this.repository.existsByUserAndPost(user, post);
@@ -40,7 +39,6 @@ public class PostLikeService {
         return this.repository.save(like);
     }
 
-    @Async
     @Transactional
     public PostLike removeReaction(Long id) {
         if (id <= 0) {
@@ -55,13 +53,11 @@ public class PostLikeService {
         return like;
     }
 
-    @Async
     @Transactional(readOnly = true)
     public boolean exists(User user, Post post) {
         return this.repository.existsByUserAndPost(user, post);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public Page<PostLike> getAllByUser(User user, Pageable pageable) {
         return this.repository.findAllByUser(user, pageable);

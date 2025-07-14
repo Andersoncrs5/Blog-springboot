@@ -20,20 +20,17 @@ public class FavoriteCommentService {
     @Autowired
     private FavoriteCommentRepository repository;
 
-    @Async
     @Transactional(readOnly = true)
     public Page<FavoriteComment> GetAllFavoriteOfUser(User user, Pageable pageable){
         return this.repository.findAllByUser(user, pageable);
     }
 
-    @Async
     @Transactional
     public FavoriteComment Delete(FavoriteComment favorite){
         this.repository.delete(favorite);
         return favorite;
     }
 
-    @Async
     @Transactional
     public FavoriteComment create(Comment comment, User user){
         Boolean check = this.repository.existsByUserAndComment(user, comment);
@@ -49,13 +46,11 @@ public class FavoriteCommentService {
         return this.repository.save(favorite);
     }
 
-    @Async
     @Transactional
     public Boolean existsItemSalve(User user, Comment comment){
         return this.repository.existsByUserAndComment(user, comment);
     }
 
-    @Async
     @Transactional
     public FavoriteComment get(Long favoriteId) {
         if (favoriteId <= 0)

@@ -20,13 +20,11 @@ public class FavoritePostService {
     @Autowired
     private FavoritePostRepository repository;
 
-    @Async
     @Transactional
     public Page<FavoritePost> GetAllFavoritePostOfUser(User user, Pageable pageable){
         return this.repository.findAllByUser(user, pageable);
     }
 
-    @Async
     @Transactional
     public FavoritePost Delete(FavoritePost favoritePost){
         this.repository.delete(favoritePost);
@@ -34,7 +32,6 @@ public class FavoritePostService {
         return favoritePost;
     }
 
-    @Async
     @Transactional
     public FavoritePost create(Post post, User user){
         boolean check = this.repository.existsByUserAndPost(user, post);
@@ -50,13 +47,11 @@ public class FavoritePostService {
         return this.repository.save(fpToCreate);
     }
 
-    @Async
     @Transactional
     public boolean existsItemSalve(User user, Post post){
         return this.repository.existsByUserAndPost(user, post);
     }
 
-    @Async
     @Transactional
     public FavoritePost get(Long id) {
         if (id <= 0)

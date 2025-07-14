@@ -24,7 +24,6 @@ public class CommentMetricsService {
     @Autowired
     private CommentMetricsRepository metricsRepository;
 
-    @Async
     @Transactional
     public CommentMetrics sumOrRedLikeOrDislike(CommentMetrics metrics, ActionSumOrReduceComment action, LikeOrUnLike likeOrUnLike) {
         if (action == ActionSumOrReduceComment.SUM && likeOrUnLike == LikeOrUnLike.LIKE ) {
@@ -46,7 +45,6 @@ public class CommentMetricsService {
         return this.metricsRepository.save(metrics);
     }
 
-    @Async
     @Transactional(readOnly = true)
     public CommentMetrics get(Comment comment) {
         if (comment.getId() <= 0 ) {
@@ -62,7 +60,6 @@ public class CommentMetricsService {
         return metrics.get();
     }
 
-    @Async
     @Transactional
     public CommentMetrics create(Comment comment) {
         CommentMetrics metrics = new CommentMetrics();
@@ -71,7 +68,6 @@ public class CommentMetricsService {
         return this.metricsRepository.save(metrics);
     }
 
-    @Async
     @Transactional
     public CommentMetrics sumView(Comment comment) {
         if (comment.getId() <= 0) {
@@ -92,7 +88,6 @@ public class CommentMetricsService {
         return this.metricsRepository.save(metrics);
     }
 
-    @Async
     @Transactional
     public void sumEdited(CommentMetrics metrics) {
         metrics.setLastEditedAt(LocalDateTime.now());
@@ -101,7 +96,6 @@ public class CommentMetricsService {
         this.metricsRepository.save(metrics);
     }
 
-    @Async
     @Transactional
     public CommentMetrics sumOrReduceFavorite(CommentMetrics metric, ActionSumOrReduceComment action) {
         if (metric.getId() <= 0L) {

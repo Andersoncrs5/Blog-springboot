@@ -26,7 +26,6 @@ public class NotificationsService {
     private final NotificationRepository repository;
     private final FollowersRepository followersRepository;
 
-    @Async
     @Transactional(readOnly = true)
     public Notification get(Long notiId) {
         if (notiId <= 0) {
@@ -42,14 +41,12 @@ public class NotificationsService {
         return notification;
     }
 
-    @Async
     @Transactional
     public Notification create(User user, Notification notification) {
         notification.setUser(user);
         return this.repository.save(notification);
     }
 
-    @Async
     @Transactional
     public void notifyFollowersAboutPostCreated(Post post) {
         User actor = post.getUser();
@@ -68,18 +65,15 @@ public class NotificationsService {
         }
     }
 
-    @Async
     @Transactional(readOnly = true)
     public Page<Notification> getAllOfUser(User user, Pageable pageable, Specification<Notification> spec) {
         return this.repository.findAllByUser(user, pageable, spec);
     }
 
-    @Async
     @Transactional
     public void markHowRead(Notification notification) {
         notification.setRead(true);
 
         this.repository.save(notification);
     }
-
 }
