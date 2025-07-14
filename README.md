@@ -1,6 +1,6 @@
 # RESTful Blog Application with Spring Boot and Java
 
-✅ Status: Completed
+Status: on going
 
 ##  Overview
 
@@ -61,8 +61,6 @@
 # Possible Future Improvements
 
     Integration with Redis (caching).
-
-    MongoDB support for additional NoSQL use cases.
 
     More complete E2E test coverage.
 
