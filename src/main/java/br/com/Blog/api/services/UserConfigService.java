@@ -83,8 +83,7 @@ public class UserConfigService {
         log.info("Config deleted!");
     }
 
-    @Async
-    public void save(User user, UserConfig config) {
+    public UserConfig save(User user, UserConfig config) {
         log.info("Starting save user config");
 
         if (user.getId() <= 0) {
@@ -94,16 +93,24 @@ public class UserConfigService {
         config.setId(null);
         config.setUser(user);
 
-        this.repository.save(config);
+        return this.repository.save(config);
     }
 
     public UserConfig update(UserConfig configToUpdate, UserConfig configOriginal) {
         log.info("Starting UserConfig update");
+
+        final String KEY = configOriginal.getUser().getId()+"_config";
+
         configToUpdate.setId(configOriginal.getId());
         configToUpdate.setUser(configOriginal.getUser());
 
         log.info("User config updated");
-        return this.repository.save(configToUpdate);
+        UserConfig save = this.repository.save(configToUpdate);
+
+        log.info("Saving User config in cache....");
+        redisTemplate.opsForValue().set(KEY, save);
+        log.info("User config saved in cache");
+        return save;
     }
 
 }
