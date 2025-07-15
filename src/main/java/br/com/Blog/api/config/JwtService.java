@@ -1,5 +1,7 @@
 package br.com.Blog.api.config;
 
+import br.com.Blog.api.entities.Role;
+import br.com.Blog.api.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -11,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtService  {
@@ -24,6 +28,7 @@ public class JwtService  {
     @Value("${app.jwt.expiration.refresh_token}")
     private long EXPIRATION_REFRESH_TOKEN;
 
+    @Deprecated
     public String generateToken(UserDetails userDetails, Long id) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -34,6 +39,37 @@ public class JwtService  {
                 .compact().trim();
     }
 
+    public String generateTokenV2(UserDetails userDetails, User user) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .claim("roles", user.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toList()))
+                .claim("userId", user.getId())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + this.EXPIRETION_ACCESS_TOKEN ))
+                .signWith(getKey(), SignatureAlgorithm.HS384)
+                .compact().trim();
+    }
+
+    public String generateRefreshtokenv2(UserDetails userDetails, User user) {
+        return Jwts.builder()
+                .setSubject(userDetails.getUsername())
+                .claim("roles", user.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toList()))
+                .claim("userId", user.getId())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + this.EXPIRATION_REFRESH_TOKEN ))
+                .signWith(getKey(), SignatureAlgorithm.HS384)
+                .compact().trim();
+    }
+
+    public List<String> extractRoles(String token) {
+        return extractAllClaims(token).get("roles", List.class);
+    }
+
+    @Deprecated
     public String generateRefreshtoken(UserDetails userDetails, Long id) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
@@ -66,7 +102,13 @@ public class JwtService  {
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
-    private boolean isTokenExpired(String token) {
+    public boolean isTokenExpiredV2(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.getExpiration().before(new Date());
+    }
+
+
+    public boolean isTokenExpired(String token) {
         return Jwts.parserBuilder().setSigningKey(getKey()).build()
                 .parseClaimsJws(token)
                 .getBody()
