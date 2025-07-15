@@ -6,7 +6,7 @@ Status: on going
 
     This project is a RESTful API developed using Spring Boot 3.4.7, designed for managing blog posts, users,
     categories, and comments. It includes features such as a favorite posts system, JWT-based authentication, 
-    password recovery via email, and robust testing coverage (unit, integration, and partial E2E).
+    password recovery via email, roles system, and robust testing coverage (unit, integration, and partial E2E).
     
     The application follows standard CRUD principles and uses Spring Data JPA for database operations, connecting 
     to a PostgreSQL 17.4 relational database. Security is enforced using Spring Security with JWT for authorization.
@@ -27,7 +27,7 @@ Status: on going
 
     JWT (JSON Web Token) – Token-based user authentication.
 
-    Swagger 2.8.8 – API documentation (Springdoc OpenAPI).
+    Swagger 2.8.9 – API documentation (Springdoc OpenAPI).
 
     Redis 
 
@@ -37,7 +37,7 @@ Status: on going
 
     Full CRUD operations for Users, Posts, Categories, and Comments.
 
-    Favorite posts system (users can mark posts as favorites).
+    Favorite posts and comments system (users can mark posts as favorites).
 
     Password recovery via email.
 
