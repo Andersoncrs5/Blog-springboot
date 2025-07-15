@@ -28,5 +28,6 @@ public class UnitOfWork {
     public final ResponseDefault responseDefault;
     public final RedisService redisService;
     public final UserPreferenceService userPreferenceService;
+    public final UserConfigService userConfigService;
 
 }
