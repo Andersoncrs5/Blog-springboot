@@ -134,8 +134,8 @@ public class UserService {
                 new UsernamePasswordAuthenticationToken(email, password)
         );
 
-        String token = jwtService.generateToken((UserDetails) authentication.getPrincipal(), user.getId());
-        String refresh = jwtService.generateRefreshtoken((UserDetails) authentication.getPrincipal(), user.getId());
+        String token = jwtService.generateTokenV2((UserDetails) authentication.getPrincipal(), user);
+        String refresh = jwtService.generateRefreshtokenv2((UserDetails) authentication.getPrincipal(), user);
 
         user.setRefreshToken(refresh);
 
@@ -162,7 +162,7 @@ public class UserService {
     }
 
     @Transactional
-    public Map<String, String> refreshToken(String refreshToken) {
+    public Map<String, String> refreshToken(String refreshToken, User user) {
         if (refreshToken.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RefreshToken is required");
         }
@@ -176,10 +176,11 @@ public class UserService {
         String username = claims.getSubject();
         Long userId = claims.get("userId", Long.class);
 
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-        String token = jwtService.generateToken(userDetails, userId);
-        String refresh = jwtService.generateRefreshtoken(userDetails, userId);
+        String token = jwtService.generateTokenV2(userDetails, user);
+        String refresh = jwtService.generateRefreshtokenv2(userDetails, user);
 
         ResponseTokens res = new ResponseTokens(token, refresh);
         return res.showTokens();

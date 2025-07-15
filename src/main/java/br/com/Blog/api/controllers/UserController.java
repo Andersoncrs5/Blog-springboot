@@ -20,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -34,6 +35,8 @@ public class UserController {
     private ResponseDefault responseDefault;
     @Autowired
     private UnitOfWork uow;
+
+//    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
 
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/getMetric")
@@ -229,8 +232,11 @@ public class UserController {
     @PostMapping("/refresh/{refresh}")
     @SecurityRequirement(name = "bearerAuth")
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
-    public ResponseEntity<?> refresh(@PathVariable String refresh ){
-        Map<String, String> res = this.uow.userService.refreshToken(refresh);
+    public ResponseEntity<?> refresh(@PathVariable String refresh, HttpServletRequest request ){
+        Long id = this.uow.jwtService.extractId(request);
+        User userExist = this.uow.userService.getV2(id);
+
+        Map<String, String> res = this.uow.userService.refreshToken(refresh, userExist);
 
         return new ResponseEntity<>(res, HttpStatus.OK);
     }
