@@ -23,7 +23,7 @@ public class UserConfig {
     private Long id = 0L;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user", updatable = false, nullable = false)
+    @JoinColumn(updatable = false, nullable = false)
     private User user;
 
     @Column(nullable = false)
