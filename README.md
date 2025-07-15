@@ -60,8 +60,6 @@ Status: on going
 
 # Possible Future Improvements
 
-    Integration with Redis (caching).
-
     More complete E2E test coverage.
 
     CORS configuration for frontend/backend separation.
