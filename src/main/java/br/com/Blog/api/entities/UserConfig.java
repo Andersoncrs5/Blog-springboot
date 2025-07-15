@@ -26,38 +26,54 @@ public class UserConfig {
     @JoinColumn(name = "user", updatable = false, nullable = false)
     private User user;
 
+    @Column(nullable = false)
     public String ThemeName;
 
+    @Column(nullable = false)
     public String PrimaryColor;
 
+    @Column(nullable = false)
     public String SecondaryColor;
 
+    @Column(nullable = false)
     public String AccentColor;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     public FontTypeEnum FontType;
 
+    @Column(nullable = false)
     public Integer FontSize;
 
+    @Column(nullable = false)
     public Double LineHeight;
 
+    @Column(nullable = false)
     public Double LetterSpacing;
 
+    @Column(nullable = false)
     public String BorderColor;
 
+    @Column(nullable = false)
     public Integer BorderSize;
 
+    @Column(nullable = false)
     public Integer BorderRadius;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     public LayoutPreferenceEnum LayoutPreference;
 
+    @Column(nullable = false)
     public Boolean ShowProfilePictureInComments  = true;
 
+    @Column(nullable = false)
     public Boolean EnableAnimations  = true;
 
+    @Column(nullable = false)
     public Boolean NotificationsEnabled  = true;
 
+    @Column(nullable = false)
     public String TimeZone;
 
     @Version
