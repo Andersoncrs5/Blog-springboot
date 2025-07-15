@@ -2,6 +2,7 @@ package br.com.Blog.api.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
@@ -16,14 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
-
+    @Async
     public void sendEmail(String to, String assunto, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
 
@@ -34,6 +33,7 @@ public class EmailService {
         mailSender.send(message);
     }
 
+    @Async
     public void sendEmailWithHtml(String para, String assunto, String html) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
 
@@ -57,7 +57,6 @@ public class EmailService {
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 
 

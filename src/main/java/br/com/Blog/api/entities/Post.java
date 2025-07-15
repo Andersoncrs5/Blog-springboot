@@ -59,7 +59,7 @@ public class Post {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "category", nullable = false)
+    @JoinColumn(nullable = false)
     private Category category;
 
     @JsonIgnore

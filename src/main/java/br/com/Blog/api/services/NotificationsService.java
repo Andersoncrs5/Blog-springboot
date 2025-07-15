@@ -48,6 +48,7 @@ public class NotificationsService {
     }
 
     @Transactional
+    @Async
     public void notifyFollowersAboutPostCreated(Post post) {
         User actor = post.getUser();
 
@@ -71,6 +72,7 @@ public class NotificationsService {
     }
 
     @Transactional
+    @Async
     public void markHowRead(Notification notification) {
         notification.setRead(true);
 

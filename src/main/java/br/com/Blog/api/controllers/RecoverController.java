@@ -21,12 +21,14 @@ public class RecoverController {
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     @PostMapping("/request")
     public ResponseEntity<?> requestToken(@RequestParam String email) {
-        return service.toCreateTokenOfRecover(email);
+        service.toCreateTokenOfRecover(email);
+        return ResponseEntity.ok().build();
     }
 
     @RateLimit(capacity = 8, refillTokens = 2, refillSeconds = 20)
     @PostMapping("/reset")
     public ResponseEntity<?> resetPassword(@RequestBody @Valid RecoverPasswordDTO dto) {
-        return service.toValidToken(dto);
+        service.toValidToken(dto);
+        return ResponseEntity.ok().build();
     }
 }

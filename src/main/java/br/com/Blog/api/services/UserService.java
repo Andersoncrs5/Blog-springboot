@@ -68,8 +68,6 @@ public class UserService {
         if(user == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-        redisTemplate.opsForValue().set(String.valueOf(id), user);
-
         return user;
     }
 
@@ -99,6 +97,7 @@ public class UserService {
         }
     }
 
+    @Async
     @Transactional
     public void delete(User user){
         this.repository.delete(user);

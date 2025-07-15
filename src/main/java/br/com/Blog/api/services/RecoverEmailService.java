@@ -28,8 +28,9 @@ public class RecoverEmailService {
     private final EmailService emailService;
     private final PasswordEncoder encoder;
 
+    @Async
     @Transactional
-    public ResponseEntity<?> toCreateTokenOfRecover(String email) {
+    public void toCreateTokenOfRecover(String email) {
         try {
             User user = userRepository.findByEmail(email);
 
@@ -60,16 +61,16 @@ public class RecoverEmailService {
 
             emailService.sendEmailWithHtml(user.getEmail(), "Password recover", html);
 
-            return ResponseEntity.ok().build();
+
 
         } catch (MessagingException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error the to send the e-mail.");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error the to send the e-mail.");
         }
     }
 
+    @Async
     @Transactional
-    public ResponseEntity<?> toValidToken(RecoverPasswordDTO dto) {
+    public void toValidToken(RecoverPasswordDTO dto) {
         RecoverEmail recover = repository.findByToken(dto.getToken())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED ,"Token invalid"));
 
@@ -96,8 +97,6 @@ public class RecoverEmailService {
         emailService.sendEmail(user.getEmail(), "Password updated", msg);
 
         this.repository.delete(recover);
-
-        return ResponseEntity.ok().build();
     }
 
     @Async

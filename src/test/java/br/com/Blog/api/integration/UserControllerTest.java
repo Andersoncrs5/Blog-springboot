@@ -2,7 +2,6 @@ package br.com.Blog.api.integration;
 
 import br.com.Blog.api.DTOs.LoginDTO;
 import br.com.Blog.api.DTOs.UserDTO;
-import br.com.Blog.api.config.TestJacksonConfig;
 import br.com.Blog.api.integration.utils.UserTestUtils;
 import br.com.Blog.api.repositories.setUnitOfWorkRepository.UnitOfWorkRepository;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-//@Import(TestJacksonConfig.class)
 public class UserControllerTest {
 
     @Autowired

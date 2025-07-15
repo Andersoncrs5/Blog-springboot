@@ -63,8 +63,7 @@ public class UserMetricsService {
     public UserMetrics setLastLogin(User user) {
         UserMetrics metric = this.get(user);
         metric.setLastLogin(LocalDateTime.now());
-        UserMetrics metricChanged = this.repository.save(metric);
-        return metricChanged;
+        return this.repository.save(metric);
     }
 
     @Transactional
