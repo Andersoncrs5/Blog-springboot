@@ -7,15 +7,11 @@ import br.com.Blog.api.entities.enums.LikeOrUnLike;
 import br.com.Blog.api.entities.enums.SumOrReduce;
 import br.com.Blog.api.repositories.UserMetricsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -171,7 +167,7 @@ public class UserMetricsService {
     }
 
     @Transactional
-    public UserMetrics sumOrRedPreferenceCount(UserMetrics metrics, SumOrReduce action) {
+    public void sumOrRedPreferenceCount(UserMetrics metrics, SumOrReduce action) {
         if (action == SumOrReduce.SUM) {
             metrics.setPreferenceCount(metrics.getPreferenceCount() + 1);
         }
@@ -180,6 +176,6 @@ public class UserMetricsService {
             metrics.setPreferenceCount(metrics.getPreferenceCount() - 1);
         }
 
-        return this.repository.save(metrics);
+        this.repository.save(metrics);
     }
 }

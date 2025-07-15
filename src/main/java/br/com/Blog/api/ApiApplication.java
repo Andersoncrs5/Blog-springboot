@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableCaching
-@EnableAsync
+//@EnableAsync
 public class ApiApplication {
 
 	public static void main(String[] args) {
