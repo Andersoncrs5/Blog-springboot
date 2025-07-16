@@ -30,6 +30,7 @@ public class UnitOfWork {
     public final RedisService redisService;
     public final UserPreferenceService userPreferenceService;
     public final UserConfigService userConfigService;
+    public final AdmService admService;
 
     // MAPPEAR
     public final UserConfigMapper userConfigMapper;

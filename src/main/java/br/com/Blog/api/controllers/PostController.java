@@ -1,16 +1,14 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.PostDTO;
-import br.com.Blog.api.Specifications.PostSpecification;
+import br.com.Blog.api.utils.Specifications.PostSpecification;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.SumOrReduce;
-import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/v1/posts")

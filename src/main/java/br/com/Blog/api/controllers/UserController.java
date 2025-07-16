@@ -2,7 +2,7 @@ package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.LoginDTO;
 import br.com.Blog.api.DTOs.UserDTO;
-import br.com.Blog.api.Specifications.PostSpecification;
+import br.com.Blog.api.utils.Specifications.PostSpecification;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Post;
@@ -20,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
