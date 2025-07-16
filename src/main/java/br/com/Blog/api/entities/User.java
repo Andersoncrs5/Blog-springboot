@@ -39,8 +39,6 @@ public class User {
     @JsonIgnore
     private String refreshToken = "";
 
-    private Boolean isAdm = false;
-
     @Version
     private Long version;
 
@@ -49,6 +47,8 @@ public class User {
 
     @LastModifiedDate
     private LocalDateTime updatedAt;
+
+    private LocalDateTime loginBlockAt;
 
     @JsonIgnore
     @OneToMany(mappedBy = "follower", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
