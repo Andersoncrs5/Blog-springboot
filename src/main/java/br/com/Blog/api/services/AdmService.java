@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdmService {
 
+    // list all user blockeds
+
     private final UnitOfWorkRepository unit;
+
+    @Transactional(readOnly = true)
+    public Page<User> getAllUser(Pageable pageable, Specification<User> specs) {
+        return unit.userRepository.findAll(pageable, specs);
+    }
 
     public Page<User> listAllAdm(Pageable pageable) {
         final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
