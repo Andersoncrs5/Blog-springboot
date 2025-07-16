@@ -112,10 +112,10 @@ public class CategoryService {
     }
 
     @Transactional
-    public void changeStatusActive(Category category) {
+    public Category changeStatusActive(Category category) {
         category.setIsActive(!category.getIsActive());
 
-        repository.save(category);
+        return repository.save(category);
     }
 
 }
