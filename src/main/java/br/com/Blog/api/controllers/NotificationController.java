@@ -1,7 +1,7 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.NotificationDto;
-import br.com.Blog.api.Specifications.NotificationSpecification;
+import br.com.Blog.api.utils.Specifications.NotificationSpecification;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.Notification;
 import br.com.Blog.api.entities.User;

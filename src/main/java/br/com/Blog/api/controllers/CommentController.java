@@ -1,22 +1,17 @@
 package br.com.Blog.api.controllers;
 
 import br.com.Blog.api.DTOs.CommentDTO;
-import br.com.Blog.api.Specifications.CommentSpecification;
-import br.com.Blog.api.Specifications.PostSpecification;
-import br.com.Blog.api.config.JwtService;
+import br.com.Blog.api.utils.Specifications.CommentSpecification;
 import br.com.Blog.api.config.annotation.RateLimit;
 import br.com.Blog.api.controllers.setUnitOfWork.UnitOfWork;
 import br.com.Blog.api.entities.*;
 import br.com.Blog.api.entities.enums.ActionSumOrReduceComment;
 import br.com.Blog.api.entities.enums.SumOrReduce;
-import br.com.Blog.api.services.CommentMetricsService;
-import br.com.Blog.api.services.CommentService;
 import br.com.Blog.api.services.response.ResponseDefault;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

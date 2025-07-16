@@ -1,4 +1,4 @@
-package br.com.Blog.api.Specifications;
+package br.com.Blog.api.utils.Specifications;
 
 import br.com.Blog.api.entities.Comment;
 import org.springframework.data.jpa.domain.Specification;

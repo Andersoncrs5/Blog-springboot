@@ -1,4 +1,4 @@
-package br.com.Blog.api.Specifications;
+package br.com.Blog.api.utils.Specifications;
 
 import br.com.Blog.api.entities.Notification;
 import br.com.Blog.api.entities.enums.StatusNotification;
