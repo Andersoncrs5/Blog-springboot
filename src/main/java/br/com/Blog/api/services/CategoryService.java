@@ -111,4 +111,11 @@ public class CategoryService {
         return this.repository.save(categoryToUpdate);
     }
 
+    @Transactional
+    public void changeStatusActive(Category category) {
+        category.setIsActive(!category.getIsActive());
+
+        repository.save(category);
+    }
+
 }
