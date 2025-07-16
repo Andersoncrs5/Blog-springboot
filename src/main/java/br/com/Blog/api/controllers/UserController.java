@@ -36,8 +36,6 @@ public class UserController {
     @Autowired
     private UnitOfWork uow;
 
-//    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/getMetric")
     @RateLimit(capacity = 24, refillTokens = 2, refillSeconds = 8)

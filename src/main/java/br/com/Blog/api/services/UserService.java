@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -73,28 +74,24 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getV2(Long id) {
-        try {
-            if (id <= 0)
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
+        if (id <= 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Id is required");
 
-            Object objCached = redisTemplate.opsForValue().get(id.toString());
+        Object objCached = redisTemplate.opsForValue().get(id.toString());
 
-            User userCached = objectMapper.convertValue(objCached, User.class);
+        User userCached = objectMapper.convertValue(objCached, User.class);
 
-            if (userCached != null)
-                return userCached;
+        if (userCached != null)
+            return userCached;
 
-            User user = this.repository.findById(id).orElse(null);
+        User user = this.repository.findById(id).orElse(null);
 
-            if (user == null)
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        if (user == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
 
-            redisTemplate.opsForValue().set(id.toString(), user, Duration.ofMinutes(15));
+        redisTemplate.opsForValue().set(id.toString(), user, Duration.ofMinutes(15));
 
-            return user;
-        } catch (ResponseStatusException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR ,e.toString());
-        }
+        return user;
     }
 
     @Async
@@ -127,12 +124,14 @@ public class UserService {
         if (user == null)
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
+        if (user.getLoginBlockAt().isAfter(LocalDateTime.now()) || user.getLoginBlockAt().isEqual(LocalDateTime.now())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
         if (!this.passwordEncoder.matches(password, user.getPassword()))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
 
-        Authentication authentication = authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
-        );
+        Authentication authentication = authManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
         String token = jwtService.generateTokenV2((UserDetails) authentication.getPrincipal(), user);
         String refresh = jwtService.generateRefreshtokenv2((UserDetails) authentication.getPrincipal(), user);
@@ -163,19 +162,16 @@ public class UserService {
 
     @Transactional
     public Map<String, String> refreshToken(String refreshToken, User user) {
-        if (refreshToken.isBlank()) {
+        if (refreshToken.isBlank())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "RefreshToken is required");
-        }
 
         Claims claims = jwtService.extractAllClaims(refreshToken);
 
-        if (claims.getExpiration().before(new Date())) {
+        if (claims.getExpiration().before(new Date()))
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
 
         String username = claims.getSubject();
         Long userId = claims.get("userId", Long.class);
-
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
