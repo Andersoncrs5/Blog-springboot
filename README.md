@@ -1,67 +1,70 @@
 # RESTful Blog Application with Spring Boot and Java
 
-Status: on going
+**Status:** on going
 
-##  Overview
+## Overview
 
-    This project is a RESTful API developed using Spring Boot 3.4.7, designed for managing blog posts, users,
-    categories, and comments. It includes features such as a favorite posts system, JWT-based authentication, 
-    password recovery via email, roles system, and robust testing coverage (unit, integration, and partial E2E).
-    
-    The application follows standard CRUD principles and uses Spring Data JPA for database operations, connecting 
-    to a PostgreSQL 17.4 relational database. Security is enforced using Spring Security with JWT for authorization.
+This project is a RESTful API developed using **Spring Boot 3.4.7**, designed for managing blog posts, 
+users, categories, and comments. It includes features such as:
+
+- JWT-based authentication and role-based access control
+- Password recovery via email
+- System for favorite posts/comments
+- User configuration and category preferences
+- Robust test coverage (unit, integration, partial E2E)
+
+The application follows clean architecture and standard CRUD principles, using **Spring Data JPA** for 
+database operations and connecting to a **PostgreSQL 17.4** database. **Spring Security + JWT** ensure 
+robust authentication and authorization.
+
+---
 
 ## Technologies Used
 
-    Java JDK 23 – Programming language.
+- **Java JDK 23** – Programming language
+- **Spring Boot 3.4.7** – Core framework
+- **Spring Data JPA** – ORM for database
+- **PostgreSQL 17.4** – Relational database
+- **Lombok** – Reduces boilerplate
+- **Spring Security** – Authentication & authorization
+- **JWT (JSON Web Token)** – Stateless auth system
+- **Swagger 2.8.9** – API documentation (Springdoc OpenAPI)
+- **Redis** – In-memory cache for sessions or tokens
 
-    Spring Boot 3.4.7 – Core framework for building RESTful APIs.
-
-    Spring Data JPA – ORM for database interaction.
-
-    PostgreSQL 17.4 – Relational database.
-
-    Lombok – Reduces boilerplate code via annotations.
-
-    Spring Security – Security and authentication framework.
-
-    JWT (JSON Web Token) – Token-based user authentication.
-
-    Swagger 2.8.9 – API documentation (Springdoc OpenAPI).
-
-    Redis 
+---
 
 ## Features
 
-    JWT-based user authentication (login and registration).
+- **JWT-based authentication** (login/registration)
+- **Role-based access control** (admin, user, etc.)
+- **CRUD for:**
+    - Users
+    - Blog Posts
+    - Categories
+    - Comments
+- ️ **Favorites system** (posts & comments)
+-  **Password recovery via email**
+- ️ **User Configuration (`UserConfig`)** – frontend preferences, theme, etc.
+-  **User Preferences (`UserPreference`)** – preferred categories for personalized feed
+-  **Global Exception Handling**
+-  **Pagination & filtering**
+-  **Password encryption (BCrypt)**
+-  **Testing coverage:**
+    - 100% **unit tests**
+    - Full **integration tests**
+    - Partial **E2E tests**
 
-    Full CRUD operations for Users, Posts, Categories, and Comments.
+---
 
-    Favorite posts and comments system (users can mark posts as favorites).
+##  Possible Future Improvements
 
-    Password recovery via email.
+-  Uploading media with **AWS S3**
+- ️ **Media system** for posts (images, videos)
+-  CORS config for frontend/backend separation
+-  **Analytics & metrics system** (e.g., most liked posts, user activity)
+-  Full E2E test coverage
+-  Spring actuator
 
-    Global exception handling.
+---
 
-    Pagination and filtering system.
-
-    Data encryption (e.g., password hashing).
-
-    RESTful API architecture with standardized endpoints.
-
-    Comprehensive testing:
-
-        Unit tests – 100% coverage.
-
-        Integration tests – fully implemented.
-
-        End-to-end (E2E) tests – partial implementation.
-
-
-# Possible Future Improvements
-
-    More complete E2E test coverage.
-
-    CORS configuration for frontend/backend separation.
-
-    Analytical data modeling and metrics system.
+##  Structure Overview (Simplified)
