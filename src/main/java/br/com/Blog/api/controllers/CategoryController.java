@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class CategoryController {
     @RateLimit(capacity = 10, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
         Category category = this.uow.categoryService.get(id);
         this.uow.categoryService.delete(category);
@@ -66,6 +68,7 @@ public class CategoryController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 20)
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/")
     public ResponseEntity<?> create(
             @RequestBody @Valid CategoryDTO dto,
@@ -86,6 +89,7 @@ public class CategoryController {
 
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 20)
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<?> update(
             @PathVariable Long id ,@RequestBody @Valid CategoryDTO dto,
