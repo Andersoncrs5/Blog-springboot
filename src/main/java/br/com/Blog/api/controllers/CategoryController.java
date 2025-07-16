@@ -28,7 +28,7 @@ public class CategoryController {
     @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/{id}")
-    public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request){
+    public ResponseEntity<?> get(@PathVariable Long id, HttpServletRequest request) {
         Category category = this.uow.categoryService.get(id);
         var response = this.uow.responseDefault.response(
                 "Category found with successfully",
@@ -43,7 +43,7 @@ public class CategoryController {
     @RateLimit(capacity = 22, refillTokens = 5, refillSeconds = 5)
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getAll(){
+    public ResponseEntity<?> getAll() {
         List<Category> allV2 = this.uow.categoryService.getAllV2();
         return ResponseEntity.ok(allV2);
     }
@@ -51,8 +51,8 @@ public class CategoryController {
     @RateLimit(capacity = 10, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request){
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN')")
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request) {
         Category category = this.uow.categoryService.get(id);
         this.uow.categoryService.delete(category);
 
@@ -70,10 +70,7 @@ public class CategoryController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PostMapping("/")
-    public ResponseEntity<?> create(
-            @RequestBody @Valid CategoryDTO dto,
-            HttpServletRequest request
-    ){
+    public ResponseEntity<?> create(@RequestBody @Valid CategoryDTO dto,HttpServletRequest request) {
         Long id = this.uow.jwtService.extractId(request);
         User user = this.uow.userService.getV2(id);
         Category result = this.uow.categoryService.create(dto.MappearToCategory(), user);
@@ -87,14 +84,11 @@ public class CategoryController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 20)
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(
-            @PathVariable Long id ,@RequestBody @Valid CategoryDTO dto,
-            HttpServletRequest request
-            ){
+    public ResponseEntity<?> update(@PathVariable Long id ,@RequestBody @Valid CategoryDTO dto,HttpServletRequest request) {
 
         Category category = this.uow.categoryService.get(id);
         var result = this.uow.categoryService.update(category, dto.MappearToCategory());
@@ -112,7 +106,7 @@ public class CategoryController {
     @SecurityRequirement(name = "bearerAuth")
     @GetMapping("change-status/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
-    public ResponseEntity<?> changeStatusActive(@PathVariable Long id, HttpServletRequest request){
+    public ResponseEntity<?> changeStatusActive(@PathVariable Long id, HttpServletRequest request) {
         Category category = this.uow.categoryService.get(id);
         Category saved = this.uow.categoryService.changeStatusActive(category);
 
@@ -126,7 +120,4 @@ public class CategoryController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
 }
-
-

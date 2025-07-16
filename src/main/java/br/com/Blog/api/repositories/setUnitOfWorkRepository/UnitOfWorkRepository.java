@@ -22,5 +22,8 @@ public class UnitOfWorkRepository {
     public final RecoverEmailRepository recoverEmailRepository;
     public final UserMetricsRepository userMetricsRepository;
     public final UserRepository userRepository;
+    public final RoleRepository roleRepository;
+    public final UserPreferenceRepository userPreferenceRepository;
+    public final UserConfigRepository userConfigRepository;
 
 }
