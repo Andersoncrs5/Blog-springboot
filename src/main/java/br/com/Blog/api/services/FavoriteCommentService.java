@@ -5,6 +5,7 @@ import br.com.Blog.api.entities.FavoriteComment;
 import br.com.Blog.api.entities.User;
 import br.com.Blog.api.repositories.FavoriteCommentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Service
 public class FavoriteCommentService {
 
