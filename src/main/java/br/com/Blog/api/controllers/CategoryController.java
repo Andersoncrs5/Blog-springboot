@@ -39,12 +39,12 @@ public class CategoryController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 5)
+    @RateLimit(capacity = 22, refillTokens = 5, refillSeconds = 5)
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     @SecurityRequirement(name = "bearerAuth")
-    public List<Category> getAll(){
-        return this.uow.categoryService.getAllV2();
+    public ResponseEntity<?> getAll(){
+        List<Category> allV2 = this.uow.categoryService.getAllV2();
+        return ResponseEntity.ok(allV2);
     }
 
     @RateLimit(capacity = 10, refillTokens = 5, refillSeconds = 10)
