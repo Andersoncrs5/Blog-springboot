@@ -25,13 +25,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdmService {
 
-    // list all user blockeds
-
     private final UnitOfWorkRepository unit;
 
     @Transactional(readOnly = true)
     public Page<User> getAllUser(Pageable pageable, Specification<User> specs) {
-        return unit.userRepository.findAll(pageable, specs);
+        return unit.userRepository.findAll(specs, pageable);
     }
 
     public Page<User> listAllAdm(Pageable pageable) {
