@@ -108,6 +108,25 @@ public class CategoryController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @RateLimit(capacity = 20, refillTokens = 5, refillSeconds = 10)
+    @SecurityRequirement(name = "bearerAuth")
+    @GetMapping("change-status/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public ResponseEntity<?> changeStatusActive(@PathVariable Long id, HttpServletRequest request){
+        Category category = this.uow.categoryService.get(id);
+        Category saved = this.uow.categoryService.changeStatusActive(category);
+
+        var response = this.uow.responseDefault.response(
+                "Category changed!",
+                200,
+                request.getRequestURL().toString(),
+                saved,
+                true
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
 }
 
 
