@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
@@ -30,6 +31,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
+    @ExceptionHandler(S3Exception.class)
+    public ResponseEntity<Map<String, Object>> handleS3(HttpServletRequest request, S3Exception ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", 403);
+        response.put("error", "Forbidden");
+        response.put("message", "You don't have authorization");
+        response.put("path", request.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
