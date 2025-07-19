@@ -53,12 +53,12 @@ robust authentication and authorization.
     - 100% **unit tests**
     - Full **integration tests**
     - Partial **E2E tests**
+-  **aws s3** - to file and image upload 
 
 ---
 
 ##  Possible Future Improvements
 
--  Uploading media with **AWS S3**
 - ️ **Media system** for posts (images, videos)
 -  CORS config for frontend/backend separation
 -  **Analytics & metrics system** (e.g., most liked posts, user activity)
