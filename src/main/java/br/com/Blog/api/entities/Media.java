@@ -34,6 +34,9 @@ public class Media {
     @Column(nullable = false)
     private int order;
 
+    @Column()
+    private Long versionObject;
+
     @Version
     private Long version;
 
