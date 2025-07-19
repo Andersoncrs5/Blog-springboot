@@ -53,6 +53,10 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PostLike> likes;
 
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Media> medias;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
