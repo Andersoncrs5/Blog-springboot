@@ -13,7 +13,7 @@ import java.net.URI;
 @Configuration
 public class S3Config {
 
-    private static final String LOCALSTACK_ENDPOINT = "http://localhost:4566";
+    public static final String LOCALSTACK_ENDPOINT = "http://localhost:4566";
     private static final String AWS_REGION = "us-east-1";
     private static final String AWS_ACCESS_KEY = "test";
     private static final String AWS_SECRET_KEY = "test";
