@@ -50,6 +50,9 @@ public class PostMetrics {
     private Long bookmarks = 0L;
 
     @Column(nullable = false)
+    private Long medias = 0L;
+
+    @Column(nullable = false)
     private Long clicks = 0L;
 
     @Column
