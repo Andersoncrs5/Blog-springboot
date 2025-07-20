@@ -1,5 +1,6 @@
 package br.com.Blog.api.services;
 
+import br.com.Blog.api.entities.Media;
 import br.com.Blog.api.entities.Post;
 import br.com.Blog.api.entities.User;
 import lombok.RequiredArgsConstructor;
@@ -65,12 +66,29 @@ public class S3Service {
 
     @Async
     public void createBucket(String bucketName) {
-        if (bucketName.isBlank()) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bucket name is required");}
-        CreateBucketRequest request = CreateBucketRequest.builder()
-                .bucket(bucketName)
-                .build();
+        if (bucketName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nome do bucket é obrigatório.");
+        }
 
-        s3Client.createBucket(request);
+        try {
+            s3Client.headBucket(HeadBucketRequest.builder().bucket(bucketName).build());
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um bucket com o nome: " + bucketName);
+        } catch (NoSuchBucketException _) {
+
+        } catch (S3Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao verificar o bucket: " + e.getMessage(), e);
+        }
+
+        CreateBucketRequest request = CreateBucketRequest.builder().bucket(bucketName).build();
+
+        try {
+            s3Client.createBucket(request);
+        } catch (S3Exception e) {
+            if (e.statusCode() == HttpStatus.CONFLICT.value()) {
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "O bucket '" + bucketName + "' já existe ou outro usuário é o proprietário.", e);
+            }
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erro ao criar bucket S3: " + e.getMessage(), e);
+        }
     }
 
     @Async
@@ -320,6 +338,5 @@ public class S3Service {
 
         s3Client.putBucketLifecycleConfiguration(putLifecycleConfigurationRequest);
     }
-
 
 }
