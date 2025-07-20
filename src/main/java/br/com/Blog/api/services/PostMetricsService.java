@@ -83,6 +83,21 @@ public class PostMetricsService {
     }
 
     @Transactional
+    public PostMetrics sumOrReduceMedia(PostMetrics metric, ActionSumOrReduceComment action) {
+        if (action == ActionSumOrReduceComment.SUM) {
+            metric.setMedias(metric.getMedias() + 1);
+        }
+
+        if (action == ActionSumOrReduceComment.REDUCE) {
+            metric.setMedias(metric.getMedias() - 1);
+        }
+
+        metric.setLastInteractionAt(LocalDateTime.now());
+
+        return this.repository.save(metric);
+    }
+
+    @Transactional
     public PostMetrics sumOrReduceFavorite(PostMetrics metric, ActionSumOrReduceComment action) {
         if (action == ActionSumOrReduceComment.SUM) {
             metric.setFavorites(metric.getFavorites() + 1);
