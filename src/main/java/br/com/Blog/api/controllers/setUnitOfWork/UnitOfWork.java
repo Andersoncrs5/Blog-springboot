@@ -3,6 +3,7 @@ package br.com.Blog.api.controllers.setUnitOfWork;
 import br.com.Blog.api.config.JwtService;
 import br.com.Blog.api.services.*;
 import br.com.Blog.api.services.response.ResponseDefault;
+import br.com.Blog.api.utils.mappers.MediaMapper;
 import br.com.Blog.api.utils.mappers.UserConfigMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,8 +32,11 @@ public class UnitOfWork {
     public final UserPreferenceService userPreferenceService;
     public final UserConfigService userConfigService;
     public final AdmService admService;
+    public final S3Service s3Service;
+    public final MediaService mediaService;
 
     // MAPPEAR
     public final UserConfigMapper userConfigMapper;
+    public final MediaMapper mediaMapper;
 
 }
