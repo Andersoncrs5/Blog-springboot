@@ -1,88 +1,9 @@
-user:
-- user/login
-- user/register
-- user/update
-- user/refresh/{refresh}
-- user/me
-- /v1/user/logout
-- /v1/user/getProfile/{id}
-- /v1/user/getMetric
-- /v1/user/getMetricOfUser/{userId}
-- /v1/user/ListPostsOfUser
 
-category:
-- /v1/category - post
-- GET /v1/category
-- DELETE /v1/category/{id}
-- PUT /v1/category/{id}
-- GET /v1/category/{id}
+o que falta:
 
-post:
-- POST /v1/posts/{categoryId}
-- GET /v1/posts/getAll
-/v1/posts/ - PUT
-/v1/posts/filterByTitle/{title} - GET
-/v1/posts/GetAllByCategory/{categoryId} - GET
-/v1/posts/{id} - DELETE
-/v1/posts/get/{id} - GET
+delete multi obkect qunado delete post
+test unitario em media service
+test integracao em media controller
+test e2e em media
 
-comment:
-GET - /v1/comment/{id}
-PUT - /v1/comment/{id}
-DELETE - /v1/comment/{id}
-POST - /v1/comment/{postId}
-GET - /v1/comment/GetAllCommentsOfPost/{id}
-
-category:
-GET - /v1/category/{id}
-PUT - /v1/category/{id}
-POST - /v1/category
-GET - /v1/category
-
-favorite:
-POST - /v1/favoritePost/{postId}
-GET - /v1/favoritePost/exists/{idPost}
-GET - /v1/favoritePost/GetAllFavoritePostOfUser
-DELETE - /v1/favoritePost/{id}
-
-favorite-post-controller
-POST - /v1/favoritePost/{postId}
-GET - /v1/favoritePost/exists/{idPost}
-GET - /v1/favoritePost/GetAllFavoritePostOfUser
-DELETE - /v1/favoritePost/{id}
-
-favorite-comment-controller
-POST - /v1/favoriteComment/{CommentId}
-GET - /v1/favoriteComment/exists/{commentId}
-GET - /v1/favoriteComment/GetAllFavoriteOfUser
-DELETE - /v1/favoriteComment/{id}
-
-followers-controller
-POST - /unfollow/{userId}
-POST - /mutual/{userId}
-POST - /follow/{userId}
-POST - /areFollowing/{userId}
-POST - /
-
-recover-controller
-
-POST - /v1/recover/reset
-POST - /v1/recover/request
-
-post-like-controller
-
-POST - /v1/postLike/{type}/{postId}
-GET - /v1/postLike/getAllByUser
-GET - /v1/postLike/{postId}
-DELETE - /v1/postLike/{likeId}
-
-comment-like-controller
-DELETE - /v1/commentLike/{likeId}
-GET - /v1/commentLike/user
-POST - /v1/commentLike/{type}/{commentId}
-GET - /v1/commentLike/exists/{commentId}
-
-oo que falta:
-
-corn
-comment on comment
+o que estou fazendo
